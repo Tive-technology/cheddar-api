@@ -67,10 +67,10 @@ You might want to set up a proxy to communicate with Cheddar. Cheddar blocks mos
 
 > Recently, a large block of IPs on the Heroku platform were listed by DenyHosts due to a spike in SSH brute force attacks coming from the Heroku platform. In short, you need to be coming from an IP that isn't listed.
 
-A proxy host is easily set with the `CHEDDAR_HOST` environment variable:
+A proxy url is easily set with the `CHEDDAR_PROXY_URL` environment variable:
 
 ```
-CHEDDAR_HOST=example.com node your-server.js
+CHEDDAR_PROXY_URL=https://example.com:1234 node your-server.js
 ```
 
 # Running tests
