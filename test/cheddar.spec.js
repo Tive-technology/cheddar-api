@@ -20,7 +20,7 @@ describe('Cheddar', function () {
         this.cheddar = new Cheddar(config.email, config.pass, config.productCode);
     });
 
-    describe('Plans', async function () {
+    describe('Plans', function () {
         describe('#getAllPricingPlans', function () {
             it('should return a plan array', async function () {
                 var plans = await this.cheddar.getAllPricingPlans();
