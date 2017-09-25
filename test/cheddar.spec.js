@@ -185,4 +185,15 @@ describe('Cheddar', function () {
             }
         });
     });
+
+    describe('#callReportingAPI', function () {
+        it('should retrieve revenue data', async function () {
+            await this.cheddar.callReportingAPI('/report/revenue-monthly', {
+                dateRange: {
+                    start: '2017-06-01',
+                    end: '2017-08-31',
+                },
+            }).then(result => chai.expect(result.revenue).to.be.an('array'));
+        });
+    });
 });
