@@ -17,7 +17,7 @@ describe('Cheddar', function () {
     beforeEach(function () {
         this.customerCode1 = 'customerCode1';
         this.customerCode2 = 'customerCode2';
-        this.cheddar = new Cheddar(config.email, config.pass, config.productCode);
+        this.cheddar = new Cheddar(config);
     });
 
     describe('Plans', function () {

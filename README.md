@@ -52,7 +52,11 @@ npm install request request-promise-native
 ```javascript
 var Cheddar = require("cheddar");
 
-var cheddar = new Cheddar("email@example.com", "passwordExample", "ProductCode");
+var cheddar = new Cheddar({
+  username: "email@example.com",
+  password: "passwordExample",
+  productCode: "ProductCode",
+});
 
 cheddar.getAllPricingPlans().then(function (results) {
   console.log(results);
@@ -78,9 +82,11 @@ First add a config file (`config.json`) with all your Cheddar credentials:
 
 ```javascript
 {
-  "email": "EMAIL",
-  "pass": "PASSWORD",
+  "username": "EMAIL",
+  "password": "PASSWORD",
+  // User either productCode OR productId
   "productCode": "PRODUCTCODE",
+  "productId": "PRODUCTID",
   "planCode": "PLANCODE",
   "itemCode": "ITEMCODE"
 }
