@@ -1,5 +1,3 @@
-'use strict';
-
 var xml2js = require('xml2js');
 var rp = require('request-promise-native');
 
@@ -10,7 +8,7 @@ var Cheddar = function Cheddar(user, pass, productCode) {
         this.auth = 'Basic ' + Buffer.from(user + ':' + pass).toString('base64');
         this.productCode = productCode;
     } else {
-        var options = user;
+        const options = user;
 
         this.auth = 'Basic ' + Buffer.from(options.username + ':' + options.password).toString('base64');
         this.productCode = options.productCode;
@@ -18,7 +16,16 @@ var Cheddar = function Cheddar(user, pass, productCode) {
     }
 };
 
-var arrays = ['plans', 'customers', 'items', 'charges', 'invoices', 'subscriptions', 'transactions', 'promotions'];
+var arrays = [
+    'plans',
+    'customers',
+    'items',
+    'charges',
+    'invoices',
+    'subscriptions',
+    'transactions',
+    'promotions',
+];
 
 function validator(xpath, currentValue, newValue) {
     // Empty values should be null
@@ -49,7 +56,7 @@ var xmlParseOptions = {
     explicitArray: false,
     validator: validator,
     emptyTag: null,
-    mergeAttrs: true
+    mergeAttrs: true,
 };
 
 function parseResult(data) {
@@ -57,12 +64,10 @@ function parseResult(data) {
         var parser = new xml2js.Parser(xmlParseOptions);
 
         parser.parseString(data, function parse(err, xml) {
-            if (err) {
-                // Handle error
+            if (err) { // Handle error
                 reject(err);
                 return;
-            } else if (!xml) {
-                // Handle empty xml
+            } else if (!xml) { // Handle empty xml
                 resolve(null);
                 return;
             }
@@ -87,26 +92,28 @@ Cheddar.prototype.callAPI = function callAPI(path, data) {
     var requestOptions = {
         uri: baseUri + '/xml' + encodedPath,
         headers: {
-            authorization: this.auth
+            authorization: this.auth,
         },
         form: data,
         proxy: process.env.CHEDDAR_PROXY_URL,
         qs: {
             productCode: this.productCode,
-            productId: this.productId
-        }
+            productId: this.productId,
+        },
     };
 
-    var promise = rp.post(requestOptions).then(parseResult).catch(function handleError(err) {
-        if (typeof err.error === 'string' && err.error.indexOf('<?xml') === 0) {
-            return parseResult(err.error).then(function createErrorFromXml(xml) {
-                var error = new Error(xml.error._);
-                error.code = Number(xml.error.code);
-                throw error;
-            });
-        }
-        throw err;
-    });
+    var promise = rp.post(requestOptions)
+        .then(parseResult)
+        .catch(function handleError(err) {
+            if (typeof err.error === 'string' && err.error.indexOf('<?xml') === 0) {
+                return parseResult(err.error).then(function createErrorFromXml(xml) {
+                    var error = new Error(xml.error._);
+                    error.code = Number(xml.error.code);
+                    throw error;
+                });
+            }
+            throw err;
+        });
 
     return promise;
 };
@@ -118,16 +125,16 @@ Cheddar.prototype.callReportingAPI = function callReportingAPI(path, data) {
     var requestOptions = {
         uri: baseUri + '/json' + encodedPath,
         headers: {
-            authorization: this.auth
+            authorization: this.auth,
         },
         qs: {
             productCode: this.productCode,
             productId: this.productId,
             startDate: data.dateRange && data.dateRange.start,
-            endDate: data.dateRange && data.dateRange.end
+            endDate: data.dateRange && data.dateRange.end,
         },
         proxy: process.env.CHEDDAR_PROXY_URL,
-        json: true
+        json: true,
     };
 
     return rp.get(requestOptions);
@@ -138,10 +145,11 @@ Cheddar.prototype.getAllPricingPlans = function getAllPricingPlans() {
 };
 
 Cheddar.prototype.getPricingPlan = function getPricingPlan(code) {
-    var promise = this.callAPI('/plans/get/code/' + code).then(function getFirstPlan(plans) {
-        // Return the first plan (it should only contain 1)
-        return plans && plans[0];
-    });
+    var promise = this.callAPI('/plans/get/code/' + code)
+        .then(function getFirstPlan(plans) {
+            // Return the first plan (it should only contain 1)
+            return plans && plans[0];
+        });
 
     return promise;
 };
@@ -151,13 +159,14 @@ Cheddar.prototype.getAllCustomers = function getAllCustomers(data) {
 };
 
 Cheddar.prototype.getCustomer = function getCustomer(code) {
-    var promise = this.callAPI('/customers/get/code/' + code).then(function getFirstCustomer(customers) {
-        if (!customers || !customers.length) {
-            throw new Error('No customers could be retrieved');
-        }
-        // Return the first customer (it should only contain 1)
-        return customers[0];
-    });
+    var promise = this.callAPI('/customers/get/code/' + code)
+        .then(function getFirstCustomer(customers) {
+            if (!customers || !customers.length) {
+                throw new Error('No customers could be retrieved');
+            }
+            // Return the first customer (it should only contain 1)
+            return customers[0];
+        });
 
     return promise;
 };
@@ -218,12 +227,13 @@ Cheddar.prototype.setItemQuantity = function setItemQuantity(code, itemCode, amo
     return this.callAPI('/customers/set-item-quantity/code/' + code + '/itemCode/' + itemCode, data);
 };
 
-Cheddar.prototype.addCustomCharge = function addCustomCharge(code, chargeCode, quantity, amount, description) {
+Cheddar.prototype.addCustomCharge =
+function addCustomCharge(code, chargeCode, quantity, amount, description) {
     var data = {
         chargeCode: chargeCode,
         quantity: quantity.toString(),
         eachAmount: amount.toString(),
-        description: description
+        description: description,
     };
 
     return this.callAPI('/customers/add-charge/code/' + code, data);
@@ -231,7 +241,7 @@ Cheddar.prototype.addCustomCharge = function addCustomCharge(code, chargeCode, q
 
 Cheddar.prototype.deleteCustomCharge = function deleteCustomCharge(code, chargeId) {
     var data = {
-        chargeId: chargeId
+        chargeId: chargeId,
     };
     return this.callAPI('/customers/delete-charge/code/' + code, data);
 };

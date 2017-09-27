@@ -1,0 +1,8 @@
+node_modules
+config.json
+npm-debug.log
+.idea
+.babelrc
+.eslintrc.js
+src
+test
