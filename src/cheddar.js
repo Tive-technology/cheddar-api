@@ -3,18 +3,20 @@ var rp = require('request-promise-native');
 
 var baseUri = 'https://getcheddar.com:443';
 
-var Cheddar = function Cheddar(user, pass, productCode) {
-    if (typeof user === 'string') {
-        this.auth = 'Basic ' + Buffer.from(user + ':' + pass).toString('base64');
-        this.productCode = productCode;
-    } else {
-        const options = user;
+class Cheddar {
+    constructor(user, pass, productCode) {
+        if (typeof user === 'string') {
+            this.auth = 'Basic ' + Buffer.from(user + ':' + pass).toString('base64');
+            this.productCode = productCode;
+        } else {
+            const options = user;
 
-        this.auth = 'Basic ' + Buffer.from(options.username + ':' + options.password).toString('base64');
-        this.productCode = options.productCode;
-        this.productId = options.productId;
+            this.auth = 'Basic ' + Buffer.from(options.username + ':' + options.password).toString('base64');
+            this.productCode = options.productCode;
+            this.productId = options.productId;
+        }
     }
-};
+}
 
 var arrays = [
     'plans',
