@@ -1,8 +1,8 @@
 /* eslint-disable func-names */
 /* eslint-env node, mocha */
-var chai = require('chai');
-var Cheddar = require('../lib/cheddar');
-var config = require('../config.json');
+const chai = require('chai');
+const Cheddar = require('../lib/cheddar');
+const config = require('../config.json');
 
 async function wait(ms) {
     return new Promise(function (resolve) {
@@ -23,7 +23,7 @@ describe('Cheddar', function () {
     describe('Plans', function () {
         describe('#getAllPricingPlans', function () {
             it('should return a plan array', async function () {
-                var plans = await this.cheddar.getAllPricingPlans();
+                const plans = await this.cheddar.getAllPricingPlans();
 
                 chai.expect(plans).to.be.an('array');
                 chai.expect(plans.length).to.be.at.least(1);
@@ -32,7 +32,7 @@ describe('Cheddar', function () {
 
         describe('#getPricingPlan', function () {
             it('should return a single plan', async function () {
-                var plan = await this.cheddar.getPricingPlan(config.planCode);
+                const plan = await this.cheddar.getPricingPlan(config.planCode);
 
                 chai.expect(typeof plan).to.equal('object');
             });
@@ -50,7 +50,7 @@ describe('Cheddar', function () {
     describe('Customers', function () {
         describe('#createCustomer', function () {
             it('should create a customer', async function () {
-                var subscriptionData = {
+                const subscriptionData = {
                     planCode: config.planCode,
                     method: 'cc',
                     ccNumber: '4111111111111111',
@@ -87,7 +87,7 @@ describe('Cheddar', function () {
 
         describe('#getAllCustomers', function () {
             it('should retrieve all customers', async function () {
-                var options = {
+                const options = {
                     planCode: [config.planCode],
                     subscriptionStatus: 'activeOnly',
                     orderBy: 'createdDatetime',
@@ -95,7 +95,7 @@ describe('Cheddar', function () {
                     createdAfterDate: '2017-01-01',
                 };
 
-                var customers = await this.cheddar.getAllCustomers(options);
+                const customers = await this.cheddar.getAllCustomers(options);
 
                 chai.expect(customers).to.be.an('array');
                 chai.expect(customers.length).to.equal(2);
@@ -105,7 +105,7 @@ describe('Cheddar', function () {
 
         describe('#getCustomer', function () {
             it('should retrieve a customer with the right code', async function () {
-                var customer = await this.cheddar.getCustomer(this.customerCode1);
+                const customer = await this.cheddar.getCustomer(this.customerCode1);
                 chai.expect(customer).to.be.an('object');
             });
 
@@ -124,7 +124,7 @@ describe('Cheddar', function () {
             it('should increase the item count', async function () {
                 await this.cheddar.setItemQuantity(this.customerCode1, config.itemCode, 1);
 
-                var customer = await this.cheddar.getCustomer(this.customerCode1);
+                const customer = await this.cheddar.getCustomer(this.customerCode1);
 
                 chai.expect(customer.subscriptions[0].items[0].quantity).to.equal(1);
             });
@@ -134,7 +134,7 @@ describe('Cheddar', function () {
             it('should add to the item count', async function () {
                 await this.cheddar.addItem(this.customerCode1, config.itemCode, 2);
 
-                var customer = await this.cheddar.getCustomer(this.customerCode1);
+                const customer = await this.cheddar.getCustomer(this.customerCode1);
 
                 chai.expect(customer.subscriptions[0].items[0].quantity).to.equal(1 + 2);
             });
@@ -142,7 +142,7 @@ describe('Cheddar', function () {
             it('should default to 1 as item count', async function () {
                 await this.cheddar.addItem(this.customerCode1, config.itemCode);
 
-                var customer = await this.cheddar.getCustomer(this.customerCode1);
+                const customer = await this.cheddar.getCustomer(this.customerCode1);
 
                 chai.expect(customer.subscriptions[0].items[0].quantity).to.equal(1 + 2 + 1);
             });
@@ -152,7 +152,7 @@ describe('Cheddar', function () {
             it('should decrease the item count', async function () {
                 await this.cheddar.removeItem(this.customerCode1, config.itemCode, 2);
 
-                var customer = await this.cheddar.getCustomer(this.customerCode1);
+                const customer = await this.cheddar.getCustomer(this.customerCode1);
 
                 chai.expect(customer.subscriptions[0].items[0].quantity).to.equal(2);
             });
@@ -160,7 +160,7 @@ describe('Cheddar', function () {
             it('should default to 1 as item count', async function () {
                 await this.cheddar.removeItem(this.customerCode1, config.itemCode);
 
-                var customer = await this.cheddar.getCustomer(this.customerCode1);
+                const customer = await this.cheddar.getCustomer(this.customerCode1);
 
                 chai.expect(customer.subscriptions[0].items[0].quantity).to.equal(1);
             });
@@ -175,7 +175,7 @@ describe('Cheddar', function () {
 
     describe('#deleteAllCustomers', function () {
         it('should remove all customers (in development mode)', async function () {
-            var ts = Math.round((new Date()).getTime() / 1000) + 2000;
+            const ts = Math.round((new Date()).getTime() / 1000) + 2000;
             await this.cheddar.deleteAllCustomers(ts);
 
             try {

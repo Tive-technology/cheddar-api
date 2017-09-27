@@ -1,7 +1,7 @@
-var xml2js = require('xml2js');
-var rp = require('request-promise-native');
+const xml2js = require('xml2js');
+const rp = require('request-promise-native');
 
-var baseUri = 'https://getcheddar.com:443';
+const baseUri = 'https://getcheddar.com:443';
 
 class Cheddar {
     constructor(user, pass, productCode) {
@@ -18,7 +18,7 @@ class Cheddar {
     }
 }
 
-var arrays = [
+const arrays = [
     'plans',
     'customers',
     'items',
@@ -40,20 +40,20 @@ function validator(xpath, currentValue, newValue) {
         return +newValue;
     }
 
-    var paths = xpath.split('/');
-    var item = paths[paths.length - 1];
+    const paths = xpath.split('/');
+    const item = paths[paths.length - 1];
 
     if (arrays.indexOf(item) === -1) {
         return newValue;
     }
     // Slice of the 's'
-    var child = item.slice(0, item.length - 1);
+    const child = item.slice(0, item.length - 1);
 
     // Make sure the child is an array using the concat function
     return [].concat(newValue[child]);
 }
 
-var xmlParseOptions = {
+const xmlParseOptions = {
     explicitRoot: true,
     explicitArray: false,
     validator: validator,
@@ -63,7 +63,7 @@ var xmlParseOptions = {
 
 function parseResult(data) {
     return new Promise(function initPromise(resolve, reject) {
-        var parser = new xml2js.Parser(xmlParseOptions);
+        const parser = new xml2js.Parser(xmlParseOptions);
 
         parser.parseString(data, function parse(err, xml) {
             if (err) { // Handle error
@@ -74,10 +74,10 @@ function parseResult(data) {
                 return;
             }
 
-            var type = Object.keys(xml)[0];
+            const type = Object.keys(xml)[0];
 
             if (type === 'error') {
-                var error = new Error(xml[type]._);
+                const error = new Error(xml[type]._);
                 error.code = +xml[type].code;
                 reject(error);
             } else {
@@ -89,9 +89,9 @@ function parseResult(data) {
 
 Cheddar.prototype.callAPI = function callAPI(path, data) {
     // Encode the path, because some codes can contain spaces
-    var encodedPath = encodeURI(path);
+    const encodedPath = encodeURI(path);
 
-    var requestOptions = {
+    const requestOptions = {
         uri: baseUri + '/xml' + encodedPath,
         headers: {
             authorization: this.auth,
@@ -104,12 +104,12 @@ Cheddar.prototype.callAPI = function callAPI(path, data) {
         },
     };
 
-    var promise = rp.post(requestOptions)
+    const promise = rp.post(requestOptions)
         .then(parseResult)
         .catch(function handleError(err) {
             if (typeof err.error === 'string' && err.error.indexOf('<?xml') === 0) {
                 return parseResult(err.error).then(function createErrorFromXml(xml) {
-                    var error = new Error(xml.error._);
+                    const error = new Error(xml.error._);
                     error.code = Number(xml.error.code);
                     throw error;
                 });
@@ -122,9 +122,9 @@ Cheddar.prototype.callAPI = function callAPI(path, data) {
 
 Cheddar.prototype.callReportingAPI = function callReportingAPI(path, data) {
     // Encode the path, because some codes can contain spaces
-    var encodedPath = encodeURI(path);
+    const encodedPath = encodeURI(path);
 
-    var requestOptions = {
+    const requestOptions = {
         uri: baseUri + '/json' + encodedPath,
         headers: {
             authorization: this.auth,
@@ -147,7 +147,7 @@ Cheddar.prototype.getAllPricingPlans = function getAllPricingPlans() {
 };
 
 Cheddar.prototype.getPricingPlan = function getPricingPlan(code) {
-    var promise = this.callAPI('/plans/get/code/' + code)
+    const promise = this.callAPI('/plans/get/code/' + code)
         .then(function getFirstPlan(plans) {
             // Return the first plan (it should only contain 1)
             return plans && plans[0];
@@ -161,7 +161,7 @@ Cheddar.prototype.getAllCustomers = function getAllCustomers(data) {
 };
 
 Cheddar.prototype.getCustomer = function getCustomer(code) {
-    var promise = this.callAPI('/customers/get/code/' + code)
+    const promise = this.callAPI('/customers/get/code/' + code)
         .then(function getFirstCustomer(customers) {
             if (!customers || !customers.length) {
                 throw new Error('No customers could be retrieved');
@@ -205,7 +205,7 @@ Cheddar.prototype.cancelSubscription = function cancelSubscription(code) {
 };
 
 Cheddar.prototype.addItem = function addItem(code, itemCode, amount) {
-    var data;
+    let data;
 
     if (amount) {
         data = { quantity: amount.toString() };
@@ -215,7 +215,7 @@ Cheddar.prototype.addItem = function addItem(code, itemCode, amount) {
 };
 
 Cheddar.prototype.removeItem = function removeItem(code, itemCode, amount) {
-    var data;
+    let data;
 
     if (amount) {
         data = { quantity: amount.toString() };
@@ -225,13 +225,13 @@ Cheddar.prototype.removeItem = function removeItem(code, itemCode, amount) {
 };
 
 Cheddar.prototype.setItemQuantity = function setItemQuantity(code, itemCode, amount) {
-    var data = { quantity: amount.toString() };
+    const data = { quantity: amount.toString() };
     return this.callAPI('/customers/set-item-quantity/code/' + code + '/itemCode/' + itemCode, data);
 };
 
 Cheddar.prototype.addCustomCharge =
 function addCustomCharge(code, chargeCode, quantity, amount, description) {
-    var data = {
+    const data = {
         chargeCode: chargeCode,
         quantity: quantity.toString(),
         eachAmount: amount.toString(),
@@ -242,14 +242,14 @@ function addCustomCharge(code, chargeCode, quantity, amount, description) {
 };
 
 Cheddar.prototype.deleteCustomCharge = function deleteCustomCharge(code, chargeId) {
-    var data = {
+    const data = {
         chargeId: chargeId,
     };
     return this.callAPI('/customers/delete-charge/code/' + code, data);
 };
 
 Cheddar.prototype.resendInvoiceEmail = function resendInvoiceEmail(idOrNumber) {
-    var data;
+    let data;
 
     if (isNaN(idOrNumber)) {
         data = { id: idOrNumber };
