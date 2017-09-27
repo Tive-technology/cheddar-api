@@ -1,4 +1,4 @@
-/* eslint-disable func-names */
+/* eslint-disable func-names, prefer-arrow-callback */
 /* eslint-env node, mocha */
 const chai = require('chai');
 const Cheddar = require('../lib/cheddar');

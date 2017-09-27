@@ -41,16 +41,16 @@ function validator(xpath, currentValue, newValue) {
 const xmlParseOptions = {
     explicitRoot: true,
     explicitArray: false,
-    validator: validator,
+    validator,
     emptyTag: null,
     mergeAttrs: true,
 };
 
 function parseResult(data) {
-    return new Promise(function initPromise(resolve, reject) {
+    return new Promise(((resolve, reject) => {
         const parser = new xml2js.Parser(xmlParseOptions);
 
-        parser.parseString(data, function parse(err, xml) {
+        parser.parseString(data, (err, xml) => {
             if (err) { // Handle error
                 reject(err);
                 return;
@@ -69,18 +69,18 @@ function parseResult(data) {
                 resolve(xml[type]);
             }
         });
-    });
+    }));
 }
 
 class Cheddar {
     constructor(user, pass, productCode) {
         if (typeof user === 'string') {
-            this.auth = 'Basic ' + Buffer.from(user + ':' + pass).toString('base64');
+            this.auth = `Basic ${Buffer.from(`${user}:${pass}`).toString('base64')}`;
             this.productCode = productCode;
         } else {
             const options = user;
 
-            this.auth = 'Basic ' + Buffer.from(options.username + ':' + options.password).toString('base64');
+            this.auth = `Basic ${Buffer.from(`${options.username}:${options.password}`).toString('base64')}`;
             this.productCode = options.productCode;
             this.productId = options.productId;
         }
@@ -91,7 +91,7 @@ class Cheddar {
         const encodedPath = encodeURI(path);
 
         const requestOptions = {
-            uri: baseUri + '/xml' + encodedPath,
+            uri: `${baseUri}/xml${encodedPath}`,
             headers: {
                 authorization: this.auth,
             },
@@ -105,9 +105,9 @@ class Cheddar {
 
         const promise = rp.post(requestOptions)
             .then(parseResult)
-            .catch(function handleError(err) {
+            .catch((err) => {
                 if (typeof err.error === 'string' && err.error.indexOf('<?xml') === 0) {
-                    return parseResult(err.error).then(function createErrorFromXml(xml) {
+                    return parseResult(err.error).then((xml) => {
                         const error = new Error(xml.error._);
                         error.code = Number(xml.error.code);
                         throw error;
@@ -124,7 +124,7 @@ class Cheddar {
         const encodedPath = encodeURI(path);
 
         const requestOptions = {
-            uri: baseUri + '/json' + encodedPath,
+            uri: `${baseUri}/json${encodedPath}`,
             headers: {
                 authorization: this.auth,
             },
@@ -146,13 +146,10 @@ class Cheddar {
     }
 
     getPricingPlan(code) {
-        const promise = this.callAPI('/plans/get/code/' + code)
-            .then(function getFirstPlan(plans) {
+        return this.callAPI(`/plans/get/code/${code}`)
+            .then(plans =>
                 // Return the first plan (it should only contain 1)
-                return plans && plans[0];
-            });
-
-        return promise;
+                plans && plans[0]);
     }
 
     getAllCustomers(data) {
@@ -160,16 +157,14 @@ class Cheddar {
     }
 
     getCustomer(code) {
-        const promise = this.callAPI('/customers/get/code/' + code)
-            .then(function getFirstCustomer(customers) {
+        return this.callAPI(`/customers/get/code/${code}`)
+            .then((customers) => {
                 if (!customers || !customers.length) {
                     throw new Error('No customers could be retrieved');
                 }
                 // Return the first customer (it should only contain 1)
                 return customers[0];
             });
-
-        return promise;
     }
 
     createCustomer(data) {
@@ -177,27 +172,27 @@ class Cheddar {
     }
 
     editCustomerAndSubscription(code, data) {
-        return this.callAPI('/customers/edit/code/' + code, data);
+        return this.callAPI(`/customers/edit/code/${code}`, data);
     }
 
     editCustomer(code, data) {
-        return this.callAPI('/customers/edit-customer/code/' + code, data);
+        return this.callAPI(`/customers/edit-customer/code/${code}`, data);
     }
 
     editSubscription(code, data) {
-        return this.callAPI('/customers/edit-subscription/code/' + code, data);
+        return this.callAPI(`/customers/edit-subscription/code/${code}`, data);
     }
 
     deleteCustomer(code) {
-        return this.callAPI('/customers/delete/code/' + code);
+        return this.callAPI(`/customers/delete/code/${code}`);
     }
 
     deleteAllCustomers(unixtimestamp) {
-        return this.callAPI('/customers/delete-all/confirm/' + unixtimestamp + '');
+        return this.callAPI(`/customers/delete-all/confirm/${unixtimestamp}`);
     }
 
     cancelSubscription(code) {
-        return this.callAPI('/customers/cancel/code/' + code);
+        return this.callAPI(`/customers/cancel/code/${code}`);
     }
 
     addItem(code, itemCode, amount) {
@@ -207,7 +202,7 @@ class Cheddar {
             data = { quantity: amount.toString() };
         }
 
-        return this.callAPI('/customers/add-item-quantity/code/' + code + '/itemCode/' + itemCode, data);
+        return this.callAPI(`/customers/add-item-quantity/code/${code}/itemCode/${itemCode}`, data);
     }
 
     removeItem(code, itemCode, amount) {
@@ -217,30 +212,30 @@ class Cheddar {
             data = { quantity: amount.toString() };
         }
 
-        return this.callAPI('/customers/remove-item-quantity/code/' + code + '/itemCode/' + itemCode, data);
+        return this.callAPI(`/customers/remove-item-quantity/code/${code}/itemCode/${itemCode}`, data);
     }
 
     setItemQuantity(code, itemCode, amount) {
         const data = { quantity: amount.toString() };
-        return this.callAPI('/customers/set-item-quantity/code/' + code + '/itemCode/' + itemCode, data);
+        return this.callAPI(`/customers/set-item-quantity/code/${code}/itemCode/${itemCode}`, data);
     }
 
     addCustomCharge(code, chargeCode, quantity, amount, description) {
         const data = {
-            chargeCode: chargeCode,
+            chargeCode,
             quantity: quantity.toString(),
             eachAmount: amount.toString(),
-            description: description,
+            description,
         };
 
-        return this.callAPI('/customers/add-charge/code/' + code, data);
+        return this.callAPI(`/customers/add-charge/code/${code}`, data);
     }
 
     deleteCustomCharge(code, chargeId) {
         const data = {
-            chargeId: chargeId,
+            chargeId,
         };
-        return this.callAPI('/customers/delete-charge/code/' + code, data);
+        return this.callAPI(`/customers/delete-charge/code/${code}`, data);
     }
 
     resendInvoiceEmail(idOrNumber) {
@@ -256,7 +251,7 @@ class Cheddar {
     }
 
     oneTimeInvoice(customerCode, data) {
-        return this.callAPI('/invoices/new/code/' + customerCode, data);
+        return this.callAPI(`/invoices/new/code/${customerCode}`, data);
     }
 }
 
