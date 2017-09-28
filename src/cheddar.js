@@ -31,7 +31,7 @@ class Cheddar {
         this.productId = productId;
     }
 
-    callAPI(path, query = {}, data, {
+    callApi(path, query = {}, data, {
         version = 'xml',
     } = {}) {
         // Encode the path, because some codes can contain spaces
@@ -75,14 +75,14 @@ class Cheddar {
     }
 
     callJsonApi(path, query = {}, data, options = {}) {
-        return this.callAPI(path, query, data, {
+        return this.callApi(path, query, data, {
             ...options,
             version: 'json',
         });
     }
 
     getPlans(query) {
-        return this.callAPI('/plans/get', query)
+        return this.callApi('/plans/get', query)
             .then(({ plans = [] } = {}) => plans);
     }
 
@@ -93,12 +93,12 @@ class Cheddar {
     }
 
     getCustomers(query) {
-        return this.callAPI('/customers/get', query)
+        return this.callApi('/customers/get', query)
             .then(({ customers } = {}) => customers);
     }
 
     searchCustomers(query) {
-        return this.callAPI('/customers/search', query);
+        return this.callApi('/customers/search', query);
     }
 
     getCustomer(code) {
@@ -113,47 +113,47 @@ class Cheddar {
     }
 
     createCustomer(data) {
-        return this.callAPI('/customers/new', {}, data);
+        return this.callApi('/customers/new', {}, data);
     }
 
     editCustomerAndSubscription(code, data) {
-        return this.callAPI('/customers/edit', { code }, data);
+        return this.callApi('/customers/edit', { code }, data);
     }
 
     editCustomer(code, data) {
-        return this.callAPI('/customers/edit-customer', { code }, data);
+        return this.callApi('/customers/edit-customer', { code }, data);
     }
 
     editSubscription(code, data) {
-        return this.callAPI('/customers/edit-subscription', { code }, data);
+        return this.callApi('/customers/edit-subscription', { code }, data);
     }
 
     deleteCustomer(code) {
-        return this.callAPI('/customers/delete', { code });
+        return this.callApi('/customers/delete', { code });
     }
 
     deleteAllCustomers(unixtimestamp) {
-        return this.callAPI('/customers/delete-all', { confirm: unixtimestamp });
+        return this.callApi('/customers/delete-all', { confirm: unixtimestamp });
     }
 
     cancelSubscription(code) {
-        return this.callAPI('/customers/cancel', { code });
+        return this.callApi('/customers/cancel', { code });
     }
 
     addItem(code, itemCode, quantity = 1) {
-        return this.callAPI('/customers/add-item-quantity', { code, itemCode }, { quantity });
+        return this.callApi('/customers/add-item-quantity', { code, itemCode }, { quantity });
     }
 
     removeItem(code, itemCode, quantity = 1) {
-        return this.callAPI('/customers/remove-item-quantity', { code, itemCode }, { quantity });
+        return this.callApi('/customers/remove-item-quantity', { code, itemCode }, { quantity });
     }
 
     setItemQuantity(code, itemCode, quantity) {
-        return this.callAPI('/customers/set-item-quantity', { code, itemCode }, { quantity });
+        return this.callApi('/customers/set-item-quantity', { code, itemCode }, { quantity });
     }
 
     addCustomCharge(code, chargeCode, quantity, eachAmount, description) {
-        return this.callAPI('/customers/add-charge', { code }, {
+        return this.callApi('/customers/add-charge', { code }, {
             chargeCode,
             quantity,
             eachAmount,
@@ -162,7 +162,7 @@ class Cheddar {
     }
 
     deleteCustomCharge(code, chargeId) {
-        return this.callAPI('/customers/delete-charge', { code }, { chargeId });
+        return this.callApi('/customers/delete-charge', { code }, { chargeId });
     }
 
     resendInvoiceEmail(idOrNumber) {
@@ -174,11 +174,11 @@ class Cheddar {
             data = { number: idOrNumber };
         }
 
-        return this.callAPI('/invoices/send-email', data);
+        return this.callApi('/invoices/send-email', data);
     }
 
     oneTimeInvoice(code, data) {
-        return this.callAPI('/invoices/new', { code }, data);
+        return this.callApi('/invoices/new', { code }, data);
     }
 }
 
