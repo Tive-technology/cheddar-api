@@ -31,11 +31,25 @@ function validator(xpath, currentValue, newValue) {
     if (arrays.indexOf(item) === -1) {
         return newValue;
     }
-    // Slice of the 's'
+
+    // Slice of the 's', to get the object key
+    // For instance: the key is customer, but the array item is customers
     const child = item.slice(0, item.length - 1);
 
     // Make sure the child is an array using the concat function
-    return [].concat(newValue[child]);
+    const arrayChild = [].concat(newValue[child]);
+
+    // If it's not the root array, return an array version directly
+    if (!xpath.startsWith(`/${item}`)) {
+        return arrayChild;
+    }
+
+    /* eslint-disable no-param-reassign */
+    newValue[item] = arrayChild;
+    delete newValue[child];
+    /* eslint-enable no-param-reassign */
+
+    return newValue;
 }
 
 const xmlParseOptions = {
@@ -72,6 +86,17 @@ function parseResult(data) {
     }));
 }
 
+function handleXmlError(err) {
+    if (typeof err.error === 'string' && err.error.indexOf('<?xml') === 0) {
+        return parseResult(err.error).then((xml) => {
+            const error = new Error(xml.error._);
+            error.code = Number(xml.error.code);
+            throw error;
+        });
+    }
+    throw err;
+}
+
 class Cheddar {
     constructor(user, pass, productCode) {
         if (typeof user === 'string') {
@@ -91,7 +116,9 @@ class Cheddar {
         }
     }
 
-    callAPI(path, query = {}, data) {
+    callAPI(path, query = {}, data, {
+        version = 'xml',
+    } = {}) {
         // Encode the path, because some codes can contain spaces
         const encodedPath = encodeURI(path);
 
@@ -101,73 +128,62 @@ class Cheddar {
             ...query,
         };
 
-        const requestOptions = {
-            uri: `${BASE_URI}/xml${encodedPath}`,
-            headers: {
-                authorization: this.auth,
-            },
-            form: data,
-            proxy: process.env.CHEDDAR_PROXY_URL,
-            qs: fullQuery,
-        };
-
-        return rp.post(requestOptions)
-            .then(parseResult)
-            .catch((err) => {
-                if (typeof err.error === 'string' && err.error.indexOf('<?xml') === 0) {
-                    return parseResult(err.error).then((xml) => {
-                        const error = new Error(xml.error._);
-                        error.code = Number(xml.error.code);
-                        throw error;
-                    });
-                }
-                throw err;
-            });
-    }
-
-    callReportingAPI(path, query = {}) {
-        // Encode the path, because some codes can contain spaces
-        const encodedPath = encodeURI(path);
-
-        const fullQuery = {
-            productCode: this.productCode,
-            productId: this.productId,
-            ...query,
-        };
-
+        // Instead of passing startDate and endDate seperately, a dataRange can also be passed
+        // Useful in combination with moment range libraries
         if (query.dateRange) {
             fullQuery.startDate = query.dateRange.start;
             fullQuery.endDate = query.dateRange.end;
         }
 
         const requestOptions = {
-            uri: `${BASE_URI}/json${encodedPath}`,
+            uri: `${BASE_URI}/${version}${encodedPath}`,
             headers: {
                 authorization: this.auth,
             },
-            qs: fullQuery,
+            form: data,
             proxy: process.env.CHEDDAR_PROXY_URL,
-            json: true,
+            qs: fullQuery,
+            method: data ? 'POST' : 'GET',
+            json: version === 'json',
         };
 
-        return rp.get(requestOptions);
+        const promise = rp(requestOptions);
+
+        switch (version) {
+        case 'xml':
+            return promise
+                .then(parseResult)
+                .catch(handleXmlError);
+        default:
+            return promise;
+        }
     }
 
-    getAllPricingPlans() {
-        return this.callAPI('/plans/get');
+    callJsonApi(path, query = {}, data, options = {}) {
+        return this.callAPI(path, query, data, {
+            ...options,
+            version: 'json',
+        });
+    }
+
+    getAllPricingPlans(query) {
+        return this.callAPI('/plans/get', query)
+            .then(({ plans = [] } = {}) => plans);
     }
 
     getPricingPlan(code) {
-        return this.callAPI('/plans/get', { code })
-            .then(plans => plans && plans[0]); // Return the first plan (it should only contain 1)
+        return this.getAllPricingPlans({ code })
+            // Return the first plan (it should only contain 1)
+            .then(plans => plans[0]);
     }
 
-    getAllCustomers(data) {
-        return this.callAPI('/customers/get', {}, data);
+    getAllCustomers(query) {
+        return this.callAPI('/customers/get', query)
+            .then(({ customers } = {}) => customers);
     }
 
     getCustomer(code) {
-        return this.callAPI('/customers/get', { code })
+        return this.getAllCustomers({ code })
             .then((customers) => {
                 if (!customers || !customers.length) {
                     throw new Error('No customers could be retrieved');
@@ -205,47 +221,29 @@ class Cheddar {
         return this.callAPI('/customers/cancel', { code });
     }
 
-    addItem(code, itemCode, amount) {
-        let data;
-
-        if (amount) {
-            data = { quantity: amount.toString() };
-        }
-
-        return this.callAPI('/customers/add-item-quantity', { code, itemCode }, data);
+    addItem(code, itemCode, quantity = 1) {
+        return this.callAPI('/customers/add-item-quantity', { code, itemCode }, { quantity });
     }
 
-    removeItem(code, itemCode, amount) {
-        let data;
-
-        if (amount) {
-            data = { quantity: amount.toString() };
-        }
-
-        return this.callAPI('/customers/remove-item-quantity', { code, itemCode }, data);
+    removeItem(code, itemCode, quantity = 1) {
+        return this.callAPI('/customers/remove-item-quantity', { code, itemCode }, { quantity });
     }
 
-    setItemQuantity(code, itemCode, amount) {
-        const data = { quantity: amount.toString() };
-        return this.callAPI('/customers/set-item-quantity', { code, itemCode }, data);
+    setItemQuantity(code, itemCode, quantity) {
+        return this.callAPI('/customers/set-item-quantity', { code, itemCode }, { quantity });
     }
 
-    addCustomCharge(code, chargeCode, quantity, amount, description) {
-        const data = {
+    addCustomCharge(code, chargeCode, quantity, eachAmount, description) {
+        return this.callAPI('/customers/add-charge', { code }, {
             chargeCode,
-            quantity: quantity.toString(),
-            eachAmount: amount.toString(),
+            quantity,
+            eachAmount,
             description,
-        };
-
-        return this.callAPI('/customers/add-charge', { code }, data);
+        });
     }
 
     deleteCustomCharge(code, chargeId) {
-        const data = {
-            chargeId,
-        };
-        return this.callAPI('/customers/delete-charge', { code }, data);
+        return this.callAPI('/customers/delete-charge', { code }, { chargeId });
     }
 
     resendInvoiceEmail(idOrNumber) {

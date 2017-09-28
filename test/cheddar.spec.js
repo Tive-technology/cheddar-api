@@ -186,9 +186,9 @@ describe('Cheddar', function () {
         });
     });
 
-    describe('#callReportingAPI', function () {
+    describe('#callJsonApi', function () {
         it('should retrieve revenue data', async function () {
-            await this.cheddar.callReportingAPI('/report/revenue-monthly', {
+            await this.cheddar.callJsonApi('/report/revenue-monthly', {
                 dateRange: {
                     start: '2017-06-01',
                     end: '2017-08-31',
