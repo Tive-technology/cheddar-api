@@ -42,6 +42,7 @@
   "license": "MIT",
   "scripts": {
     "build": "babel src -d lib",
+    "release": "npm run build && doctoc README.md && npm test && npm publish",
     "test": "eslint . && mocha"
   },
   "false": {}
