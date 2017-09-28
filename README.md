@@ -49,6 +49,24 @@ npm install request request-promise-native
 ```
 
 # Basic usage
+```javascript
+import Cheddar from 'cheddar';
+
+const cheddar = new Cheddar({
+  username: "email@example.com",
+  password: "passwordExample",
+  productCode: "PRODUCT_CODE",
+});
+
+cheddar.getPlans()
+  .then(plans => console.log(plans))
+  .catch(err => console.error(err));
+
+// When inside an async function, you can simply await any Cheddar function
+const plans = await cheddar.getPlans();
+```
+
+Or using ES5:
 
 ```javascript
 var Cheddar = require("cheddar");
