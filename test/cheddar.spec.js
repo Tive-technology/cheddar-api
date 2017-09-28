@@ -103,6 +103,29 @@ describe('Cheddar', function () {
             });
         });
 
+        describe('#searchCustomers', function () {
+            it('should retrieve pagenated customers', async function () {
+                const query = {
+                    perPage: 1,
+                };
+
+                const {
+                    count,
+                    pageNumber,
+                    pageCount,
+                    hasNextPage,
+                    customers,
+                } = await this.cheddar.searchCustomers(query);
+
+                chai.expect(count, 'number of customers').to.equal(2);
+                chai.expect(pageNumber, 'current page number').to.equal(1);
+                chai.expect(pageCount, 'number of pages').to.equal(2);
+                chai.expect(hasNextPage, 'has more pages').to.equal(1);
+                chai.expect(customers).to.be.an('array');
+                chai.expect(customers.length).to.equal(1);
+            });
+        });
+
         describe('#getCustomer', function () {
             it('should retrieve a customer with the right code', async function () {
                 const customer = await this.cheddar.getCustomer(this.customerCode1);

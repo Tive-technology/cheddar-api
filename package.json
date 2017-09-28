@@ -16,7 +16,7 @@
     "api"
   ],
   "dependencies": {
-    "xml2js": "0.4.4"
+    "xml2js": "0.4.19"
   },
   "peerDependencies": {
     "request": "2.x",

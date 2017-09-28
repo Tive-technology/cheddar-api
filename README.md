@@ -18,6 +18,7 @@ This module will simplify the process of integrating [Cheddar](https://www.getch
 * `getAllPricingPlans()`
 * `getPricingPlan(planCode)`
 * `getAllCustomers([searchParams])`
+* `searchCustomers([query])`
 * `getCustomer(customerCode)`
 * `createCustomer(customerData)`
 * `editCustomerAndSubscription(customerData)` or `updateCustomerAndSubscription(customerData)`

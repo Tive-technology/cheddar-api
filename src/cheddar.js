@@ -1,5 +1,6 @@
 const xml2js = require('xml2js');
 const rp = require('request-promise-native');
+const { parseNumbers } = require('xml2js/lib/processors');
 
 const BASE_URI = 'https://getcheddar.com:443';
 
@@ -58,6 +59,8 @@ const xmlParseOptions = {
     validator,
     emptyTag: null,
     mergeAttrs: true,
+    valueProcessors: [parseNumbers],
+    attrValueProcessors: [parseNumbers],
 };
 
 function parseResult(data) {
@@ -180,6 +183,10 @@ class Cheddar {
     getAllCustomers(query) {
         return this.callAPI('/customers/get', query)
             .then(({ customers } = {}) => customers);
+    }
+
+    searchCustomers(query) {
+        return this.callAPI('/customers/search', query);
     }
 
     getCustomer(code) {
