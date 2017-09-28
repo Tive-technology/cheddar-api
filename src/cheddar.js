@@ -3,23 +3,32 @@ const { parseResult, handleXmlError } = require('./xmlParsing');
 
 const BASE_URI = 'https://getcheddar.com:443';
 
-class Cheddar {
-    constructor(user, pass, productCode) {
-        if (typeof user === 'string') {
-            this.auth = `Basic ${Buffer.from(`${user}:${pass}`).toString('base64')}`;
-            this.productCode = productCode;
-        } else {
-            const {
-                username,
-                password,
-                productCode: prCode,
-                productId,
-            } = user;
+function makeAuthHeader(username, password) {
+    return `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+}
 
-            this.auth = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
-            this.productCode = prCode;
-            this.productId = productId;
+class Cheddar {
+    constructor(config = {}, deprecatedPassword, deprecatedProductCode) {
+        // backwards compatible initialisation via params
+        if (typeof config === 'string') {
+            // eslint-disable-next-line no-param-reassign
+            config = {
+                username: config,
+                password: deprecatedPassword,
+                productCode: deprecatedProductCode,
+            };
         }
+
+        const {
+            username,
+            password,
+            productCode,
+            productId,
+        } = config;
+
+        this.authorizationHeader = makeAuthHeader(username, password);
+        this.productCode = productCode;
+        this.productId = productId;
     }
 
     callAPI(path, query = {}, data, {
@@ -44,7 +53,7 @@ class Cheddar {
         const requestOptions = {
             uri: `${BASE_URI}/${version}${encodedPath}`,
             headers: {
-                authorization: this.auth,
+                authorization: this.authorizationHeader,
             },
             form: data,
             proxy: process.env.CHEDDAR_PROXY_URL,
