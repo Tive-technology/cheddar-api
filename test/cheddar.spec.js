@@ -70,7 +70,7 @@ describe('Cheddar', function () {
                 });
 
                 // Make sure the createdDatetime are different for each user
-                await wait(2000);
+                await wait(1000);
 
                 await this.cheddar.createCustomer({
                     code: this.customerCode2,
@@ -81,7 +81,7 @@ describe('Cheddar', function () {
                 });
 
                 // Make the customer is saved before continuing
-                await wait(2000);
+                await wait(1000);
             });
         });
 
