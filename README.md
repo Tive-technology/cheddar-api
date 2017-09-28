@@ -5,9 +5,9 @@ This module will simplify the process of integrating [Cheddar](https://www.getch
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Goals and Status](#goals-and-status)
 - [Installation](#installation)
 - [Basic usage](#basic-usage)
+- [Implemented methods](#implemented-methods)
 - [Using a proxy](#using-a-proxy)
 - [Running tests](#running-tests)
 - [Credits](#credits)
