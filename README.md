@@ -1,3 +1,6 @@
+## Cheddar API
+This module will simplify the process of integrating [Cheddar](https://www.getcheddar.com/) into your existing node.js apps.
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
@@ -10,31 +13,6 @@
 - [Credits](#credits)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-# Goals and Status
-
-This module will simplify the process of integrating [Cheddar](https://www.getcheddar.com/) into your existing node.js apps.
-
-* `getPlans()`
-* `getPlan(planCode)`
-* `getCustomers([query])`
-* `searchCustomers([query])`
-* `getCustomer(customerCode)`
-* `createCustomer(customerData)`
-* `editCustomerAndSubscription(customerData)`
-* `editCustomer(customerCode, customerData)`
-* `editSubscription(customerCode, customerData)`
-* `deleteCustomer(customerCode)`
-* `cancelSubscription(customerCode)`
-* `addItem(customerCode, itemCode, [amount])`
-* `removeItem(customerCode, itemCode, [amount])`
-* `setItemQuantity(customerCode, itemCode, amount)`
-* `addCustomCharge(customerCode, chargeCode, quantity, amount, description)`
-* `deleteCustomCharge(customerCode, chargeId)`
-* `resendInvoiceEmail(idOrNumber)`
-* `oneTimeInvoice(customerCode, {data})`
-
-All methods return a promise with the requested data in JSON format.
 
 # Installation
 
@@ -81,6 +59,29 @@ cheddar.getPlans()
   .then(function (plans) { console.log(plans); })
   .catch(function (err) { console.error(err); });
 ```
+
+# Implemented methods
+
+* `getPlans()`
+* `getPlan(planCode)`
+* `getCustomers([query])`
+* `getCustomer(customerCode)`
+* `searchCustomers([query])`
+* `createCustomer(customerData)`
+* `editCustomerAndSubscription(customerData)`
+* `editCustomer(customerCode, customerData)`
+* `editSubscription(customerCode, customerData)`
+* `deleteCustomer(customerCode)`
+* `cancelSubscription(customerCode)`
+* `addItem(customerCode, itemCode, [amount])`
+* `removeItem(customerCode, itemCode, [amount])`
+* `setItemQuantity(customerCode, itemCode, amount)`
+* `addCustomCharge(customerCode, chargeCode, quantity, amount, description)`
+* `deleteCustomCharge(customerCode, chargeId)`
+* `resendInvoiceEmail(idOrNumber)`
+* `oneTimeInvoice(customerCode, {data})`
+
+All methods return a promise with the requested data in JSON format.
 
 # Using a proxy
 
