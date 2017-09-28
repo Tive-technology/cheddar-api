@@ -169,18 +169,18 @@ class Cheddar {
         });
     }
 
-    getAllPricingPlans(query) {
+    getPlans(query) {
         return this.callAPI('/plans/get', query)
             .then(({ plans = [] } = {}) => plans);
     }
 
-    getPricingPlan(code) {
+    getPlan(code) {
         return this.getAllPricingPlans({ code })
             // Return the first plan (it should only contain 1)
             .then(plans => plans[0]);
     }
 
-    getAllCustomers(query) {
+    getCustomers(query) {
         return this.callAPI('/customers/get', query)
             .then(({ customers } = {}) => customers);
     }
@@ -190,7 +190,7 @@ class Cheddar {
     }
 
     getCustomer(code) {
-        return this.getAllCustomers({ code })
+        return this.getCustomers({ code })
             .then((customers) => {
                 if (!customers || !customers.length) {
                     throw new Error('No customers could be retrieved');
@@ -270,8 +270,12 @@ class Cheddar {
     }
 }
 
+// Backwards compatible synonyms
 Cheddar.prototype.updateCustomerAndSubscription = Cheddar.prototype.editCustomerAndSubscription;
 Cheddar.prototype.updateCustomer = Cheddar.prototype.editCustomer;
 Cheddar.prototype.updateSubscription = Cheddar.prototype.editSubscription;
+Cheddar.prototype.getAllPricingPlans = Cheddar.prototype.getPlans;
+Cheddar.prototype.getPricingPlan = Cheddar.prototype.getPlan;
+Cheddar.prototype.getAllCustomers = Cheddar.prototype.getCustomers;
 
 module.exports = Cheddar;

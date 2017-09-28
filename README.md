@@ -15,15 +15,15 @@
 
 This module will simplify the process of integrating [Cheddar](https://www.getcheddar.com/) into your existing node.js apps.
 
-* `getAllPricingPlans()`
-* `getPricingPlan(planCode)`
-* `getAllCustomers([searchParams])`
+* `getPlans()`
+* `getPlan(planCode)`
+* `getCustomers([query])`
 * `searchCustomers([query])`
 * `getCustomer(customerCode)`
 * `createCustomer(customerData)`
-* `editCustomerAndSubscription(customerData)` or `updateCustomerAndSubscription(customerData)`
-* `editCustomer(customerCode, customerData)` or `updateCustomer(customerCode, customerData)`
-* `editSubscription(customerCode, customerData)` or `updateSubscription(customerCode, customerData)`
+* `editCustomerAndSubscription(customerData)`
+* `editCustomer(customerCode, customerData)`
+* `editSubscription(customerCode, customerData)`
 * `deleteCustomer(customerCode)`
 * `cancelSubscription(customerCode)`
 * `addItem(customerCode, itemCode, [amount])`
@@ -56,14 +56,12 @@ var Cheddar = require("cheddar");
 var cheddar = new Cheddar({
   username: "email@example.com",
   password: "passwordExample",
-  productCode: "ProductCode",
+  productCode: "PRODUCT_CODE",
 });
 
-cheddar.getAllPricingPlans().then(function (results) {
-  console.log(results);
-}).catch(function (err) {
-  console.error(err);
-});
+cheddar.getPlans()
+  .then(function (plans) { console.log(plans); })
+  .catch(function (err) { console.error(err); });
 ```
 
 # Using a proxy

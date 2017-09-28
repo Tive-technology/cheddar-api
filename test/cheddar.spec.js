@@ -21,25 +21,25 @@ describe('Cheddar', function () {
     });
 
     describe('Plans', function () {
-        describe('#getAllPricingPlans', function () {
+        describe('#getPlans', function () {
             it('should return a plan array', async function () {
-                const plans = await this.cheddar.getAllPricingPlans();
+                const plans = await this.cheddar.getPlans();
 
                 chai.expect(plans).to.be.an('array');
                 chai.expect(plans.length).to.be.at.least(1);
             });
         });
 
-        describe('#getPricingPlan', function () {
+        describe('#getPlan', function () {
             it('should return a single plan', async function () {
-                const plan = await this.cheddar.getPricingPlan(config.planCode);
+                const plan = await this.cheddar.getPlan(config.planCode);
 
                 chai.expect(typeof plan).to.equal('object');
             });
 
             it('should fail on bad plan code', async function () {
                 try {
-                    await this.cheddar.getPricingPlan('Bad Plan Code');
+                    await this.cheddar.getPlan('Bad Plan Code');
                 } catch (err) {
                     chai.expect(err.message).to.include('Plan not found');
                 }
@@ -85,7 +85,7 @@ describe('Cheddar', function () {
             });
         });
 
-        describe('#getAllCustomers', function () {
+        describe('#getCustomers', function () {
             it('should retrieve all customers', async function () {
                 const options = {
                     planCode: [config.planCode],
@@ -95,7 +95,7 @@ describe('Cheddar', function () {
                     createdAfterDate: '2017-01-01',
                 };
 
-                const customers = await this.cheddar.getAllCustomers(options);
+                const customers = await this.cheddar.getCustomers(options);
 
                 chai.expect(customers).to.be.an('array');
                 chai.expect(customers.length).to.equal(2);
@@ -202,7 +202,7 @@ describe('Cheddar', function () {
             await this.cheddar.deleteAllCustomers(ts);
 
             try {
-                this.cheddar.getAllCustomers({});
+                this.cheddar.getCustomers({});
             } catch (err) {
                 chai.expect(err.message).to.include('No customers found');
             }
