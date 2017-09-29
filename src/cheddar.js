@@ -86,35 +86,36 @@ class Cheddar {
         });
     }
 
-    getPlans(query) {
-        return this.callApi('/plans/get', query)
-            .then(({ plans = [] } = {}) => plans);
+    async getPlans(query) {
+        const { plans = [] } = await this.callApi('/plans/get', query);
+
+        return plans;
     }
 
-    getPlan(code) {
-        return this.getAllPricingPlans({ code })
-            // Return the first plan (it should only contain 1)
-            .then(plans => plans[0]);
+    async getPlan(code) {
+        const plans = await this.getPlans({ code });
+
+        return plans[0];
     }
 
-    getCustomers(query) {
-        return this.callApi('/customers/get', query)
-            .then(({ customers } = {}) => customers);
+    async getCustomers(query) {
+        const { customers } = await this.callApi('/customers/get', query);
+
+        return customers;
     }
 
     searchCustomers(query) {
         return this.callApi('/customers/search', query);
     }
 
-    getCustomer(code) {
-        return this.getCustomers({ code })
-            .then((customers) => {
-                if (!customers || !customers.length) {
-                    throw new Error('No customers could be retrieved');
-                }
-                // Return the first customer (it should only contain 1)
-                return customers[0];
-            });
+    async getCustomer(code) {
+        const customers = await this.getCustomers({ code });
+
+        if (!customers || !customers.length) {
+            throw new Error('No customers could be retrieved');
+        }
+
+        return customers[0];
     }
 
     createCustomer(data) {
