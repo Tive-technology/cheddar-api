@@ -10,6 +10,8 @@ const arrays = [
     'subscriptions',
     'transactions',
     'promotions',
+    'coupons',
+    'incentives',
 ];
 
 function validator(xpath, currentValue, newValue) {
@@ -25,6 +27,12 @@ function validator(xpath, currentValue, newValue) {
 
     const paths = xpath.split('/');
     const item = paths[paths.length - 1];
+
+    if (item === 'coupon' && Array.isArray(newValue.code)) {
+        const [firstCode] = newValue.code;
+        // eslint-disable-next-line no-param-reassign
+        newValue.code = firstCode;
+    }
 
     if (arrays.indexOf(item) === -1) {
         return newValue;

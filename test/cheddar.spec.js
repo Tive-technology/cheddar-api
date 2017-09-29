@@ -201,11 +201,12 @@ describe('Cheddar', function () {
         });
 
         describe('#getPromotion', function () {
-            it('should return all promotions', async function () {
+            it('should return a single promotion', async function () {
                 const promotion = await this.cheddar.getPromotion(config.promoCode);
 
                 chai.expect(promotion).to.be.an('object');
-                chai.expect(promotion.name).to.equal(config.promoCode);
+                chai.expect(promotion.coupons).to.be.an('array');
+                chai.expect(promotion.coupons[0].code).to.equal(config.promoCode);
             });
         });
     });
