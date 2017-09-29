@@ -1,6 +1,11 @@
 const rp = require('request-promise-native');
 const { parseResult, handleXmlError } = require('./xmlParsing');
 
+// To support async/await in node 4, we need the regeneratorRuntime
+// We can remove this when we drop support for node 4
+// eslint-disable-next-line no-unused-vars
+const regeneratorRuntime = require('regenerator-runtime');
+
 const BASE_URI = 'https://getcheddar.com:443';
 
 function makeAuthHeader(username, password) {
@@ -179,6 +184,18 @@ class Cheddar {
 
     oneTimeInvoice(code, data) {
         return this.callApi('/invoices/new', { code }, data);
+    }
+
+    async getPromotions(query) {
+        const { promotions } = await this.callApi('/promotions/get', query);
+
+        return promotions;
+    }
+
+    async getPromotion(code) {
+        const promotions = await this.getPromotions({ code });
+
+        return promotions && promotions[0];
     }
 }
 

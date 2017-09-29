@@ -1,4 +1,4 @@
-## Cheddar API
+## Node.js Cheddar API wrapper
 This module will simplify the process of integrating [Cheddar](https://www.getcheddar.com/) into your existing node.js apps.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -79,7 +79,9 @@ cheddar.getPlans()
 * `addCustomCharge(customerCode, chargeCode, quantity, amount, description)`
 * `deleteCustomCharge(customerCode, chargeId)`
 * `resendInvoiceEmail(idOrNumber)`
-* `oneTimeInvoice(customerCode, {data})`
+* `oneTimeInvoice(customerCode, invoiceData)`
+* `getPromotions([query])`
+* `getPromotion(promotionCode)`
 
 All methods return a promise with the requested data in JSON format.
 
@@ -106,7 +108,8 @@ First add a config file (`config.json`) with all your Cheddar credentials:
   "productCode": "PRODUCTCODE",
   "productId": "PRODUCTID",
   "planCode": "PLANCODE",
-  "itemCode": "ITEMCODE"
+  "itemCode": "ITEMCODE",
+  "promoCode": "PROMOCODE"
 }
 ```
 

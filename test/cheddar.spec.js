@@ -190,6 +190,26 @@ describe('Cheddar', function () {
         });
     });
 
+    describe('Promotions', function () {
+        describe('#getPromotions', function () {
+            it('should return all promotions', async function () {
+                const promotions = await this.cheddar.getPromotions();
+
+                chai.expect(promotions).to.be.an('array');
+                chai.expect(promotions.length).to.be.at.least(1);
+            });
+        });
+
+        describe('#getPromotion', function () {
+            it('should return all promotions', async function () {
+                const promotion = await this.cheddar.getPromotion(config.promoCode);
+
+                chai.expect(promotion).to.be.an('object');
+                chai.expect(promotion.name).to.equal(config.promoCode);
+            });
+        });
+    });
+
     describe('#deleteCustomer', function () {
         it('should remove a specific customer', async function () {
             await this.cheddar.deleteCustomer(this.customerCode1);
