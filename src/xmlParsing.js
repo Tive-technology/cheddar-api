@@ -12,6 +12,7 @@ const arrays = [
     'promotions',
     'coupons',
     'incentives',
+    'errors',
 ];
 
 function validator(xpath, currentValue, newValue) {
@@ -82,10 +83,19 @@ function parseResult(data) {
             }
 
             const type = Object.keys(xml)[0];
+            let foundError = xml.error;
 
-            if (type === 'error') {
-                const error = new Error(xml[type]._);
-                error.code = +xml[type].code;
+            if (!foundError &&
+                xml[type] &&
+                xml[type].errors &&
+                xml[type].errors.length
+            ) {
+                [foundError] = xml[type].errors;
+            }
+
+            if (foundError) {
+                const error = new Error(foundError._);
+                error.code = Number(foundError.code);
                 reject(error);
             } else {
                 resolve(xml[type]);
@@ -96,11 +106,7 @@ function parseResult(data) {
 
 function handleXmlError(err) {
     if (typeof err.error === 'string' && err.error.indexOf('<?xml') === 0) {
-        return parseResult(err.error).then((xml) => {
-            const error = new Error(xml.error._);
-            error.code = Number(xml.error.code);
-            throw error;
-        });
+        return parseResult(err.error);
     }
     throw err;
 }
