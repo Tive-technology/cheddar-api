@@ -20,6 +20,17 @@ describe('Cheddar', function () {
         this.cheddar = new Cheddar(config);
     });
 
+    describe('#callApi', function () {
+        it('should handle none existing URIs nicely', async function () {
+            try {
+                await this.cheddar.callApi('/foo');
+                throw new Error('THIS_SHOULD_NOT_BE_THROWN');
+            } catch (err) {
+                chai.expect(err.message).to.equal('Resource not found');
+            }
+        });
+    });
+
     describe('Plans', function () {
         describe('#getPlans', function () {
             it('should return a plan array', async function () {
