@@ -103,6 +103,31 @@ describe('Cheddar', function () {
             });
         });
 
+        describe('#editCustomer', function () {
+            it('should update customer details', async function () {
+                const newFirstName = 'A new name';
+
+                await this.cheddar.editCustomer(this.customerCode1, {
+                    firstName: newFirstName,
+                });
+
+                const customer = await this.cheddar.getCustomer(this.customerCode1);
+
+                chai.expect(customer.firstName).to.equal(newFirstName);
+            });
+
+            it('should handle bad updates nicely', async function () {
+                try {
+                    await this.cheddar.editCustomer(this.customerCode1, {
+                        firstName: 'Make this a way to long name so we can check if it fails or not',
+                    });
+                    throw new Error('THIS_SHOULD_NOT_BE_THROWN');
+                } catch (err) {
+                    chai.expect(err.message).to.include('is more than 40 characters long');
+                }
+            });
+        });
+
         describe('#searchCustomers', function () {
             it('should retrieve pagenated customers', async function () {
                 const query = {
