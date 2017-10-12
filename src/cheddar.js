@@ -1,4 +1,4 @@
-const rp = require('request-promise-native');
+const requestPromise = require('./requestPromise');
 const { parseResult, handleXmlError } = require('./xmlParsing');
 
 // To support async/await in node 4, we need the regeneratorRuntime
@@ -67,7 +67,7 @@ class Cheddar {
             json: version === 'json',
         };
 
-        const promise = rp(requestOptions);
+        const promise = requestPromise(requestOptions);
 
         switch (version) {
         case 'xml':
