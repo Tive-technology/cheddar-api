@@ -21,7 +21,7 @@ describe('Cheddar', function () {
     });
 
     describe('#callApi', function () {
-        it('should handle none existing URIs nicely', async function () {
+        it('should handle none existing URIs', async function () {
             try {
                 await this.cheddar.callApi('/foo');
                 throw new Error('THIS_SHOULD_NOT_BE_THROWN');
@@ -127,7 +127,7 @@ describe('Cheddar', function () {
                 chai.expect(customer.firstName).to.equal(newFirstName);
             });
 
-            it('should handle bad updates nicely', async function () {
+            it('should handle bad updates', async function () {
                 try {
                     await this.cheddar.editCustomer(this.customerCode1, {
                         firstName: 'Make this a way to long name so we can check if it fails or not',
