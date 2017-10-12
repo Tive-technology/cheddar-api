@@ -23,7 +23,7 @@ npm install cheddar
 Also install the peer dependencies:
 
 ```
-npm install request request-promise-native
+npm install request
 ```
 
 # Basic usage
