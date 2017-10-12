@@ -44,7 +44,7 @@ function validator(xpath, currentValue, newValue) {
     const child = item.slice(0, item.length - 1);
 
     // Make sure the child is an array using the concat function
-    const arrayChild = [].concat(newValue[child]);
+    const arrayChild = newValue[child] ? [].concat(newValue[child]) : [];
 
     // If it's not the root array, return an array version directly
     if (!xpath.startsWith(`/${item}`)) {
