@@ -1,5 +1,7 @@
 const request = require('request');
 
+const CHEDDAR_RESPONSE_STATUS_CODE_ERROR = 'CHEDDAR_RESPONSE_STATUS_CODE_ERROR';
+
 function requestPromise(options) {
     return new Promise((resolve, reject) => {
         function callback(err, response, body) {
@@ -15,7 +17,7 @@ function requestPromise(options) {
                 return;
             }
 
-            const error = new Error('');
+            const error = new Error(CHEDDAR_RESPONSE_STATUS_CODE_ERROR);
             error.error = body;
             error.code = response.statusCode;
             reject(error);
