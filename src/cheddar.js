@@ -180,7 +180,7 @@ class Cheddar {
             data = { number: idOrNumber };
         }
 
-        return this.callApi('/invoices/send-email', data);
+        return this.callApi('/invoices/send-email', {}, data);
     }
 
     oneTimeInvoice(code, data) {
