@@ -4,10 +4,10 @@
   "author": "Michiel ter Reehorst",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jamiter/node-cheddar-api"
+    "url": "https://github.com/swydo/node-cheddar-api"
   },
   "description": "Wrapper for the Cheddar recurring billing system APIs",
-  "homepage": "https://github.com/jamiter/node-cheddar-api",
+  "homepage": "https://github.com/swydo/node-cheddar-api",
   "keywords": [
     "getcheddar",
     "cheddargetter",
