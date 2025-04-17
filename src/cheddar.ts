@@ -58,9 +58,9 @@ export class Cheddar {
 
     try {
       const response: AxiosResponse<T> = await axios(requestConfig);
-      return parseResult<T>(response.data);
+      return await parseResult<T>(response.data as string);
     } catch (error) {
-      console.log(error);
+      console.log(error.message);
       throw error;
     }
   }
@@ -71,11 +71,11 @@ export class Cheddar {
    * https://docs.getcheddar.com/#get-all-pricing-plans
    */
   async getPlans(): Promise<Plan[]> {
-    const { plans } = await this.callApi<{ plans?: Plan[] }>({
+    const { plans } = await this.callApi<{ plans: { plan: Plan[] } }>({
       method: "GET",
-      path: `/plans/get/productCode/${this.productCode}`,
+      path: `plans/get/productCode/${this.productCode}`,
     });
-    return plans ?? [];
+    return plans.plan ?? [];
   }
 
   /**
@@ -86,7 +86,7 @@ export class Cheddar {
   async getPlan(code: string): Promise<Plan | undefined> {
     const { plan } = await this.callApi<{ plan: Plan }>({
       method: "GET",
-      path: `/plans/get/productCode/${this.productCode}/code/${code}`,
+      path: `plans/get/productCode/${this.productCode}/code/${code}`,
     });
     return plan;
   }

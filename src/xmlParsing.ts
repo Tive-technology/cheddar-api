@@ -1,30 +1,18 @@
 import { XMLParser } from "fast-xml-parser";
 
-const arrays = [
-  "plans",
-  "customers",
-  "items",
-  "charges",
-  "invoices",
-  "subscriptions",
-  "transactions",
-  "promotions",
-  "coupons",
-  "incentives",
-  "errors",
-];
-
 const xmlParser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: "_",
-  isArray: (
-    tagName: string,
-    jPath: string,
-    isLeafNode: boolean,
-    isAttribute: boolean
-  ) => arrays.includes(tagName),
 });
 
-export function parseResult<T>(value: any): T {
-  return xmlParser.parse(value);
+export function parseResult<T>(xml: string): T {
+  console.log(xml);
+  return xmlParser.parse(xml);
+}
+
+export function handleXmlError(err: any) {
+  if (typeof err.error === "string" && err.error.indexOf("<?xml") === 0) {
+    return parseResult(err.error);
+  }
+  throw err;
 }
