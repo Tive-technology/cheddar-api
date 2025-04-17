@@ -167,7 +167,9 @@ export class Cheddar {
    */
   async editCustomer(request: EditCustomerRequest): Promise<CustomerResponse> {
     const { code, ...data } = request;
-    const result = await this.callApi<{customers: {customer: CustomerResponse}}>({
+    const result = await this.callApi<{
+      customers: { customer: CustomerResponse };
+    }>({
       method: "POST",
       path: `customers/edit-customer/productCode/${this.productCode}/code/${code}`,
       data,
@@ -227,11 +229,14 @@ export class Cheddar {
    *
    * http://docs.getcheddar.com/#cancel-a-customer-39-s-subscription
    */
-  async cancelSubscription(code: string): Promise<any> {
-    return this.callApi({
+  async cancelSubscription(code: string): Promise<CustomerResponse> {
+    const result = await this.callApi<{
+      customers: { customer: CustomerResponse };
+    }>({
       method: "POST",
       path: `customers/cancel/productCode/${this.productCode}/code/${code}`,
     });
+    return result.customers.customer;
   }
 
   /**
