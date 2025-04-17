@@ -5,7 +5,7 @@ import { Cheddar } from "../lib/cheddar.js";
 import config from "../config.json";
 import { SubscriptionData } from "../src/types.js";
 
-async function sleep(ms) {
+async function sleep(ms: number) {
   return new Promise(function (resolve) {
     setTimeout(resolve, ms);
   });
