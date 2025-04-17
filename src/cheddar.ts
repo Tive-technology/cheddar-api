@@ -128,6 +128,11 @@ export class Cheddar {
     return result.customers.customer;
   }
 
+  /**
+   * Create a new customer in the product and subscribe the customer to a pricing plan.
+   * 
+   * https://docs.getcheddar.com/#create-a-new-customer
+   */
   async createCustomer(
     request: CreateCustomerRequest
   ): Promise<CustomerResponse> {
