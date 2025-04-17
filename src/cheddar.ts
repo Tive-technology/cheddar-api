@@ -165,12 +165,14 @@ export class Cheddar {
    *
    * https://docs.getcheddar.com/#update-a-customer-only
    */
-  async editCustomer(code: string, data: EditCustomerRequest): Promise<any> {
-    return this.callApi({
+  async editCustomer(request: EditCustomerRequest): Promise<CustomerResponse> {
+    const { code, ...data } = request;
+    const result = await this.callApi<{customers: {customer: CustomerResponse}}>({
       method: "POST",
       path: `customers/edit-customer/productCode/${this.productCode}/code/${code}`,
       data,
     });
+    return result.customers.customer;
   }
 
   /**

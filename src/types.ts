@@ -327,6 +327,7 @@ export type Promotion = {
 export type InvoicePeriod = "current" | "outstanding";
 
 export type EditCustomerRequest = {
+  code: string;
   /**
    * Limited to 20 characters.
    */

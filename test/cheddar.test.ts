@@ -1,6 +1,5 @@
-import assert from "assert/strict";
+import assert from "node:assert/strict";
 import { beforeEach, describe, it } from "node:test";
-
 import config from "../config.json";
 import { Cheddar } from "../src/cheddar.ts";
 import { SubscriptionData } from "../src/types.ts";
@@ -43,7 +42,7 @@ describe("Cheddar", {}, () => {
 
   describe("Customers", () => {
     describe("#getCustomers", (t) => {
-      it("should return an array of customers", { skip: true }, async (t) => {
+      it("should return an array of customers", async (t) => {
         const customers = await cheddar.getCustomers({});
         console.log(customers);
 
@@ -54,22 +53,18 @@ describe("Cheddar", {}, () => {
         );
       });
 
-      it(
-        "searching customers should return an array of customers",
-        { skip: true },
-        async (t) => {
-          const customers = await cheddar.getCustomers({
-            searchText: "test@example.com",
-          });
-          console.log(customers);
+      it("searching customers should return an array of customers", async (t) => {
+        const customers = await cheddar.getCustomers({
+          searchText: "test@example.com",
+        });
+        console.log(customers);
 
-          assert.ok(Array.isArray(customers), "customers should be an array");
-          assert.ok(
-            customers.length >= 1,
-            "customers array should have at least one element"
-          );
-        }
-      );
+        assert.ok(Array.isArray(customers), "customers should be an array");
+        assert.ok(
+          customers.length >= 1,
+          "customers array should have at least one element"
+        );
+      });
     });
 
     describe("#getCustomer", (t) => {
@@ -82,7 +77,7 @@ describe("Cheddar", {}, () => {
         );
       });
 
-      it("should return null if customer not found", async function () {
+      it("should return null if customer not found", async (t) => {
         const customer = await cheddar.getCustomer("123sadsd12edsa");
         console.log({ customer });
         assert.strictEqual(customer, null);
@@ -117,6 +112,16 @@ describe("Cheddar", {}, () => {
           "object",
           "customer should be an object"
         );
+      });
+    });
+
+    describe("#updateCustomer", (t) => {
+      it("updates and returns customer", async (t) => {
+        const customer = await cheddar.editCustomer({
+          code: customerCode,
+          firstName: "updatedFirstName",
+        });
+        assert.strictEqual(customer.firstName, "updatedFirstName");
       });
     });
 
