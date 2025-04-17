@@ -74,8 +74,8 @@ describe("Cheddar", {}, () => {
       });
     });
 
-    describe("#getCustomers", { skip: true }, (t) => {
-      it("should return an array of customers", async (t) => {
+    describe("#getCustomers", (t) => {
+      it("should return an array of customers", { skip: true }, async (t) => {
         const customers = await cheddar.getCustomers({});
         console.log(customers);
 
@@ -85,6 +85,23 @@ describe("Cheddar", {}, () => {
           "customers array should have at least one element"
         );
       });
+
+      it(
+        "searching customers should return an array of customers",
+        { skip: true },
+        async (t) => {
+          const customers = await cheddar.getCustomers({
+            searchText: "test@example.com",
+          });
+          console.log(customers);
+
+          assert.ok(Array.isArray(customers), "customers should be an array");
+          assert.ok(
+            customers.length >= 1,
+            "customers array should have at least one element"
+          );
+        }
+      );
     });
   });
 });
