@@ -13,9 +13,9 @@ describe("Cheddar", {}, () => {
     cheddar = new Cheddar(config);
   });
 
-  describe("Plans", function () {
-    describe("#getPlans", function () {
-      it("should return a plan array", async function () {
+  describe("Plans", () => {
+    describe("#getPlans", () => {
+      it("should return a plan array", async () => {
         const plans = await cheddar.getPlans();
         console.log(plans);
 
@@ -28,12 +28,12 @@ describe("Cheddar", {}, () => {
     });
 
     describe("#getPlan", function () {
-      it("should return a single plan", async function () {
+      it("should return a single plan", async () => {
         const plan = await cheddar.getPlan(config.planCode);
         assert.strictEqual(typeof plan, "object", "plan should be an object");
       });
 
-      it("should return null if plan not found", async function () {
+      it("should return null if plan not found", async () => {
         const plan = await cheddar.getPlan("Bad Plan Code");
         console.log(plan);
         assert.strictEqual(plan, null);
