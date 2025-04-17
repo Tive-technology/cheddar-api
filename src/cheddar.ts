@@ -130,7 +130,7 @@ export class Cheddar {
 
   /**
    * Create a new customer in the product and subscribe the customer to a pricing plan.
-   * 
+   *
    * https://docs.getcheddar.com/#create-a-new-customer
    */
   async createCustomer(
@@ -146,6 +146,11 @@ export class Cheddar {
     return result?.customers.customer;
   }
 
+  /**
+   * Update a Customer and Subscription
+   * 
+   * https://docs.getcheddar.com/#update-a-customer-and-subscription
+   */
   async editCustomerAndSubscription(
     code: string,
     data: Record<string, any>
@@ -157,6 +162,11 @@ export class Cheddar {
     });
   }
 
+  /**
+   * Update a Customer Only
+   * 
+   * https://docs.getcheddar.com/#update-a-customer-only
+   */
   async editCustomer(code: string, data: EditCustomerRequest): Promise<any> {
     return this.callApi({
       method: "POST",
@@ -165,6 +175,11 @@ export class Cheddar {
     });
   }
 
+  /**
+   * Update an existing customer's subscription information in the product
+   * 
+   * https://docs.getcheddar.com/#update-a-subscription-only
+   */
   async editSubscription(
     code: string,
     data: Record<string, any>
