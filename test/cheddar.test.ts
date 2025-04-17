@@ -7,14 +7,13 @@ import { SubscriptionData } from "../src/types.ts";
 
 describe("Cheddar", {}, () => {
   let cheddar: Cheddar;
-  const customerCode1 = "customerCode1";
-  const customerCode2 = "customerCode2";
+  const customerCode = "customerCode1";
 
   beforeEach(() => {
     cheddar = new Cheddar(config);
   });
 
-  describe("Plans", { skip: true }, function () {
+  describe("Plans", function () {
     describe("#getPlans", function () {
       it("should return a plan array", async function () {
         const plans = await cheddar.getPlans();
@@ -34,7 +33,7 @@ describe("Cheddar", {}, () => {
         assert.strictEqual(typeof plan, "object", "plan should be an object");
       });
 
-      it("should fail on bad plan code", async function () {
+      it("should return null if plan not found", async function () {
         const plan = await cheddar.getPlan("Bad Plan Code");
         console.log(plan);
         assert.strictEqual(plan, null);
@@ -58,7 +57,7 @@ describe("Cheddar", {}, () => {
         };
 
         const customer = await cheddar.createCustomer({
-          code: customerCode1,
+          code: customerCode,
           firstName: "FName",
           lastName: "LName",
           email: "test@example.com",
@@ -102,6 +101,23 @@ describe("Cheddar", {}, () => {
           );
         }
       );
+    });
+
+    describe("#getCustomer", (t) => {
+      it("should return a valid customer", async (t) => {
+        const customer = await cheddar.getCustomer(customerCode);
+        assert.strictEqual(
+          typeof customer,
+          "object",
+          "customer should be an object"
+        );
+      });
+
+      it("should return null if customer not found", async function () {
+        const customer = await cheddar.getCustomer("123sadsd12edsa");
+        console.log({ customer });
+        assert.strictEqual(customer, null);
+      });
     });
   });
 });

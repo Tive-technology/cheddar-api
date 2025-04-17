@@ -92,6 +92,7 @@ export class Cheddar {
       method: "GET",
       path: `plans/get/productCode/${this.productCode}/code/${code}`,
     });
+    if (!result) return null;
     return result?.plans.plan;
   }
 
@@ -114,14 +115,18 @@ export class Cheddar {
   }
 
 
-  async getCustomer(code: string): Promise<any | null> {
+  /**
+   * Get a Single Customer
+   */
+  async getCustomer(code: string): Promise<CustomerResponse | null> {
     const result = await this.callApi<{
       customers: { customer: CustomerResponse };
     }>({
       method: "GET",
       path: `customers/get/productCode/${this.productCode}/code/${code}`,
     });
-    return result?.customers.customer;
+    if (!result) return null;
+    return result.customers.customer;
   }
 
   async createCustomer(
