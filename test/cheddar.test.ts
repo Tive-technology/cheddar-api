@@ -13,7 +13,7 @@ describe("Cheddar", {}, () => {
     cheddar = new Cheddar(config);
   });
 
-  describe("Plans", () => {
+  describe("Pricing Plans", () => {
     describe("#getPlans", () => {
       it("should return a plan array", async () => {
         const plans = await cheddar.getPlans();
@@ -41,8 +41,8 @@ describe("Cheddar", {}, () => {
     });
   });
 
-  describe("customers", () => {
-    describe("#createCustomer", { skip: true }, (t) => {
+  describe("Customers", () => {
+    describe("#createCustomer", (t) => {
       it("it should create a customer", async (t) => {
         const subscriptionData: SubscriptionData = {
           planCode: config.planCode,
@@ -119,5 +119,24 @@ describe("Cheddar", {}, () => {
         assert.strictEqual(customer, null);
       });
     });
+
+    describe("#deleteCustomer", (t) => {
+      it("should delete and return a valid customer", async (t) => {
+        const customer = await cheddar.deleteCustomer(customerCode);
+        assert.strictEqual(
+          typeof customer,
+          "object",
+          "customer should be an object"
+        );
+      });
+    });
   });
+
+  describe("Subscriptions", () => {});
+
+  describe("Tracked Items", () => {});
+
+  describe("Invoice Interactions", () => {});
+
+  describe("Promotions", () => {});
 });

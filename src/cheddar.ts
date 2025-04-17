@@ -98,11 +98,11 @@ export class Cheddar {
 
   /**
    * Get all customer data from the product
-   * 
+   *
    * https://docs.getcheddar.com/#get-all-customers
    */
   async getCustomers(
-    request: GetCustomersRequest,
+    request: GetCustomersRequest
   ): Promise<CustomerResponse[]> {
     const result = await this.callApi<{
       customers: { customer: CustomerResponse[] };
@@ -113,7 +113,6 @@ export class Cheddar {
     });
     return result?.customers.customer ?? [];
   }
-
 
   /**
    * Get a Single Customer
@@ -130,7 +129,7 @@ export class Cheddar {
   }
 
   async createCustomer(
-    request: CreateCustomerRequest,
+    request: CreateCustomerRequest
   ): Promise<CustomerResponse> {
     const result = await this.callApi<{
       customers: { customer: CustomerResponse };
@@ -144,7 +143,7 @@ export class Cheddar {
 
   async editCustomerAndSubscription(
     code: string,
-    data: Record<string, any>,
+    data: Record<string, any>
   ): Promise<any> {
     return this.callApi({
       method: "POST",
@@ -163,7 +162,7 @@ export class Cheddar {
 
   async editSubscription(
     code: string,
-    data: Record<string, any>,
+    data: Record<string, any>
   ): Promise<any> {
     return this.callApi({
       method: "POST",
@@ -177,7 +176,7 @@ export class Cheddar {
    *
    * https://docs.getcheddar.com/#delete-a-customer
    */
-  async deleteCustomer(code: string): Promise<any> {
+  async deleteCustomer(code: string): Promise<void> {
     return this.callApi({
       method: "POST",
       path: `customers/delete/productCode/${this.productCode}/code/${code}`,
@@ -262,7 +261,7 @@ export class Cheddar {
    */
   async addCustomCharge(
     code: string,
-    request: AddCustomChargeRequest,
+    request: AddCustomChargeRequest
   ): Promise<any> {
     return this.callApi({
       method: "POST",
@@ -278,7 +277,7 @@ export class Cheddar {
    */
   async deleteCustomCharge(
     code: string,
-    request: DeleteCustomChargeRequest,
+    request: DeleteCustomChargeRequest
   ): Promise<any> {
     return this.callApi({
       method: "POST",
@@ -311,7 +310,7 @@ export class Cheddar {
    */
   async oneTimeInvoice(
     code: string,
-    request: CreateOneTimeInvoiceRequest,
+    request: CreateOneTimeInvoiceRequest
   ): Promise<any> {
     return this.callApi({
       method: "POST",
