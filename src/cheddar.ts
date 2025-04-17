@@ -96,9 +96,9 @@ export class Cheddar {
   }
 
   /**
-   *
-   * @param query
-   * @returns
+   * Get all customer data from the product
+   * 
+   * https://docs.getcheddar.com/#get-all-customers
    */
   async getCustomers(
     request: GetCustomersRequest,
@@ -112,6 +112,7 @@ export class Cheddar {
     });
     return result?.customers.customer ?? [];
   }
+
 
   async getCustomer(code: string): Promise<any | null> {
     const result = await this.callApi<{
