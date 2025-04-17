@@ -23,7 +23,7 @@ describe("Cheddar", {}, () => {
         assert.ok(Array.isArray(plans), "plans should be an array");
         assert.ok(
           plans.length >= 1,
-          "plans array should have at least one element",
+          "plans array should have at least one element"
         );
       });
     });
@@ -69,7 +69,20 @@ describe("Cheddar", {}, () => {
         assert.strictEqual(
           typeof customer,
           "object",
-          "customer should be an object",
+          "customer should be an object"
+        );
+      });
+    });
+
+    describe("#getCustomers", { skip: true }, (t) => {
+      it("should return an array of customers", async (t) => {
+        const customers = await cheddar.getCustomers({});
+        console.log(customers);
+
+        assert.ok(Array.isArray(customers), "customers should be an array");
+        assert.ok(
+          customers.length >= 1,
+          "customers array should have at least one element"
         );
       });
     });
