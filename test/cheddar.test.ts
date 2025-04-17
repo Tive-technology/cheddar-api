@@ -42,37 +42,6 @@ describe("Cheddar", {}, () => {
   });
 
   describe("Customers", () => {
-    describe("#createCustomer", (t) => {
-      it("it should create a customer", async (t) => {
-        const subscriptionData: SubscriptionData = {
-          planCode: config.planCode,
-          method: "cc",
-          ccNumber: "4111111111111111",
-          ccExpiration: "12/2030",
-          ccType: "visa",
-          ccCardCode: "123",
-          ccFirstName: "FName",
-          ccLastName: "LName",
-          ccZip: "95123",
-        };
-
-        const customer = await cheddar.createCustomer({
-          code: customerCode,
-          firstName: "FName",
-          lastName: "LName",
-          email: "test@example.com",
-          subscription: subscriptionData,
-        });
-        console.log(customer);
-
-        assert.strictEqual(
-          typeof customer,
-          "object",
-          "customer should be an object"
-        );
-      });
-    });
-
     describe("#getCustomers", (t) => {
       it("should return an array of customers", { skip: true }, async (t) => {
         const customers = await cheddar.getCustomers({});
@@ -117,6 +86,37 @@ describe("Cheddar", {}, () => {
         const customer = await cheddar.getCustomer("123sadsd12edsa");
         console.log({ customer });
         assert.strictEqual(customer, null);
+      });
+    });
+
+    describe("#createCustomer", (t) => {
+      it("it should create a customer", async (t) => {
+        const subscriptionData: SubscriptionData = {
+          planCode: config.planCode,
+          method: "cc",
+          ccNumber: "4111111111111111",
+          ccExpiration: "12/2030",
+          ccType: "visa",
+          ccCardCode: "123",
+          ccFirstName: "FName",
+          ccLastName: "LName",
+          ccZip: "95123",
+        };
+
+        const customer = await cheddar.createCustomer({
+          code: customerCode,
+          firstName: "FName",
+          lastName: "LName",
+          email: "test@example.com",
+          subscription: subscriptionData,
+        });
+        console.log(customer);
+
+        assert.strictEqual(
+          typeof customer,
+          "object",
+          "customer should be an object"
+        );
       });
     });
 
