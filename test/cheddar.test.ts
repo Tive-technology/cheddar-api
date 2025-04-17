@@ -6,7 +6,7 @@ import { SubscriptionData } from "../src/types.ts";
 
 describe("Cheddar", {}, () => {
   let cheddar: Cheddar;
-  const customerCode = "customerCode1";
+  const customerCode = "test-customer-code";
 
   beforeEach(() => {
     cheddar = new Cheddar(config);
@@ -141,7 +141,6 @@ describe("Cheddar", {}, () => {
           ...subscriptionData,
         });
         assert.strictEqual(customer._code, customerCode);
-        assert.strictEqual(customer, customerCode);
       });
     });
   });
