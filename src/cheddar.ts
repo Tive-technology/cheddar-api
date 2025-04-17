@@ -8,12 +8,17 @@ import {
   CustomerResponse,
   DeleteCustomChargeRequest,
   EditCustomerRequest,
+  EditSubscriptionRequest,
   GetCustomersRequest,
   ItemQuantityRequest,
   Plan,
   SetItemQuantityRequest,
 } from "./types";
-import { makeAuthHeader, parseCustomerRequest } from "./utils";
+import {
+  makeAuthHeader,
+  parseCustomerRequest,
+  parseSubscriptionData,
+} from "./utils";
 import { parseResult } from "./xmlParsing";
 
 const BASE_URI = "https://getcheddar.com:443/xml";
@@ -53,8 +58,6 @@ export class Cheddar {
       params,
       method,
     };
-
-    console.log(data);
 
     try {
       const response: AxiosResponse<T> = await axios(requestConfig);
@@ -182,15 +185,16 @@ export class Cheddar {
    *
    * https://docs.getcheddar.com/#update-a-subscription-only
    */
-  async editSubscription(
-    code: string,
-    data: Record<string, any>
-  ): Promise<any> {
-    return this.callApi({
+  async editSubscription(request: EditSubscriptionRequest): Promise<CustomerResponse> {
+    const { customerCode, ...data } = request;
+    const result = await this.callApi<{
+      customers: { customer: CustomerResponse };
+    }>({
       method: "POST",
-      path: `customers/edit-subscription/productCode/${this.productCode}/code/${code}`,
-      data,
+      path: `customers/edit-subscription/productCode/${this.productCode}/code/${customerCode}`,
+      data: parseSubscriptionData(data),
     });
+    return result.customers.customer;
   }
 
   /**

@@ -26,7 +26,7 @@ export function parseCustomerRequest(request: CreateCustomerRequest) {
   };
 }
 
-function parseSubscriptionData(subscription: SubscriptionData) {
+export function parseSubscriptionData(subscription: SubscriptionData) {
   return Object.fromEntries(
     Object.entries(subscription).map(([key, value]) => [
       `subscription[${key}]`,

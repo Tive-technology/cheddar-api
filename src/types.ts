@@ -409,6 +409,10 @@ export type EditCustomerRequest = {
   remoteAddress?: string;
 };
 
+export type EditSubscriptionRequest = SubscriptionData & {
+  customerCode: string;
+};
+
 /**
  * Create a parallel one-time invoice and execute the transaction immediately
  * using the customer's current payment method in the product
