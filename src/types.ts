@@ -152,6 +152,36 @@ export type SubscriptionData = {
   cancelUrl?: string;
 };
 
+export type ChargeData = {
+  /**
+   * Your code for this charge. Limited to 36 characters.
+   */
+  chargeCode?: string;
+  /**
+   * Positive integer quantity
+   */
+  quantity?: number;
+  /**
+   * Positive or negative integer or float with two digit decimal precision. A positive number will create a charge (debit). A negative number will create a credit.
+   */
+  eachAmount?: number;
+  /**
+   * Description for this charge/credit
+   */
+  description?: string;
+};
+
+export type ItemData = {
+  /**
+   * Your code for this tracked item. Limited to 36 characters.
+   */
+  itemCode?: string;
+  /**
+   * The positive amount accurate to up to 4 decimal places that you wish to set the current usage to for this item. Can be zero.
+   */
+  quantity?: number;
+};
+
 export type CreateCustomerRequest = {
   /**
    * Your code for this customer. Limited to 255 characters.
@@ -196,7 +226,7 @@ export type CreateCustomerRequest = {
   /**
    * Date or datetime in ISO 8601 format.(e.g., 2011-08-01 or 2011-08-01T15:30:00+00:00). See the KB Article
    */
-  firstContactDatetime?: string;
+  firstContactDatetime?: Date;
   /**
    * A valid URL referer. Limited to 255 characters. See the KB Article
    */
@@ -228,39 +258,42 @@ export type CreateCustomerRequest = {
   /**
    * Your code for the subscribed pricing plan.
    */
-  subscription: SubscriptionData;
-  charges?: {
-    /**
-     * Your code for this charge. Limited to 36 characters.
-     */
-    chargeCode?: string;
-    /**
-     * Positive integer quantity
-     */
-    quantity?: number;
-    /**
-     * Positive or negative integer or float with two digit decimal precision. A positive number will create a charge (debit). A negative number will create a credit.
-     */
-    eachAmount?: number;
-    /**
-     * Description for this charge/credit
-     */
-    description?: string;
-  }[];
-  items?: {
-    /**
-     * Your code for this tracked item. Limited to 36 characters.
-     */
-    itemCode?: string;
-    /**
-     * The positive amount accurate to up to 4 decimal places that you wish to set the current usage to for this item. Can be zero.
-     */
-    quantity?: number;
-  }[];
+  subscription?: SubscriptionData;
+  charges?: ChargeData[];
+  items?: ItemData[];
   /**
    * Client IPv4 address
    */
   remoteAddress?: string;
+};
+
+export type CustomerResponse = {
+  firstName: string;
+  lastName: string;
+  company: string;
+  email: string;
+  notes: string;
+  gatewayToken: string;
+  isTaxExempt: number;
+  isVatExempt: number;
+  taxNumber: string;
+  vatNumber: string;
+  taxRate: string;
+  firstContactDatetime: string;
+  referer: string;
+  refererHost: string;
+  campaignSource: string;
+  campaignMedium: string;
+  campaignTerm: string;
+  campaignContent: string;
+  campaignName: string;
+  key: string;
+  createdDatetime: string;
+  modifiedDatetime: string;
+  metaData: string;
+  subscriptions: any; // You might want to define a more specific type for this
+  _id: string;
+  _code: string;
 };
 
 export type Plan = {

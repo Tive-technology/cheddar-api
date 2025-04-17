@@ -1,11 +1,11 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import * as qs from "node:querystring";
 import {
   AddCustomChargeRequest,
   CheddarConfig,
   CreateCustomerRequest,
   CreateOneTimeInvoiceRequest,
-  CustomerData,
+  CustomerResponse,
   DeleteCustomChargeRequest,
   EditCustomerRequest,
   GetCustomersRequest,
@@ -15,7 +15,7 @@ import {
   QueryParams,
   SetItemQuantityRequest,
 } from "./types";
-import { makeAuthHeader } from "./utils";
+import { makeAuthHeader, parseCustomerRequest } from "./utils";
 import { parseResult } from "./xmlParsing";
 
 const BASE_URI = "https://getcheddar.com:443/xml";
@@ -41,7 +41,7 @@ export class Cheddar {
     path: string;
     params?: any;
     data?: Record<string, any>;
-  }): Promise<T> {
+  }): Promise<T | null> {
     // Encode the path, because some codes can contain spaces
     const encodedPath = encodeURI(path);
 
@@ -56,11 +56,15 @@ export class Cheddar {
       method,
     };
 
+    console.log(data);
+
     try {
       const response: AxiosResponse<T> = await axios(requestConfig);
       return await parseResult<T>(response.data as string);
     } catch (error) {
-      console.log(error.message);
+      if (error instanceof AxiosError && error.response?.status === 404) {
+        return null;
+      }
       throw error;
     }
   }
@@ -71,11 +75,11 @@ export class Cheddar {
    * https://docs.getcheddar.com/#get-all-pricing-plans
    */
   async getPlans(): Promise<Plan[]> {
-    const { plans } = await this.callApi<{ plans: { plan: Plan[] } }>({
+    const result = await this.callApi<{ plans: { plan: Plan[] } }>({
       method: "GET",
       path: `plans/get/productCode/${this.productCode}`,
     });
-    return plans.plan ?? [];
+    return result?.plans.plan ?? [];
   }
 
   /**
@@ -83,12 +87,12 @@ export class Cheddar {
    *
    * https://docs.getcheddar.com/#get-a-single-pricing-plan
    */
-  async getPlan(code: string): Promise<Plan | undefined> {
-    const { plan } = await this.callApi<{ plan: Plan }>({
+  async getPlan(code: string): Promise<Plan | null> {
+    const result = await this.callApi<{ plans: { plan: Plan } }>({
       method: "GET",
       path: `plans/get/productCode/${this.productCode}/code/${code}`,
     });
-    return plan;
+    return result?.plans.plan;
   }
 
   /**
@@ -96,38 +100,49 @@ export class Cheddar {
    * @param query
    * @returns
    */
-  async getCustomers(request: GetCustomersRequest): Promise<CustomerData[]> {
-    const { customers } = await this.callApi<{ customers: any[] }>({
+  async getCustomers(
+    request: GetCustomersRequest,
+  ): Promise<CustomerResponse[]> {
+    const result = await this.callApi<{
+      customers: { customer: CustomerResponse[] };
+    }>({
       method: "GET",
-      path: `/customers/get/productCode/${this.productCode}`,
+      path: `customers/get/productCode/${this.productCode}`,
       params: request,
     });
-    return customers;
+    return result?.customers.customer ?? [];
   }
 
-  async getCustomer(code: string): Promise<any> {
-    const { customer } = await this.callApi<{ customer: CustomerData }>({
+  async getCustomer(code: string): Promise<any | null> {
+    const result = await this.callApi<{
+      customers: { customer: CustomerResponse };
+    }>({
       method: "GET",
-      path: `/customers/get/productCode/${this.productCode}/code/${code}`,
+      path: `customers/get/productCode/${this.productCode}/code/${code}`,
     });
-    return customer;
+    return result?.customers.customer;
   }
 
-  async createCustomer(request: CreateCustomerRequest): Promise<any> {
-    return this.callApi({
+  async createCustomer(
+    request: CreateCustomerRequest,
+  ): Promise<CustomerResponse> {
+    const result = await this.callApi<{
+      customers: { customer: CustomerResponse };
+    }>({
       method: "POST",
-      path: `/customers/new/productCode/${this.productCode}`,
-      data: request,
+      path: `customers/new/productCode/${this.productCode}`,
+      data: parseCustomerRequest(request),
     });
+    return result?.customers.customer;
   }
 
   async editCustomerAndSubscription(
     code: string,
-    data: Record<string, any>
+    data: Record<string, any>,
   ): Promise<any> {
     return this.callApi({
       method: "POST",
-      path: `/customers/edit/productCode/${this.productCode}/code/${code}`,
+      path: `customers/edit/productCode/${this.productCode}/code/${code}`,
       data,
     });
   }
@@ -135,18 +150,18 @@ export class Cheddar {
   async editCustomer(code: string, data: EditCustomerRequest): Promise<any> {
     return this.callApi({
       method: "POST",
-      path: `/customers/edit-customer/productCode/${this.productCode}/code/${code}`,
+      path: `customers/edit-customer/productCode/${this.productCode}/code/${code}`,
       data,
     });
   }
 
   async editSubscription(
     code: string,
-    data: Record<string, any>
+    data: Record<string, any>,
   ): Promise<any> {
     return this.callApi({
       method: "POST",
-      path: `/customers/edit-subscription/productCode/${this.productCode}/code/${code}`,
+      path: `customers/edit-subscription/productCode/${this.productCode}/code/${code}`,
       data,
     });
   }
@@ -159,7 +174,7 @@ export class Cheddar {
   async deleteCustomer(code: string): Promise<any> {
     return this.callApi({
       method: "POST",
-      path: `/customers/delete/productCode/${this.productCode}/code/${code}`,
+      path: `customers/delete/productCode/${this.productCode}/code/${code}`,
     });
   }
 
@@ -174,7 +189,7 @@ export class Cheddar {
   async deleteAllCustomers(unixtimestamp: number): Promise<any> {
     return this.callApi({
       method: "POST",
-      path: `/customers/delete-all/confirm/${unixtimestamp}/productCode/${this.productCode}`,
+      path: `customers/delete-all/confirm/${unixtimestamp}/productCode/${this.productCode}`,
     });
   }
 
@@ -190,7 +205,7 @@ export class Cheddar {
   async cancelSubscription(code: string): Promise<any> {
     return this.callApi({
       method: "POST",
-      path: `/customers/cancel/productCode/${this.productCode}/code/${code}`,
+      path: `customers/cancel/productCode/${this.productCode}/code/${code}`,
     });
   }
 
@@ -203,7 +218,7 @@ export class Cheddar {
     const { customerCode, itemCode, ...data } = request;
     return this.callApi({
       method: "POST",
-      path: `/customers/add-item-quantity/productCode/${this.productCode}/code/${customerCode}/itemCode/${itemCode}`,
+      path: `customers/add-item-quantity/productCode/${this.productCode}/code/${customerCode}/itemCode/${itemCode}`,
       data,
     });
   }
@@ -217,7 +232,7 @@ export class Cheddar {
     const { customerCode, itemCode, ...data } = request;
     return this.callApi({
       method: "POST",
-      path: `/customers/remove-item-quantity/productCode/${this.productCode}/code/${customerCode}/itemCode/${itemCode}`,
+      path: `customers/remove-item-quantity/productCode/${this.productCode}/code/${customerCode}/itemCode/${itemCode}`,
       data,
     });
   }
@@ -231,7 +246,7 @@ export class Cheddar {
     const { customerCode, itemCode, ...data } = request;
     return this.callApi({
       method: "POST",
-      path: `/customers/set-item-quantity/productCode/${this.productCode}/code/${customerCode}/itemCode/${itemCode}`,
+      path: `customers/set-item-quantity/productCode/${this.productCode}/code/${customerCode}/itemCode/${itemCode}`,
       data,
     });
   }
@@ -241,11 +256,11 @@ export class Cheddar {
    */
   async addCustomCharge(
     code: string,
-    request: AddCustomChargeRequest
+    request: AddCustomChargeRequest,
   ): Promise<any> {
     return this.callApi({
       method: "POST",
-      path: `/customers/add-charge/productCode/${this.productCode}/code/${code}`,
+      path: `customers/add-charge/productCode/${this.productCode}/code/${code}`,
       data: request,
     });
   }
@@ -257,11 +272,11 @@ export class Cheddar {
    */
   async deleteCustomCharge(
     code: string,
-    request: DeleteCustomChargeRequest
+    request: DeleteCustomChargeRequest,
   ): Promise<any> {
     return this.callApi({
       method: "POST",
-      path: `/customers/add-charge/productCode/${this.productCode}/code/${code}`,
+      path: `customers/add-charge/productCode/${this.productCode}/code/${code}`,
       data: request,
     });
   }
@@ -275,7 +290,7 @@ export class Cheddar {
     }
     return this.callApi({
       method: "POST",
-      path: `/invoices/send-email/productCode/${this.productCode}`,
+      path: `invoices/send-email/productCode/${this.productCode}`,
       data,
     });
   }
@@ -290,11 +305,11 @@ export class Cheddar {
    */
   async oneTimeInvoice(
     code: string,
-    request: CreateOneTimeInvoiceRequest
+    request: CreateOneTimeInvoiceRequest,
   ): Promise<any> {
     return this.callApi({
       method: "POST",
-      path: `/invoices/new/productCode/${this.productCode}/code/${code}`,
+      path: `invoices/new/productCode/${this.productCode}/code/${code}`,
       data: request,
     });
   }
@@ -307,7 +322,7 @@ export class Cheddar {
   async getPromotions(query?: QueryParams): Promise<Promotion[]> {
     const { promotions } = await this.callApi<{ promotions?: Promotion[] }>({
       method: "GET",
-      path: `/promotions/get/productCode/${this.productCode}`,
+      path: `promotions/get/productCode/${this.productCode}`,
     });
     return promotions || [];
   }
@@ -321,7 +336,7 @@ export class Cheddar {
   async getPromotion(code: string): Promise<Promotion | undefined> {
     const { promotion } = await this.callApi<{ promotion?: Promotion }>({
       method: "GET",
-      path: `/promotions/get/productCode/${this.productCode}/code/${code}`,
+      path: `promotions/get/productCode/${this.productCode}/code/${code}`,
     });
     return promotion;
   }
