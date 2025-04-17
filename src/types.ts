@@ -415,6 +415,7 @@ export type EditCustomerRequest = {
  * https://docs.getcheddar.com/#invoice-interactions
  */
 export type CreateOneTimeInvoiceRequest = {
+  customerCode: string;
   /**
    * An array of charges to include in the one-time invoice. Each object in the array represents a single charge.
    */

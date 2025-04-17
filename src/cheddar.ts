@@ -11,8 +11,6 @@ import {
   GetCustomersRequest,
   ItemQuantityRequest,
   Plan,
-  Promotion,
-  QueryParams,
   SetItemQuantityRequest,
 } from "./types";
 import { makeAuthHeader, parseCustomerRequest } from "./utils";
@@ -148,7 +146,7 @@ export class Cheddar {
 
   /**
    * Update a Customer and Subscription
-   * 
+   *
    * https://docs.getcheddar.com/#update-a-customer-and-subscription
    */
   async editCustomerAndSubscription(
@@ -164,7 +162,7 @@ export class Cheddar {
 
   /**
    * Update a Customer Only
-   * 
+   *
    * https://docs.getcheddar.com/#update-a-customer-only
    */
   async editCustomer(code: string, data: EditCustomerRequest): Promise<any> {
@@ -177,7 +175,7 @@ export class Cheddar {
 
   /**
    * Update an existing customer's subscription information in the product
-   * 
+   *
    * https://docs.getcheddar.com/#update-a-subscription-only
    */
   async editSubscription(
@@ -306,6 +304,11 @@ export class Cheddar {
     });
   }
 
+  /**
+   * Send (or resend) email notification for the invoice in the product
+   *
+   * https://docs.getcheddar.com/#send-or-resend-an-invoice-email
+   */
   async resendInvoiceEmail(idOrNumber: string | number): Promise<any> {
     const data: { id?: string; number?: number } = {};
     if (isNaN(Number(idOrNumber))) {
@@ -328,14 +331,12 @@ export class Cheddar {
    *
    * https://docs.getcheddar.com/#invoice-interactions
    */
-  async oneTimeInvoice(
-    code: string,
-    request: CreateOneTimeInvoiceRequest
-  ): Promise<any> {
+  async oneTimeInvoice(request: CreateOneTimeInvoiceRequest): Promise<any> {
+    const { customerCode, ...data } = request;
     return this.callApi({
       method: "POST",
-      path: `invoices/new/productCode/${this.productCode}/code/${code}`,
-      data: request,
+      path: `invoices/new/productCode/${this.productCode}/code/${customerCode}`,
+      data,
     });
   }
 
@@ -344,12 +345,11 @@ export class Cheddar {
    *
    * https://docs.getcheddar.com/#get-all-promotions
    */
-  async getPromotions(query?: QueryParams): Promise<Promotion[]> {
-    const { promotions } = await this.callApi<{ promotions?: Promotion[] }>({
+  async getPromotions(): Promise<any> {
+    return this.callApi({
       method: "GET",
       path: `promotions/get/productCode/${this.productCode}`,
     });
-    return promotions || [];
   }
 
   /**
@@ -358,11 +358,10 @@ export class Cheddar {
    *
    * @param code - coupon code
    */
-  async getPromotion(code: string): Promise<Promotion | undefined> {
-    const { promotion } = await this.callApi<{ promotion?: Promotion }>({
+  async getPromotion(code: string): Promise<any> {
+    return this.callApi({
       method: "GET",
       path: `promotions/get/productCode/${this.productCode}/code/${code}`,
     });
-    return promotion;
   }
 }
