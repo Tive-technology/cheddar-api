@@ -280,6 +280,11 @@ export type CreateCustomerRequest = {
   remoteAddress?: string;
 };
 
+export type EditCustomerSubscriptionRequest = {
+  customerCode: string;
+  [key: string]: string;
+};
+
 export type Charge = {
   _id: string;
   _code: string;
@@ -625,6 +630,13 @@ export type IssueRefundRequest = IssueVoidRequest & {
    * Required An amount less than or equal to the refundable amount. See notes.
    */
   amount: number;
+};
+
+export type ResendInvoiceEmailRequest = {
+  /**
+   * Either Cheddar's ID for the invoice or the Cheddar-generated invoice number
+   */
+  idOrNumber: number | string;
 };
 
 /**

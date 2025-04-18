@@ -10,6 +10,7 @@ import {
   CustomersXmlParseResult,
   DeleteCustomChargeRequest,
   EditCustomerRequest,
+  EditCustomerSubscriptionRequest,
   EditSubscriptionRequest,
   GetCustomersRequest,
   IssueRefundRequest,
@@ -152,12 +153,12 @@ export class Cheddar {
    * https://docs.getcheddar.com/#update-a-customer-and-subscription
    */
   async editCustomerAndSubscription(
-    code: string,
-    data: Record<string, any>
+    request: EditCustomerSubscriptionRequest
   ): Promise<any> {
+    const { customerCode, ...data } = request;
     return this.callApi<CustomersXmlParseResult>({
       method: "POST",
-      path: `customers/edit/productCode/${this.productCode}/code/${code}`,
+      path: `customers/edit/productCode/${this.productCode}/code/${customerCode}`,
       data,
     });
   }
@@ -241,9 +242,7 @@ export class Cheddar {
    *
    * https://docs.getcheddar.com/#add-item-quantity
    */
-  async addTrackedItemQuantity(
-    request: ItemQuantityRequest
-  ): Promise<Customer> {
+  async addItem(request: ItemQuantityRequest): Promise<Customer> {
     const { customerCode, itemCode, ...data } = request;
     const response = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
@@ -258,9 +257,7 @@ export class Cheddar {
    *
    * https://docs.getcheddar.com/#remove-item-quantity
    */
-  async removeTrackedItemQuantity(
-    request: ItemQuantityRequest
-  ): Promise<Customer> {
+  async removeItem(request: ItemQuantityRequest): Promise<Customer> {
     const { customerCode, itemCode, ...data } = request;
     const response = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
@@ -275,9 +272,7 @@ export class Cheddar {
    *
    * https://docs.getcheddar.com/#set-item-quantity
    */
-  async setTrackedItemQuantity(
-    request: SetItemQuantityRequest
-  ): Promise<Customer> {
+  async setItem(request: SetItemQuantityRequest): Promise<Customer> {
     const { customerCode, itemCode, ...data } = request;
     const response = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
@@ -421,17 +416,19 @@ export class Cheddar {
    *
    * https://docs.getcheddar.com/#send-or-resend-an-invoice-email
    */
-  async resendInvoiceEmail(idOrNumber: string | number): Promise<any> {
-    const data: { id?: string; number?: number } = {};
-    if (isNaN(Number(idOrNumber))) {
-      data.id = String(idOrNumber);
-    } else {
-      data.number = Number(idOrNumber);
-    }
+  async resendInvoiceEmail(request: IssueVoidRequest): Promise<any> {
+    const { idOrNumber } = request;
+    const isString = isNaN(Number(idOrNumber));
+
     return this.callApi({
       method: "POST",
       path: `invoices/send-email/productCode/${this.productCode}`,
-      data,
+      data: {
+        ...request,
+        ...(isString
+          ? { id: String(idOrNumber) }
+          : { number: Number(idOrNumber) }),
+      },
     });
   }
 

@@ -148,9 +148,9 @@ describe("Cheddar", {}, () => {
   });
 
   describe("Tracked Items", () => {
-    describe("#addTrackedItemQuantity", () => {
+    describe("#addItem", () => {
       test("increments the tracked item by 3", async () => {
-        const customer = await cheddar.addTrackedItemQuantity({
+        const customer = await cheddar.addItem({
           customerCode,
           itemCode: config.itemCode,
           quantity: 3,
@@ -162,9 +162,9 @@ describe("Cheddar", {}, () => {
       });
     });
 
-    describe("#removeTrackedItemQuantity", () => {
+    describe("#removeItem", () => {
       test("decrements the tracked item by 3", async () => {
-        const customer = await cheddar.removeTrackedItemQuantity({
+        const customer = await cheddar.removeItem({
           customerCode,
           itemCode: config.itemCode,
           quantity: 3,
@@ -176,9 +176,9 @@ describe("Cheddar", {}, () => {
       });
     });
 
-    describe("#setTrackedItemQuantity", () => {
+    describe("#setItem", () => {
       test("decrements the tracked item by 3", async () => {
-        const customer = await cheddar.setTrackedItemQuantity({
+        const customer = await cheddar.setItem({
           customerCode,
           itemCode: config.itemCode,
           quantity: 8,
