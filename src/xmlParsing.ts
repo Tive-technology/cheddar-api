@@ -16,6 +16,7 @@ const alwaysArray = [
 export const cheddarXmlParser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: "_",
+  textNodeName: "_$text",
   isArray: (tagName, jPath, isLeafNode, isAttribute) => {
     return alwaysArray.includes(jPath);
   },
@@ -28,7 +29,15 @@ export function parseResult<T>(xml: string): T {
 
 export function handleXmlError(err: any) {
   if (typeof err.error === "string" && err.error.indexOf("<?xml") === 0) {
-    return parseResult(err.error);
+    const { error } = parseResult<{
+      error: {
+        _$text: string;
+        _id: string;
+        _code: string;
+        _auxCode: string;
+      };
+    }>(err.error);
+    throw Error(`code: ${error._code} message: ${error._$text}`);
   }
   throw err;
 }

@@ -84,6 +84,16 @@ describe("XmlParser", () => {
       assert.ok(Array.isArray(transactions));
     });
   });
+
+  describe("error response", () => {
+    test("parses error result", () => {
+      const result = cheddarXmlParser.parse(errorResponse);
+      assert.strictEqual(result.error._$text, "Customer not found");
+      assert.strictEqual(result.error._id, "73542");
+      assert.strictEqual(result.error._code, "404");
+      assert.strictEqual(result.error._auxCode, "");
+    });
+  });
 });
 
 // https://gist.githubusercontent.com/marcguyer/660077/raw/86551a5ec77b1c3b52c3ba8a4d68791fca897a8e/customers.xml
@@ -415,3 +425,6 @@ const plansResponse = `<?xml version="1.0" encoding="UTF-8"?>
     </items>
   </plan>
 </plans>`;
+
+const errorResponse = `<?xml version="1.0" encoding="UTF-8"?>
+<error id="73542" code="404" auxCode="">Customer not found</error>`;

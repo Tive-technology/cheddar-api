@@ -21,7 +21,7 @@ import {
   parseCreateCustomerRequest,
   parseSubscriptionData,
 } from "./utils";
-import { parseResult } from "./xmlParsing";
+import { handleXmlError, parseResult } from "./xmlParsing";
 
 const BASE_URI = "https://getcheddar.com:443/xml";
 
@@ -68,7 +68,7 @@ export class Cheddar {
       if (error instanceof AxiosError && error.response?.status === 404) {
         return null;
       }
-      throw error;
+      handleXmlError(error);
     }
   }
 
