@@ -160,6 +160,20 @@ describe("Cheddar", {}, () => {
         assert.strictEqual(item!.quantity, 3);
       });
     });
+
+    describe("#removeTrackedItemQuantity", () => {
+      test("decrements the tracked item by 3", async () => {
+        const customer = await cheddar.removeTrackedItemQuantity({
+          customerCode,
+          itemCode: config.itemCode,
+          quantity: 3,
+        });
+        const item = customer.subscriptions![0].invoices![0].charges!.find(
+          (charge) => charge._code === config.itemCode
+        );
+        assert.strictEqual(item!.quantity, 0);
+      });
+    });
   });
 
   describe("Invoice Interactions", () => {});
