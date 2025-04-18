@@ -190,7 +190,21 @@ describe("Cheddar", {}, () => {
     });
   });
 
-  describe("Invoice Interactions", () => {});
+  describe("Invoice Interactions", () => {
+    test("#addCustomCharge", async () => {
+      const customer = await cheddar.addCustomCharge({
+        customerCode,
+        chargeCode: 'CUSTOM',
+        quantity: 4,
+        eachAmount: 2.25,
+      });
+      const charges = customer.subscriptions![0].invoices![0].charges!;
+      console.log(charges);
+      const charge = charges.find((charge) => charge._code === 'CUSTOM');
+      assert.strictEqual(charge!.quantity, 4);
+      assert.strictEqual(charge!.eachAmount, 2.25);
+    });
+  });
 
   describe("Promotions", () => {});
 

@@ -278,7 +278,9 @@ export class Cheddar {
    *
    * https://docs.getcheddar.com/#set-item-quantity
    */
-  async setTrackedItemQuantity(request: SetItemQuantityRequest): Promise<Customer> {
+  async setTrackedItemQuantity(
+    request: SetItemQuantityRequest
+  ): Promise<Customer> {
     const { customerCode, itemCode, ...data } = request;
     const response = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
@@ -292,15 +294,15 @@ export class Cheddar {
   /**
    * Add an arbitrary charge or credit to the customer's current invoice in the product
    */
-  async addCustomCharge(
-    code: string,
-    request: AddCustomChargeRequest
-  ): Promise<any> {
-    return this.callApi({
+  async addCustomCharge(request: AddCustomChargeRequest): Promise<Customer> {
+    const { customerCode, ...data } = request;
+    const response = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
-      path: `customers/add-charge/productCode/${this.productCode}/code/${code}`,
-      data: request,
+      path: `customers/add-charge/productCode/${this.productCode}/code/${customerCode}`,
+      data,
     });
+    if (!response) return null;
+    return customersParser(response)[0];
   }
 
   /**

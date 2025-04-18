@@ -536,6 +536,7 @@ export type CreateOneTimeInvoiceRequest = {
  * https://docs.getcheddar.com/#add-a-custom-charge-credit
  */
 export type AddCustomChargeRequest = {
+  customerCode: string;
   /**
    * Your code for this charge. Limited to 36 characters.
    */
