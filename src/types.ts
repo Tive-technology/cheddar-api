@@ -267,58 +267,138 @@ export type CreateCustomerRequest = {
   remoteAddress?: string;
 };
 
-export type CustomerResponse = {
-  firstName: string;
-  lastName: string;
-  company: string;
-  email: string;
-  notes: string;
-  gatewayToken: string;
-  isTaxExempt: number;
-  isVatExempt: number;
-  taxNumber: string;
-  vatNumber: string;
-  taxRate: string;
-  firstContactDatetime: string;
-  referer: string;
-  refererHost: string;
-  campaignSource: string;
-  campaignMedium: string;
-  campaignTerm: string;
-  campaignContent: string;
-  campaignName: string;
-  key: string;
-  createdDatetime: string;
-  modifiedDatetime: string;
-  metaData: string;
-  subscriptions: any; // You might want to define a more specific type for this
+export type Charge = {
   _id: string;
   _code: string;
+  type: string;
+  quantity: string;
+  eachAmount: string;
+  description: string;
+  createdDatetime?: string;
+};
+
+export type TransactionGatewayAccount = {
+  id: string;
+  gateway: string;
+  type: string;
+};
+
+export type Transaction = {
+  _id: string;
+  _code: string;
+  parentId?: string;
+  gatewayToken?: string;
+  gatewayAccount: TransactionGatewayAccount;
+  amount: string;
+  memo: string;
+  response: string;
+  responseReason?: string;
+  transactedDatetime: string;
+  createdDatetime: string;
+};
+
+export type Invoice = {
+  _id: string;
+  number: string;
+  type: string;
+  vatRate?: string;
+  billingDatetime: string;
+  paidTransactionId?: string;
+  createdDatetime: string;
+  charges?: Charge[];
+  transactions?: Transaction[];
+};
+
+export type SubscriptionItem = {
+  _id: string;
+  _code: string;
+  name: string;
+  quantity?: string;
+  createdDatetime: string;
+  modifiedDatetime?: string;
+};
+
+export type PlanItem = {
+  _id: string;
+  _code: string;
+  name: string;
+  quantityIncluded: string;
+  isPeriodic: string;
+  overageAmount: string;
+  createdDatetime: string;
 };
 
 export type Plan = {
-  code: string;
+  _id: string;
+  _code: string;
   name: string;
   description: string;
-  amount: number;
-  interval: string;
-  intervalCount: number;
-  setupFee: number;
-  trialDays: number;
-  [key: string]: any;
+  isActive: string;
+  isFree: string;
+  trialDays: string;
+  billingFrequency: string;
+  billingFrequencyPer: string;
+  billingFrequencyUnit: string;
+  billingFrequencyQuantity: string;
+  setupChargeCode: string;
+  setupChargeAmount: string;
+  recurringChargeCode: string;
+  recurringChargeAmount: string;
+  createdDatetime: string;
+  items?: PlanItem[];
 };
 
-export type Promotion = {
-  code: string;
-  name: string;
-  description: string;
+export type GatewayAccount = {
+  id: string;
+  gateway: string;
   type: string;
-  amount: number;
-  percent: number;
-  maxRedemptions: number;
-  expiresAt: string | null;
-  coupons: { code: string }[];
-  [key: string]: any;
+};
+
+export type Subscription = {
+  _id: string;
+  plans?: Plan[];
+  gatewayToken: string;
+  gatewayAccount: GatewayAccount;
+  ccFirstName: string;
+  ccLastName: string;
+  ccCompany?: string;
+  ccCountry?: string;
+  ccAddress?: string;
+  ccCity?: string;
+  ccState?: string;
+  ccZip: string;
+  ccType: string;
+  ccLastFour: string;
+  ccExpirationDate: string;
+  canceledDatetime?: string;
+  createdDatetime: string;
+  items?: SubscriptionItem[];
+  invoices?: Invoice[];
+};
+
+export type Customer = {
+  _id: string;
+  _code: string;
+  firstName: string;
+  lastName: string;
+  company?: string;
+  email: string;
+  notes?: string;
+  gatewayToken: string;
+  isVatExempt: string;
+  vatNumber?: string;
+  firstContactDatetime: string;
+  referer?: string;
+  refererHost?: string;
+  campaignSource?: string;
+  campaignMedium?: string;
+  campaignTerm?: string;
+  campaignContent?: string;
+  campaignName?: string;
+  createdDatetime: string;
+  modifiedDatetime: string;
+  metaData?: string;
+  subscriptions?: Subscription[];
 };
 
 /**
@@ -515,8 +595,30 @@ export type CheddarApiStatusCode =
   | "500" // Internal Server Error
   | "502"; // Bad Gateway
 
+type InvoiceResponse = Omit<Invoice, "charges" | "transactions"> & {
+  charges?: { charge: Charge[] };
+  transactions?: { transaction: Transaction[] };
+};
+
+type PlanResponse = Omit<Plan, "items"> & {
+  items?: { item: PlanItem[] };
+};
+
+type SubscriptionResponse = Omit<
+  Subscription,
+  "plans" | "items" | "invoices"
+> & {
+  plans?: { plan: PlanResponse[] };
+  items?: { item: SubscriptionItem[] };
+  invoices?: { invoice: InvoiceResponse[] };
+};
+
+type CustomerResponse = Omit<Customer, "subscriptions"> & {
+  subscriptions: { subscription: SubscriptionResponse[] };
+};
+
 export type CustomersXmlParseResult = {
   customers: { customer: CustomerResponse[] };
 };
 
-export type PlansXmlParseResult = { plans: { plan: Plan[] } };
+export type PlansXmlParseResult = { plans: { plan: PlanResponse[] } };

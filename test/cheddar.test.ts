@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import test, { beforeEach, describe, it } from "node:test";
+import test, { beforeEach, describe } from "node:test";
 import config from "../config.json";
 import { Cheddar } from "../src/cheddar.ts";
 import { SubscriptionData } from "../src/types.ts";
@@ -27,7 +27,7 @@ describe("Cheddar", {}, () => {
     describe("#getPlan", function () {
       test("should return a single plan", async () => {
         const plan = await cheddar.getPlan(config.planCode);
-        assert.strictEqual(typeof plan, "object", "plan should be an object");
+        assert.strictEqual(plan?._code, config.planCode);
       });
 
       test("should return null if plan not found", async () => {
@@ -38,8 +38,8 @@ describe("Cheddar", {}, () => {
   });
 
   describe("Customers", () => {
-    describe("#getCustomers", (t) => {
-      test("should return an array of customers", async (t) => {
+    describe("#getCustomers", () => {
+      test("should return an array of customers", async () => {
         const customers = await cheddar.getCustomers({});
         assert.ok(Array.isArray(customers), "customers should be an array");
         assert.ok(
@@ -48,7 +48,7 @@ describe("Cheddar", {}, () => {
         );
       });
 
-      test("searching customers should return an array of customers", async (t) => {
+      test("searching customers should return an array of customers", async () => {
         const customers = await cheddar.getCustomers({
           searchText: "test@example.com",
         });
@@ -60,24 +60,8 @@ describe("Cheddar", {}, () => {
       });
     });
 
-    describe("#getCustomer", (t) => {
-      test("should return a valid customer", async (t) => {
-        const customer = await cheddar.getCustomer(customerCode);
-        assert.strictEqual(
-          typeof customer,
-          "object",
-          "customer should be an object"
-        );
-      });
-
-      test("should return null if customer not found", async (t) => {
-        const customer = await cheddar.getCustomer("123sadsd12edsa");
-        assert.strictEqual(customer, null);
-      });
-    });
-
-    describe("#createCustomer", (t) => {
-      test("it should create a customer", async (t) => {
+    describe("#createCustomer", () => {
+      test("it should create a customer", async () => {
         const subscriptionData: SubscriptionData = {
           planCode: config.planCode,
           method: "cc",
@@ -96,35 +80,48 @@ describe("Cheddar", {}, () => {
           email: "test@example.com",
           subscription: subscriptionData,
         });
-        assert.strictEqual(
-          typeof customer,
-          "object",
-          "customer should be an object"
-        );
+        assert.strictEqual(customer._code, customerCode);
+        assert.strictEqual(customer.firstName, "FName");
+        assert.strictEqual(customer.lastName, "LName");
+        assert.strictEqual(customer.email, "test@example.com");
+        assert.strictEqual(customer.subscriptions?.length, 1);
       });
     });
 
-    describe("#updateCustomer", (t) => {
-      test("updates and returns customer", async (t) => {
+    describe("#getCustomer", () => {
+      test("should return a valid customer", async () => {
+        const customer = await cheddar.getCustomer(customerCode);
+        assert.strictEqual(customer?._code, customerCode);
+      });
+
+      test("should return null if customer not found", async () => {
+        const customer = await cheddar.getCustomer("123sadsd12edsa");
+        assert.strictEqual(customer, null);
+      });
+    });
+
+    describe("#updateCustomer", () => {
+      test("updates and returns customer", async () => {
         const customer = await cheddar.editCustomer({
           code: customerCode,
           firstName: "updatedFirstName",
         });
+        assert.strictEqual(customer._code, customerCode);
         assert.strictEqual(customer.firstName, "updatedFirstName");
       });
     });
   });
 
   describe("Subscriptions", () => {
-    describe("#cancelSubscription", (t) => {
-      test("cancels the customers subscription", async (t) => {
+    describe("#cancelSubscription", () => {
+      test("cancels the customers subscription", async () => {
         const customer = await cheddar.cancelSubscription(customerCode);
         assert.strictEqual(customer._code, customerCode);
       });
     });
 
-    describe("#editSubscription", (t) => {
-      test("updates the customers subscription", async (t) => {
+    describe("#editSubscription", () => {
+      test("updates the customers subscription", async () => {
         const subscriptionData: SubscriptionData = {
           planCode: config.planCode,
           method: "cc",
@@ -141,6 +138,10 @@ describe("Cheddar", {}, () => {
           ...subscriptionData,
         });
         assert.strictEqual(customer._code, customerCode);
+        assert.strictEqual(
+          customer.subscriptions![0].plans![0]._code,
+          config.planCode
+        );
       });
     });
   });
@@ -153,11 +154,10 @@ describe("Cheddar", {}, () => {
           itemCode: config.itemCode,
           quantity: 3,
         });
-        console.log({ subscriptions: JSON.stringify(customer.subscriptions) });
-        const item = customer.subscriptions[0].plans[0].items.find(
-          (item) => item._code === config.itemCode
+        const item = customer.subscriptions![0].invoices![0].charges!.find(
+          (charge) => charge._code === config.itemCode
         );
-        assert.strictEqual(item.quantityIncluded, 3);
+        assert.strictEqual(item!.quantity, 3);
       });
     });
   });
@@ -166,8 +166,8 @@ describe("Cheddar", {}, () => {
 
   describe("Promotions", () => {});
 
-  describe("#deleteCustomer", (t) => {
-    test("should delete and return a valid customer", async (t) => {
+  describe("#deleteCustomer", () => {
+    test("should delete and return a valid customer", async () => {
       const customer = await cheddar.deleteCustomer(customerCode);
       assert.strictEqual(
         typeof customer,
