@@ -1,12 +1,29 @@
 import { XMLParser } from "fast-xml-parser";
 
-const xmlParser = new XMLParser({
+const alwaysArray = [
+  "plans.plan",
+  "plans.plan.items.item",
+  "customers.customer",
+  "customers.customer.subscriptions.subscription",
+  "customers.customer.subscriptions.subscription.plans.plan",
+  "customers.customer.subscriptions.subscription.plans.plan.items.item",
+  "customers.customer.subscriptions.subscription.items.item",
+  "customers.customer.subscriptions.subscription.invoices.invoice",
+  "customers.customer.subscriptions.subscription.invoices.invoice.charges.charge",
+  "customers.customer.subscriptions.subscription.invoices.invoice.transactions.transaction",
+];
+
+export const cheddarXmlParser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: "_",
+  isArray: (tagName, jPath, isLeafNode, isAttribute) => {
+    return alwaysArray.includes(jPath);
+  },
+  ignoreDeclaration: true,
 });
 
 export function parseResult<T>(xml: string): T {
-  return xmlParser.parse(xml);
+  return cheddarXmlParser.parse(xml);
 }
 
 export function handleXmlError(err: any) {

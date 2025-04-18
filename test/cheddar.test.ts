@@ -13,7 +13,7 @@ describe("Cheddar", {}, () => {
   });
 
   describe("Pricing Plans", () => {
-    describe("#getPlans", { skip: true }, () => {
+    describe("#getPlans", () => {
       test("should return a plan array", async () => {
         const plans = await cheddar.getPlans();
         assert.ok(Array.isArray(plans), "plans should be an array");
@@ -145,7 +145,22 @@ describe("Cheddar", {}, () => {
     });
   });
 
-  describe("Tracked Items", () => {});
+  describe("Tracked Items", () => {
+    describe("#addTrackedItemQuantity", () => {
+      test("increments the tracked item by 3", async () => {
+        const customer = await cheddar.addTrackedItemQuantity({
+          customerCode,
+          itemCode: config.itemCode,
+          quantity: 3,
+        });
+        console.log({ subscriptions: JSON.stringify(customer.subscriptions) });
+        const item = customer.subscriptions[0].plans[0].items.find(
+          (item) => item._code === config.itemCode
+        );
+        assert.strictEqual(item.quantityIncluded, 3);
+      });
+    });
+  });
 
   describe("Invoice Interactions", () => {});
 

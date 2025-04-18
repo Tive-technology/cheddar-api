@@ -514,3 +514,9 @@ export type CheddarApiStatusCode =
   | "422" // Unprocessable Entity
   | "500" // Internal Server Error
   | "502"; // Bad Gateway
+
+export type CustomersXmlParseResult = {
+  customers: { customer: CustomerResponse[] };
+};
+
+export type PlansXmlParseResult = { plans: { plan: Plan[] } };
