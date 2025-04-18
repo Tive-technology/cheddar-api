@@ -278,7 +278,7 @@ export class Cheddar {
    *
    * https://docs.getcheddar.com/#set-item-quantity
    */
-  async setItemQuantity(request: SetItemQuantityRequest): Promise<Customer> {
+  async setTrackedItemQuantity(request: SetItemQuantityRequest): Promise<Customer> {
     const { customerCode, itemCode, ...data } = request;
     const response = await this.callApi<CustomersXmlParseResult>({
       method: "POST",

@@ -174,6 +174,20 @@ describe("Cheddar", {}, () => {
         assert.strictEqual(item!.quantity, 0);
       });
     });
+
+    describe("#setTrackedItemQuantity", () => {
+      test("decrements the tracked item by 3", async () => {
+        const customer = await cheddar.setTrackedItemQuantity({
+          customerCode,
+          itemCode: config.itemCode,
+          quantity: 8,
+        });
+        const item = customer.subscriptions![0].invoices![0].charges!.find(
+          (charge) => charge._code === config.itemCode
+        );
+        assert.strictEqual(item!.quantity, 8);
+      });
+    });
   });
 
   describe("Invoice Interactions", () => {});
