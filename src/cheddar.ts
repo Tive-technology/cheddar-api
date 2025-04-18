@@ -30,6 +30,14 @@ import { handleXmlError, parseResult } from "./xmlParsing";
 
 const BASE_URI = "https://getcheddar.com:443/xml";
 
+/**
+ * Cheddar API client wrapper
+ * 
+ * ```typescript
+ * const config: CheddarConfig = {...};
+ * const cheddar = new Cheddar(config);
+ * ```
+ */
 export class Cheddar {
   private authorizationHeader: string;
   private productCode: string;
