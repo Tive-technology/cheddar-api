@@ -140,7 +140,6 @@ export class Cheddar {
       path: `customers/new/productCode/${this.productCode}`,
       data: parseCreateCustomerRequest(request),
     });
-    if (!response) return null;
     return customersParser(response)[0];
   }
 
@@ -172,7 +171,6 @@ export class Cheddar {
       path: `customers/edit-customer/productCode/${this.productCode}/code/${code}`,
       data,
     });
-    if (!response) return null;
     return customersParser(response)[0];
   }
 
@@ -188,7 +186,6 @@ export class Cheddar {
       path: `customers/edit-subscription/productCode/${this.productCode}/code/${customerCode}`,
       data: parseSubscriptionData(data),
     });
-    if (!response) return null;
     return customersParser(response)[0];
   }
 
@@ -233,7 +230,6 @@ export class Cheddar {
       method: "POST",
       path: `customers/cancel/productCode/${this.productCode}/code/${code}`,
     });
-    if (!response) return null;
     return customersParser(response)[0];
   }
 
@@ -251,7 +247,6 @@ export class Cheddar {
       path: `customers/add-item-quantity/productCode/${this.productCode}/code/${customerCode}/itemCode/${itemCode}`,
       data,
     });
-    if (!response) return null;
     return customersParser(response)[0];
   }
 
@@ -269,7 +264,6 @@ export class Cheddar {
       path: `customers/remove-item-quantity/productCode/${this.productCode}/code/${customerCode}/itemCode/${itemCode}`,
       data,
     });
-    if (!response) return null;
     return customersParser(response)[0];
   }
 
@@ -287,7 +281,6 @@ export class Cheddar {
       path: `customers/set-item-quantity/productCode/${this.productCode}/code/${customerCode}/itemCode/${itemCode}`,
       data,
     });
-    if (!response) return null;
     return customersParser(response)[0];
   }
 
@@ -301,7 +294,6 @@ export class Cheddar {
       path: `customers/add-charge/productCode/${this.productCode}/code/${customerCode}`,
       data,
     });
-    if (!response) return null;
     return customersParser(response)[0];
   }
 
@@ -311,14 +303,15 @@ export class Cheddar {
    * https://docs.getcheddar.com/#delete-a-custom-charge-credit
    */
   async deleteCustomCharge(
-    code: string,
     request: DeleteCustomChargeRequest
-  ): Promise<any> {
-    return this.callApi({
+  ): Promise<Customer> {
+    const { customerCode, ...data } = request;
+    const response = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
-      path: `customers/add-charge/productCode/${this.productCode}/code/${code}`,
-      data: request,
+      path: `customers/delete-charge/productCode/${this.productCode}/code/${customerCode}`,
+      data: data,
     });
+    return customersParser(response)[0];
   }
 
   /**

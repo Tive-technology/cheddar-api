@@ -6,6 +6,7 @@ import { SubscriptionData } from "../src/types.ts";
 
 describe("Cheddar", {}, () => {
   let cheddar: Cheddar;
+  let customChargeId: string;
   const customerCode = "test-customer-code";
 
   beforeEach(() => {
@@ -194,15 +195,26 @@ describe("Cheddar", {}, () => {
     test("#addCustomCharge", async () => {
       const customer = await cheddar.addCustomCharge({
         customerCode,
-        chargeCode: 'CUSTOM',
+        chargeCode: "CUSTOM",
         quantity: 4,
         eachAmount: 2.25,
       });
       const charges = customer.subscriptions![0].invoices![0].charges!;
       console.log(charges);
-      const charge = charges.find((charge) => charge._code === 'CUSTOM');
-      assert.strictEqual(charge!.quantity, 4);
-      assert.strictEqual(charge!.eachAmount, 2.25);
+      const charge = charges.find((charge) => charge._code === "CUSTOM")!;
+      customChargeId = charge._id;
+      assert.strictEqual(charge.quantity, 4);
+      assert.strictEqual(charge.eachAmount, 2.25);
+    });
+
+    test("#deleteCustomCharge", async () => {
+      const customer = await cheddar.deleteCustomCharge({
+        customerCode,
+        chargeId: customChargeId,
+      });
+      const charges = customer.subscriptions![0].invoices![0].charges!;
+      const charge = charges.find((charge) => charge._code === "CUSTOM");
+      assert.strictEqual(charge, undefined);
     });
   });
 
