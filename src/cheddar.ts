@@ -18,7 +18,7 @@ import {
 } from "./types";
 import {
   makeAuthHeader,
-  parseCustomerRequest,
+  parseCreateCustomerRequest,
   parseSubscriptionData,
 } from "./utils";
 import { parseResult } from "./xmlParsing";
@@ -138,7 +138,7 @@ export class Cheddar {
     const result = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/new/productCode/${this.productCode}`,
-      data: parseCustomerRequest(request),
+      data: parseCreateCustomerRequest(request),
     });
     return result?.customers.customer[0];
   }

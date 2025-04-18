@@ -16,7 +16,7 @@ export function makeAuthHeader({
   return `Basic ${Buffer.from(`${username}:${password}`).toString("base64")}`;
 }
 
-export function parseCustomerRequest(request: CreateCustomerRequest) {
+export function parseCreateCustomerRequest(request: CreateCustomerRequest) {
   const { subscription, charges, items, ...data } = request;
   return {
     ...data,
