@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import * as qs from "node:querystring";
+import { customersParser, plansParser } from "./parser";
 import {
   AddCustomChargeRequest,
   CheddarConfig,
@@ -11,7 +12,10 @@ import {
   EditCustomerRequest,
   EditSubscriptionRequest,
   GetCustomersRequest,
+  IssueRefundRequest,
+  IssueVoidRequest,
   ItemQuantityRequest,
+  OutstandingInvoiceRequest,
   Plan,
   PlansXmlParseResult,
   SetItemQuantityRequest,
@@ -22,7 +26,6 @@ import {
   parseSubscriptionData,
 } from "./utils";
 import { handleXmlError, parseResult } from "./xmlParsing";
-import { customersParser, plansParser } from "./parser";
 
 const BASE_URI = "https://getcheddar.com:443/xml";
 
@@ -315,6 +318,105 @@ export class Cheddar {
   }
 
   /**
+   * Create a One-Time Invoice
+   *
+   * Create a parallel one-time invoice and execute the transaction immediately
+   * using the customer's current payment method in the product
+   *
+   * https://docs.getcheddar.com/#invoice-interactions
+   */
+  async createOneTimeInvoice(
+    request: CreateOneTimeInvoiceRequest
+  ): Promise<any> {
+    const { customerCode, ...data } = request;
+    return this.callApi({
+      method: "POST",
+      path: `invoices/new/productCode/${this.productCode}/code/${customerCode}`,
+      data,
+    });
+  }
+
+  /**
+   * Execute an outstanding invoice in the product
+   *
+   * https://docs.getcheddar.com/#run-an-outstanding-invoice
+   */
+  async runOutstandingInvoice(
+    request: OutstandingInvoiceRequest
+  ): Promise<Customer> {
+    const { customerCode, ...data } = request;
+    const response = await this.callApi<CustomersXmlParseResult>({
+      method: "POST",
+      path: `customers/run-outstanding/productCode/${this.productCode}/code/${customerCode}`,
+      data: data,
+    });
+    return customersParser(response)[0];
+  }
+
+  /**
+   * Issue a Refund
+   * Refund a transaction on a billed invoice in the product
+   */
+  async issueRefund(request: IssueRefundRequest): Promise<any> {
+    const { idOrNumber } = request;
+    const isString = isNaN(Number(idOrNumber));
+
+    return this.callApi({
+      method: "POST",
+      path: `invoices/refund/productCode/${this.productCode}`,
+      data: {
+        ...request,
+        ...(isString
+          ? { id: String(idOrNumber) }
+          : { number: Number(idOrNumber) }),
+      },
+    });
+  }
+
+  /**
+   * Defer to Cheddar to decide if a void or a refund is executed against
+   * the invoice in the product
+   *
+   * https://docs.getcheddar.com/#issue-a-void
+   */
+  async issueVoid(request: IssueVoidRequest): Promise<any> {
+    const { idOrNumber } = request;
+    const isString = isNaN(Number(idOrNumber));
+
+    return this.callApi({
+      method: "POST",
+      path: `invoices/void/productCode/${this.productCode}`,
+      data: {
+        ...request,
+        ...(isString
+          ? { id: String(idOrNumber) }
+          : { number: Number(idOrNumber) }),
+      },
+    });
+  }
+
+  /**
+   * Defer to Cheddar to decide if a void or a refund is executed against the invoice in the product
+   *
+   * https://docs.getcheddar.com/#issue-a-void-or-refund
+   */
+  async issueVoidOrRefund(request: IssueVoidRequest): Promise<any> {
+    const { idOrNumber } = request;
+    const isString = isNaN(Number(idOrNumber));
+
+    return this.callApi({
+      method: "POST",
+      path: `invoices/void-or-refund/productCode/${this.productCode}`,
+      data: {
+        ...request,
+        ...(isString
+          ? { id: String(idOrNumber) }
+          : { number: Number(idOrNumber) }),
+      },
+    });
+  }
+
+  /**
    * Send (or resend) email notification for the invoice in the product
    *
    * https://docs.getcheddar.com/#send-or-resend-an-invoice-email
@@ -329,23 +431,6 @@ export class Cheddar {
     return this.callApi({
       method: "POST",
       path: `invoices/send-email/productCode/${this.productCode}`,
-      data,
-    });
-  }
-
-  /**
-   * Create a One-Time Invoice
-   *
-   * Create a parallel one-time invoice and execute the transaction immediately
-   * using the customer's current payment method in the product
-   *
-   * https://docs.getcheddar.com/#invoice-interactions
-   */
-  async oneTimeInvoice(request: CreateOneTimeInvoiceRequest): Promise<any> {
-    const { customerCode, ...data } = request;
-    return this.callApi({
-      method: "POST",
-      path: `invoices/new/productCode/${this.productCode}/code/${customerCode}`,
       data,
     });
   }

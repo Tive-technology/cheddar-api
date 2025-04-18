@@ -104,17 +104,17 @@ export type SubscriptionData = {
    */
   ccCardCode?: string;
   /**
-   * Conditional (See Notes) The gateway reference code for the payment method. 
+   * Conditional (See Notes) The gateway reference code for the payment method.
    * Provide this in lieu of ccNumber when pre-tokenized payment methods are available.
    */
   gatewayToken?: string;
   /**
-   * Conditional visa, mc, disc, amex, diners, jcb, unk. 
+   * Conditional visa, mc, disc, amex, diners, jcb, unk.
    * If you specify a subscription[gatewayToken], this is required.
    */
   ccType?: "visa" | "mc" | "disc" | "amex" | "diners" | "jcb" | "unk";
   /**
-   * Conditional Numbers only -- last four digits of credit/debit card number. 
+   * Conditional Numbers only -- last four digits of credit/debit card number.
    * If you specify a subscription[gatewayToken], this is required.
    */
   ccLastFour?: string;
@@ -166,8 +166,8 @@ export type ChargeData = {
    */
   quantity?: number;
   /**
-   * Positive or negative integer or float with two digit decimal precision. 
-   * A positive number will create a charge (debit). 
+   * Positive or negative integer or float with two digit decimal precision.
+   * A positive number will create a charge (debit).
    * A negative number will create a credit.
    */
   eachAmount?: number;
@@ -183,7 +183,7 @@ export type ItemData = {
    */
   itemCode?: string;
   /**
-   * The positive amount accurate to up to 4 decimal places that 
+   * The positive amount accurate to up to 4 decimal places that
    * you wish to set the current usage to for this item. Can be zero.
    */
   quantity?: number;
@@ -231,7 +231,7 @@ export type CreateCustomerRequest = {
    */
   notes?: string;
   /**
-   * Date or datetime in ISO 8601 format.(e.g., 2011-08-01 or 2011-08-01T15:30:00+00:00). 
+   * Date or datetime in ISO 8601 format.(e.g., 2011-08-01 or 2011-08-01T15:30:00+00:00).
    * See the KB Article
    */
   firstContactDatetime?: Date;
@@ -240,27 +240,27 @@ export type CreateCustomerRequest = {
    */
   referer?: string;
   /**
-   * The "term" or "keyword" phrase that lead a potential customer to your site. 
+   * The "term" or "keyword" phrase that lead a potential customer to your site.
    * Google Adwords equivalent: "utm_term". See the KB Article
    */
   campaignTerm?: string;
   /**
-   * The name of the marketing campaign. 
+   * The name of the marketing campaign.
    * Google Adwords equivalent: "utm_campaign". See the KB Article
    */
   campaignName?: string;
   /**
-   * The source of the lead. 
+   * The source of the lead.
    * Google Adwords equivalent: "utm_source". See the KB Article
    */
   campaignSource?: string;
   /**
-   * The medium used to find your site. 
+   * The medium used to find your site.
    * Google Adwords equivalent: "utm_medium". See the KB Article
    */
   campaignMedium?: string;
   /**
-   * The content you wish to track. 
+   * The content you wish to track.
    * Google Adwords equivalent: "utm_content". See the KB Article
    */
   campaignContent?: string;
@@ -595,6 +595,36 @@ export type DeleteCustomChargeRequest = {
    * Client IPv4 address
    */
   remoteAddress?: string;
+};
+
+export type OutstandingInvoiceRequest = {
+  customerCode: string;
+  /**
+   * 3-4 digits - The Card Verification Value (CCV).
+   */
+  ccCardCode?: string;
+  /**
+   * Client IPv4 address
+   */
+  remoteAddress?: string;
+};
+
+export type IssueVoidRequest = {
+  /**
+   * Either Cheddar's ID for the invoice or the Cheddar-generated invoice number
+   */
+  idOrNumber: number | string;
+  /**
+   * 	Client IPv4 address
+   */
+  remoteAddress?: string;
+};
+
+export type IssueRefundRequest = IssueVoidRequest & {
+  /**
+   * Required An amount less than or equal to the refundable amount. See notes.
+   */
+  amount: number;
 };
 
 /**
