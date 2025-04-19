@@ -34,5 +34,7 @@
     "release": "npm run build && doctoc README.md && npm test && npm publish",
     "test": "node --import tsx --test 'test/**/*.test.ts'"
   },
-  "false": {}
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }
