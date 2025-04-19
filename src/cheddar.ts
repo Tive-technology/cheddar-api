@@ -1,5 +1,5 @@
 import * as qs from "node:querystring";
-import { customersParser, plansParser } from "./parser";
+import { customersParser, plansParser, promotionsParser } from "./parser";
 import {
   AddCustomChargeRequest,
   CheddarConfig,
@@ -19,6 +19,8 @@ import {
   OutstandingInvoiceRequest,
   Plan,
   PlansXmlParseResult,
+  Promotion,
+  PromotionsXmlParseResult,
   SetItemQuantityRequest,
 } from "./types";
 import {
@@ -524,8 +526,8 @@ export class Cheddar {
    *
    * https://docs.getcheddar.com/#get-all-promotions
    */
-  async getPromotions(): Promise<any> {
-    const parseResult = await this.callApi({
+  async getPromotions(): Promise<Promotion[]> {
+    const parseResult = await this.callApi<PromotionsXmlParseResult>({
       method: "GET",
       path: `promotions/get/productCode/${this.productCode}`,
     });
@@ -536,7 +538,7 @@ export class Cheddar {
       }
       throw parseResult.error;
     }
-    return parseResult.result;
+    return promotionsParser(parseResult.result);
   }
 
   /**
@@ -545,8 +547,8 @@ export class Cheddar {
    *
    * @param code - coupon code
    */
-  async getPromotion(code: string): Promise<any> {
-    const parseResult = await this.callApi({
+  async getPromotion(code: string): Promise<Promotion | null> {
+    const parseResult = await this.callApi<PromotionsXmlParseResult>({
       method: "GET",
       path: `promotions/get/productCode/${this.productCode}/code/${code}`,
     });
@@ -557,6 +559,6 @@ export class Cheddar {
       }
       throw parseResult.error;
     }
-    return parseResult.result;
+    return promotionsParser(parseResult.result)[0];
   }
 }

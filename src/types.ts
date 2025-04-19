@@ -5,7 +5,7 @@ export class CheddarError extends Error {
 
   constructor(id: string, code: number, message: string, auxCode?: string) {
     super(message);
-    this.name = 'CheddarError';
+    this.name = "CheddarError";
     this.id = id;
     this.code = code;
     this.auxCode = auxCode;
@@ -455,6 +455,31 @@ export type Customer = {
  */
 export type InvoicePeriod = "current" | "outstanding";
 
+export type Promotion = {
+  _id: string;
+  name: string;
+  description: string;
+  createdDatetime: string;
+  incentives?: Incentive[];
+  coupons?: Coupon[];
+};
+
+export type Incentive = {
+  _id: string;
+  type: string;
+  percentage: number;
+  months: number;
+};
+
+export type Coupon = {
+  _id: string;
+  _code: string;
+  code: string;
+  maxRedemptions?: string;
+  expirationDatetime: string;
+  createdDatetime: string;
+};
+
 export type EditCustomerRequest = {
   code: string;
   /**
@@ -705,8 +730,17 @@ type CustomerResponse = Omit<Customer, "subscriptions"> & {
   subscriptions: { subscription: SubscriptionResponse[] };
 };
 
+type PromotionResponse = Omit<Promotion, "incentives" | "coupons"> & {
+  incentives: { incentive: Incentive[] };
+  coupons: { coupon: Coupon[] };
+};
+
 export type CustomersXmlParseResult = {
   customers: { customer: CustomerResponse[] };
 };
 
 export type PlansXmlParseResult = { plans: { plan: PlanResponse[] } };
+
+export type PromotionsXmlParseResult = {
+  promotions: { promotion: PromotionResponse[] };
+};

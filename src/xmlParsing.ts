@@ -12,6 +12,9 @@ const alwaysArray = [
   "customers.customer.subscriptions.subscription.invoices.invoice",
   "customers.customer.subscriptions.subscription.invoices.invoice.charges.charge",
   "customers.customer.subscriptions.subscription.invoices.invoice.transactions.transaction",
+  "promotions.promotion",
+  "promotions.promotion.incentives.incentive",
+  "promotions.promotion.coupons.coupon",
 ];
 
 export const cheddarXmlParser = new XMLParser({
@@ -25,6 +28,8 @@ export const cheddarXmlParser = new XMLParser({
 });
 
 export function parseResult<T>(xml: string): T {
+  console.log(xml);
+
   return cheddarXmlParser.parse(xml);
 }
 
@@ -34,5 +39,10 @@ export function handleXmlError(text: string): CheddarError {
   }
 
   const { error } = parseResult<ErrorType>(text);
-  return new CheddarError(error._id, Number(error._code), error._$text, error._auxCode);
+  return new CheddarError(
+    error._id,
+    Number(error._code),
+    error._$text,
+    error._auxCode
+  );
 }

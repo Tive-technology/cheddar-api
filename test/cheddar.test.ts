@@ -217,7 +217,24 @@ describe("Cheddar", {}, () => {
     });
   });
 
-  describe("Promotions", () => {});
+  describe("Promotions", () => {
+    describe("#getPromotions", () => {
+      test("gets all promotions", async () => {
+        const promotions = await cheddar.getPromotions();
+        assert.ok(Array.isArray(promotions));
+      });
+
+      test("gets valid promotion", async () => {
+        const promotion = await cheddar.getPromotion(config.promoCode);
+        assert.strictEqual(promotion!.coupons![0]._code, config.promoCode);
+      });
+
+      test("gets invalid promotion", async () => {
+        const promotion = await cheddar.getPromotion("INVALID_CODE");
+        assert.strictEqual(promotion, null);
+      });
+    });
+  });
 
   describe("#deleteCustomer", () => {
     test("should delete and return a valid customer", async () => {

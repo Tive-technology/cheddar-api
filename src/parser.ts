@@ -3,6 +3,8 @@ import {
   CustomersXmlParseResult,
   Plan,
   PlansXmlParseResult,
+  Promotion,
+  PromotionsXmlParseResult,
 } from "./types";
 
 export function customersParser(response: CustomersXmlParseResult): Customer[] {
@@ -30,5 +32,13 @@ export function plansParser(response: PlansXmlParseResult): Plan[] {
   return response.plans.plan.map((plan) => ({
     ...plan,
     items: plan.items?.item,
+  }));
+}
+
+export function promotionsParser(response: PromotionsXmlParseResult): Promotion[] {
+  return response.promotions.promotion.map((promotion) => ({
+    ...promotion,
+    incentives: promotion.incentives?.incentive,
+    coupons: promotion.coupons?.coupon,
   }));
 }

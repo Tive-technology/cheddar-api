@@ -85,6 +85,28 @@ describe("XmlParser", () => {
     });
   });
 
+  describe("Promotions response", () => {
+    test("promotions.promotion", () => {
+      const result = cheddarXmlParser.parse(promotionsResponse);
+      const promotions = result.promotions.promotion;
+      assert.ok(Array.isArray(promotions));
+    });
+
+    test("promotions.promotion.incentives.incentive", () => {
+      const result = cheddarXmlParser.parse(promotionsResponse);
+      const promotion = result.promotions.promotion[0];
+      const incentives = promotion.incentives.incentive;
+      assert.ok(Array.isArray(incentives));
+    });
+
+    test("promotions.promotion.coupons.coupon", () => {
+      const result = cheddarXmlParser.parse(promotionsResponse);
+      const promotion = result.promotions.promotion[0];
+      const coupons = promotion.coupons.coupon;
+      assert.ok(Array.isArray(coupons));
+    });
+  });
+
   describe("error response", () => {
     test("parses error result", () => {
       const result = cheddarXmlParser.parse(errorResponse);
@@ -425,6 +447,30 @@ const plansResponse = `<?xml version="1.0" encoding="UTF-8"?>
     </items>
   </plan>
 </plans>`;
+
+const promotionsResponse = `<?xml version="1.0" encoding="UTF-8"?>
+<promotions>
+  <promotion id="0a328ac3-1d62-11f0-952a-0eff6b8b8fd3">
+    <name>Get 50% off VRI Minutes</name>
+    <description>Your first 2 weeks 50% off of VRI minutes!</description>
+    <createdDatetime>2025-04-19T21:05:36+00:00</createdDatetime>
+    <incentives>
+      <incentive id="0a36c075-1d62-11f0-952a-0eff6b8b8fd3">
+        <type>percentage</type>
+        <percentage>50</percentage>
+        <months>1</months>
+      </incentive>
+    </incentives>
+    <coupons>
+      <coupon id="0a3b755f-1d62-11f0-952a-0eff6b8b8fd3" code="1_MONTH_50">
+        <code>1_MONTH_50</code>
+        <maxRedemptions/>
+        <expirationDatetime>2025-04-30T00:00:00+00:00</expirationDatetime>
+        <createdDatetime>2025-04-19T21:05:36+00:00</createdDatetime>
+      </coupon>
+    </coupons>
+  </promotion>
+</promotions>`;
 
 const errorResponse = `<?xml version="1.0" encoding="UTF-8"?>
 <error id="73542" code="404" auxCode="">Customer not found</error>`;
