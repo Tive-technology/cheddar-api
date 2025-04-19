@@ -1,9 +1,9 @@
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import * as qs from "node:querystring";
 import { customersParser, plansParser } from "./parser";
 import {
   AddCustomChargeRequest,
   CheddarConfig,
+  CheddarError,
   CreateCustomerRequest,
   CreateOneTimeInvoiceRequest,
   Customer,
@@ -32,7 +32,7 @@ const BASE_URI = "https://getcheddar.com:443/xml";
 
 /**
  * Cheddar API client wrapper
- * 
+ *
  * ```typescript
  * const config: CheddarConfig = {...};
  * const cheddar = new Cheddar(config);
@@ -59,30 +59,31 @@ export class Cheddar {
     path: string;
     params?: any;
     data?: Record<string, any>;
-  }): Promise<T | null> {
+  }): Promise<{ result: T } | { error: CheddarError }> {
     // Encode the path, because some codes can contain spaces
     const encodedPath = encodeURI(path);
 
-    const requestConfig: AxiosRequestConfig = {
-      url: `${BASE_URI}/${encodedPath}`,
+    const requestConfig: RequestInit = {
       headers: {
         authorization: this.authorizationHeader,
         ...(data && { "Content-Type": "application/x-www-form-urlencoded" }),
       },
-      data: data ? qs.stringify(data) : undefined,
-      params,
+      body: data ? qs.stringify(data) : undefined,
       method,
     };
 
-    try {
-      const response: AxiosResponse<T> = await axios(requestConfig);
-      return await parseResult<T>(response.data as string);
-    } catch (error) {
-      if (error instanceof AxiosError && error.response?.status === 404) {
-        return null;
-      }
-      handleXmlError(error);
+    const searchParams = new URLSearchParams(params);
+    const url = `${BASE_URI}/${encodedPath}`;
+    const fullUrl =
+      searchParams.size > 0 ? `${url}?${searchParams.toString()}` : url;
+
+    const response = await fetch(fullUrl, requestConfig);
+    const text = await response.text();
+    if (!response.ok) {
+      return { error: handleXmlError(text) };
     }
+    const result = await parseResult<T>(text);
+    return { result };
   }
 
   /**
@@ -91,13 +92,14 @@ export class Cheddar {
    * https://docs.getcheddar.com/#get-all-pricing-plans
    */
   async getPlans(): Promise<Plan[]> {
-    const response = await this.callApi<PlansXmlParseResult>({
+    const parseResult = await this.callApi<PlansXmlParseResult>({
       method: "GET",
       path: `plans/get/productCode/${this.productCode}`,
     });
-    if (!response) return [];
-
-    return plansParser(response);
+    if ("error" in parseResult) {
+      throw parseResult.error;
+    }
+    return plansParser(parseResult.result);
   }
 
   /**
@@ -106,12 +108,17 @@ export class Cheddar {
    * https://docs.getcheddar.com/#get-a-single-pricing-plan
    */
   async getPlan(code: string): Promise<Plan | null> {
-    const response = await this.callApi<PlansXmlParseResult>({
+    const parseResult = await this.callApi<PlansXmlParseResult>({
       method: "GET",
       path: `plans/get/productCode/${this.productCode}/code/${code}`,
     });
-    if (!response) return null;
-    return plansParser(response)[0];
+    if ("error" in parseResult) {
+      if (parseResult.error.code === 404) {
+        return null;
+      }
+      throw parseResult.error;
+    }
+    return plansParser(parseResult.result)[0];
   }
 
   /**
@@ -120,25 +127,35 @@ export class Cheddar {
    * https://docs.getcheddar.com/#get-all-customers
    */
   async getCustomers(request: GetCustomersRequest): Promise<Customer[]> {
-    const response = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "GET",
       path: `customers/get/productCode/${this.productCode}`,
       params: request,
     });
-    if (!response) return [];
-    return customersParser(response);
+    if ("error" in parseResult) {
+      if (parseResult.error.code === 404) {
+        return [];
+      }
+      throw parseResult.error;
+    }
+    return customersParser(parseResult.result);
   }
 
   /**
    * Get a Single Customer
    */
   async getCustomer(code: string): Promise<Customer | null> {
-    const response = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "GET",
       path: `customers/get/productCode/${this.productCode}/code/${code}`,
     });
-    if (!response) return null;
-    return customersParser(response)[0];
+    if ("error" in parseResult) {
+      if (parseResult.error.code === 404) {
+        return null;
+      }
+      throw parseResult.error;
+    }
+    return customersParser(parseResult.result)[0];
   }
 
   /**
@@ -147,12 +164,15 @@ export class Cheddar {
    * https://docs.getcheddar.com/#create-a-new-customer
    */
   async createCustomer(request: CreateCustomerRequest): Promise<Customer> {
-    const response = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/new/productCode/${this.productCode}`,
       data: parseCreateCustomerRequest(request),
     });
-    return customersParser(response)[0];
+    if ("error" in parseResult) {
+      throw parseResult.error;
+    }
+    return customersParser(parseResult.result)[0];
   }
 
   /**
@@ -164,11 +184,15 @@ export class Cheddar {
     request: EditCustomerSubscriptionRequest
   ): Promise<any> {
     const { customerCode, ...data } = request;
-    return this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/edit/productCode/${this.productCode}/code/${customerCode}`,
       data,
     });
+    if ("error" in parseResult) {
+      throw parseResult.error;
+    }
+    return customersParser(parseResult.result)[0];
   }
 
   /**
@@ -178,12 +202,15 @@ export class Cheddar {
    */
   async editCustomer(request: EditCustomerRequest): Promise<Customer> {
     const { code, ...data } = request;
-    const response = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/edit-customer/productCode/${this.productCode}/code/${code}`,
       data,
     });
-    return customersParser(response)[0];
+    if ("error" in parseResult) {
+      throw parseResult.error;
+    }
+    return customersParser(parseResult.result)[0];
   }
 
   /**
@@ -193,12 +220,15 @@ export class Cheddar {
    */
   async editSubscription(request: EditSubscriptionRequest): Promise<Customer> {
     const { customerCode, ...data } = request;
-    const response = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/edit-subscription/productCode/${this.productCode}/code/${customerCode}`,
       data: parseSubscriptionData(data),
     });
-    return customersParser(response)[0];
+    if ("error" in parseResult) {
+      throw parseResult.error;
+    }
+    return customersParser(parseResult.result)[0];
   }
 
   /**
@@ -206,11 +236,15 @@ export class Cheddar {
    *
    * https://docs.getcheddar.com/#delete-a-customer
    */
-  async deleteCustomer(code: string): Promise<void> {
-    return this.callApi({
+  async deleteCustomer(code: string): Promise<any> {
+    const parseResult = await this.callApi({
       method: "POST",
       path: `customers/delete/productCode/${this.productCode}/code/${code}`,
     });
+    if ("error" in parseResult) {
+      throw parseResult.error;
+    }
+    return parseResult.result;
   }
 
   /**
@@ -222,10 +256,14 @@ export class Cheddar {
    * https://docs.getcheddar.com/#delete-all-customers
    */
   async deleteAllCustomers(unixtimestamp: number): Promise<any> {
-    return this.callApi({
+    const parseResult = await this.callApi({
       method: "POST",
       path: `customers/delete-all/confirm/${unixtimestamp}/productCode/${this.productCode}`,
     });
+    if ("error" in parseResult) {
+      throw parseResult.error;
+    }
+    return parseResult.result;
   }
 
   /**
@@ -238,11 +276,14 @@ export class Cheddar {
    * http://docs.getcheddar.com/#cancel-a-customer-39-s-subscription
    */
   async cancelSubscription(code: string): Promise<Customer> {
-    const response = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/cancel/productCode/${this.productCode}/code/${code}`,
     });
-    return customersParser(response)[0];
+    if ("error" in parseResult) {
+      throw parseResult.error;
+    }
+    return customersParser(parseResult.result)[0];
   }
 
   /**
@@ -252,12 +293,15 @@ export class Cheddar {
    */
   async addItem(request: ItemQuantityRequest): Promise<Customer> {
     const { customerCode, itemCode, ...data } = request;
-    const response = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/add-item-quantity/productCode/${this.productCode}/code/${customerCode}/itemCode/${itemCode}`,
       data,
     });
-    return customersParser(response)[0];
+    if ("error" in parseResult) {
+      throw parseResult.error;
+    }
+    return customersParser(parseResult.result)[0];
   }
 
   /**
@@ -267,12 +311,15 @@ export class Cheddar {
    */
   async removeItem(request: ItemQuantityRequest): Promise<Customer> {
     const { customerCode, itemCode, ...data } = request;
-    const response = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/remove-item-quantity/productCode/${this.productCode}/code/${customerCode}/itemCode/${itemCode}`,
       data,
     });
-    return customersParser(response)[0];
+    if ("error" in parseResult) {
+      throw parseResult.error;
+    }
+    return customersParser(parseResult.result)[0];
   }
 
   /**
@@ -282,12 +329,15 @@ export class Cheddar {
    */
   async setItem(request: SetItemQuantityRequest): Promise<Customer> {
     const { customerCode, itemCode, ...data } = request;
-    const response = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/set-item-quantity/productCode/${this.productCode}/code/${customerCode}/itemCode/${itemCode}`,
       data,
     });
-    return customersParser(response)[0];
+    if ("error" in parseResult) {
+      throw parseResult.error;
+    }
+    return customersParser(parseResult.result)[0];
   }
 
   /**
@@ -295,12 +345,15 @@ export class Cheddar {
    */
   async addCustomCharge(request: AddCustomChargeRequest): Promise<Customer> {
     const { customerCode, ...data } = request;
-    const response = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/add-charge/productCode/${this.productCode}/code/${customerCode}`,
       data,
     });
-    return customersParser(response)[0];
+    if ("error" in parseResult) {
+      throw parseResult.error;
+    }
+    return customersParser(parseResult.result)[0];
   }
 
   /**
@@ -312,12 +365,15 @@ export class Cheddar {
     request: DeleteCustomChargeRequest
   ): Promise<Customer> {
     const { customerCode, ...data } = request;
-    const response = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/delete-charge/productCode/${this.productCode}/code/${customerCode}`,
       data: data,
     });
-    return customersParser(response)[0];
+    if ("error" in parseResult) {
+      throw parseResult.error;
+    }
+    return customersParser(parseResult.result)[0];
   }
 
   /**
@@ -332,11 +388,15 @@ export class Cheddar {
     request: CreateOneTimeInvoiceRequest
   ): Promise<any> {
     const { customerCode, ...data } = request;
-    return this.callApi({
+    const parseResult = await this.callApi({
       method: "POST",
       path: `invoices/new/productCode/${this.productCode}/code/${customerCode}`,
       data,
     });
+    if ("error" in parseResult) {
+      throw parseResult.error;
+    }
+    return parseResult.result;
   }
 
   /**
@@ -348,12 +408,15 @@ export class Cheddar {
     request: OutstandingInvoiceRequest
   ): Promise<Customer> {
     const { customerCode, ...data } = request;
-    const response = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/run-outstanding/productCode/${this.productCode}/code/${customerCode}`,
       data: data,
     });
-    return customersParser(response)[0];
+    if ("error" in parseResult) {
+      throw parseResult.error;
+    }
+    return customersParser(parseResult.result)[0];
   }
 
   /**
@@ -364,7 +427,7 @@ export class Cheddar {
     const { idOrNumber } = request;
     const isString = isNaN(Number(idOrNumber));
 
-    return this.callApi({
+    const parseResult = await this.callApi({
       method: "POST",
       path: `invoices/refund/productCode/${this.productCode}`,
       data: {
@@ -374,6 +437,10 @@ export class Cheddar {
           : { number: Number(idOrNumber) }),
       },
     });
+    if ("error" in parseResult) {
+      throw parseResult.error;
+    }
+    return parseResult.result;
   }
 
   /**
@@ -386,7 +453,7 @@ export class Cheddar {
     const { idOrNumber } = request;
     const isString = isNaN(Number(idOrNumber));
 
-    return this.callApi({
+    const parseResult = await this.callApi({
       method: "POST",
       path: `invoices/void/productCode/${this.productCode}`,
       data: {
@@ -396,6 +463,10 @@ export class Cheddar {
           : { number: Number(idOrNumber) }),
       },
     });
+    if ("error" in parseResult) {
+      throw parseResult.error;
+    }
+    return parseResult.result;
   }
 
   /**
@@ -407,7 +478,7 @@ export class Cheddar {
     const { idOrNumber } = request;
     const isString = isNaN(Number(idOrNumber));
 
-    return this.callApi({
+    const parseResult = await this.callApi({
       method: "POST",
       path: `invoices/void-or-refund/productCode/${this.productCode}`,
       data: {
@@ -417,6 +488,10 @@ export class Cheddar {
           : { number: Number(idOrNumber) }),
       },
     });
+    if ("error" in parseResult) {
+      throw parseResult.error;
+    }
+    return parseResult.result;
   }
 
   /**
@@ -428,7 +503,7 @@ export class Cheddar {
     const { idOrNumber } = request;
     const isString = isNaN(Number(idOrNumber));
 
-    return this.callApi({
+    const parseResult = await this.callApi({
       method: "POST",
       path: `invoices/send-email/productCode/${this.productCode}`,
       data: {
@@ -438,6 +513,10 @@ export class Cheddar {
           : { number: Number(idOrNumber) }),
       },
     });
+    if ("error" in parseResult) {
+      throw parseResult.error;
+    }
+    return parseResult.result;
   }
 
   /**
@@ -446,10 +525,18 @@ export class Cheddar {
    * https://docs.getcheddar.com/#get-all-promotions
    */
   async getPromotions(): Promise<any> {
-    return this.callApi({
+    const parseResult = await this.callApi({
       method: "GET",
       path: `promotions/get/productCode/${this.productCode}`,
     });
+
+    if ("error" in parseResult) {
+      if (parseResult.error.code === 404) {
+        return [];
+      }
+      throw parseResult.error;
+    }
+    return parseResult.result;
   }
 
   /**
@@ -459,9 +546,17 @@ export class Cheddar {
    * @param code - coupon code
    */
   async getPromotion(code: string): Promise<any> {
-    return this.callApi({
+    const parseResult = await this.callApi({
       method: "GET",
       path: `promotions/get/productCode/${this.productCode}/code/${code}`,
     });
+
+    if ("error" in parseResult) {
+      if (parseResult.error.code === 404) {
+        return null;
+      }
+      throw parseResult.error;
+    }
+    return parseResult.result;
   }
 }

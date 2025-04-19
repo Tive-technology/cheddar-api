@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test, { beforeEach, describe } from "node:test";
 import config from "../config.json";
-import { Cheddar } from "../src/cheddar.ts";
+import { Cheddar } from "../src/index.ts";
 import { SubscriptionData } from "../src/types.ts";
 
 describe("Cheddar", {}, () => {
@@ -200,7 +200,6 @@ describe("Cheddar", {}, () => {
         eachAmount: 2.25,
       });
       const charges = customer.subscriptions![0].invoices![0].charges!;
-      console.log(charges);
       const charge = charges.find((charge) => charge._code === "CUSTOM")!;
       customChargeId = charge._id;
       assert.strictEqual(charge.quantity, 4);

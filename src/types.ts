@@ -1,3 +1,34 @@
+export class CheddarError extends Error {
+  readonly id: string;
+  readonly code: number;
+  readonly auxCode?: string;
+
+  constructor(id: string, code: number, message: string, auxCode?: string) {
+    super(message);
+    this.name = 'CheddarError';
+    this.id = id;
+    this.code = code;
+    this.auxCode = auxCode;
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, CheddarError);
+    }
+  }
+}
+
+export type ErrorType = {
+  error: {
+    _$text: string;
+    _id: string;
+    _code: number;
+    _auxCode: string;
+  };
+};
+
+// _$text: string;
+// _id: string;
+// _code: string;
+// _auxCode: string;
 export type CheddarConfig = {
   username: string;
   password: string;
