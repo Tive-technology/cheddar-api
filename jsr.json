@@ -1,5 +1,15 @@
 {
   "name": "@tive/cheddar",
-  "version": "0.2.4",
-  "exports": "./src/index.ts"
+  "version": "0.2.5",
+  "exports": "./src/index.ts",
+  "publish": {
+    "include": [
+      "LICENSE",
+      "README.md",
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "tests"
+    ]
+  }
 }

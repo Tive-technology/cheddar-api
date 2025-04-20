@@ -28,8 +28,6 @@ export const cheddarXmlParser = new XMLParser({
 });
 
 export function parseResult<T>(xml: string): T {
-  console.log(xml);
-
   return cheddarXmlParser.parse(xml);
 }
 
