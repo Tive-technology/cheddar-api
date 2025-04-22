@@ -1,13 +1,13 @@
 {
-  "name": "cheddar",
-  "version": "0.11.2",
-  "author": "Michiel ter Reehorst",
+  "name": "@tive/cheddar",
+  "version": "0.2.5",
+  "author": "Victor Uvarov",
   "repository": {
     "type": "git",
-    "url": "https://github.com/swydo/node-cheddar-api"
+    "url": "https://github.com/Tive-technology/node-cheddar-api"
   },
   "description": "Wrapper for the Cheddar recurring billing system APIs",
-  "homepage": "https://github.com/swydo/node-cheddar-api",
+  "homepage": "https://github.com/Tive-technology/node-cheddar-api",
   "keywords": [
     "getcheddar",
     "cheddargetter",
@@ -16,34 +16,25 @@
     "api"
   ],
   "dependencies": {
-    "regenerator-runtime": "^0.11.0",
-    "xml2js": "0.4.19"
-  },
-  "peerDependencies": {
-    "request": "2.x",
-    "request-promise-native": "1.x"
+    "fast-xml-parser": "^5.2.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-preset-env": "^1.6.0",
-    "chai": "^4.1.2",
-    "doctoc": "^1.3.0",
+    "@types/node": "^22.14.1",
     "eslint": "^4.6.1",
-    "eslint-config-airbnb-base": "^12.0.0",
-    "eslint-plugin-import": "^2.7.0",
-    "mocha": "^3.5.3",
-    "request": "2.x"
-  },
-  "engines": {
-    "node": ">= 4.x"
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3"
   },
   "main": "lib/cheddar",
+  "files": [
+    "dist"
+  ],
   "license": "MIT",
   "scripts": {
-    "build": "babel src -d lib",
+    "build": "tsc",
     "release": "npm run build && doctoc README.md && npm test && npm publish",
-    "test": "eslint . && mocha"
+    "test": "node --import tsx --test 'test/**/*.test.ts'"
   },
-  "false": {}
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }
