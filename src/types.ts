@@ -55,7 +55,7 @@ export type GetCustomersRequest = {
   /**
    * search customer name, company, email address and last four digits of credit card.
    */
-  searchText?: string;
+  search?: string;
 };
 
 export type CustomerData = {

@@ -34,7 +34,7 @@ describe("Parser", () => {
       transactedAfterDate: new Date("2023-10-05T10:30:00Z"),
       orderBy: "name",
       orderByDirection: "desc",
-      searchText: "john",
+      search: "john",
     };
     const result = parseGetCustomersRequest(request);
 
@@ -57,7 +57,7 @@ describe("Parser", () => {
     expectedParams.set("transactedAfterDate", "2023-10-05");
     expectedParams.set("orderBy", "name");
     expectedParams.set("orderByDirection", "desc");
-    expectedParams.set("searchText", "john");
+    expectedParams.set("search", "john");
 
     // Iterate through the expected parameters and ensure they exist in the result
     for (const [key, value] of expectedParams.entries()) {
