@@ -1,5 +1,10 @@
 import * as qs from "node:querystring";
-import { customersParser, plansParser, promotionsParser } from "./parser";
+import {
+  customersParser,
+  parseGetCustomersRequest,
+  plansParser,
+  promotionsParser,
+} from "./parser";
 import {
   AddCustomChargeRequest,
   CheddarConfig,
@@ -74,7 +79,20 @@ export class Cheddar {
       method,
     };
 
-    const searchParams = new URLSearchParams(params);
+    const searchParams = new URLSearchParams();
+    if (params) {
+      for (const key in params) {
+        if (Object.prototype.hasOwnProperty.call(params, key)) {
+          const value = params[key];
+          if (Array.isArray(value)) {
+            value.forEach((v) => searchParams.append(key, v));
+          } else {
+            searchParams.append(key, value);
+          }
+        }
+      }
+    }
+
     const url = `${BASE_URI}/${encodedPath}`;
     const fullUrl =
       searchParams.size > 0 ? `${url}?${searchParams.toString()}` : url;
@@ -132,7 +150,7 @@ export class Cheddar {
     const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "GET",
       path: `customers/get/productCode/${this.productCode}`,
-      params: request,
+      params: parseGetCustomersRequest(request),
     });
     if ("error" in parseResult) {
       if (parseResult.error.code === 404) {
