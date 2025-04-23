@@ -1,6 +1,6 @@
 {
   "name": "@tive/cheddar",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "author": "Victor Uvarov",
   "repository": {
     "type": "git",
@@ -15,6 +15,7 @@
     "getter",
     "api"
   ],
+  "type": "module",
   "dependencies": {
     "fast-xml-parser": "^5.2.0"
   },
