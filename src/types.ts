@@ -354,7 +354,7 @@ export type SubscriptionItem = {
   _id: string;
   _code: string;
   name: string;
-  quantity?: string;
+  quantity?: number;
   createdDatetime: string;
   modifiedDatetime?: string;
 };
@@ -363,7 +363,7 @@ export type PlanItem = {
   _id: string;
   _code: string;
   name: string;
-  quantityIncluded: string;
+  quantityIncluded: number;
   isPeriodic: string;
   overageAmount: string;
   createdDatetime: string;
