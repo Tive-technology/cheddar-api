@@ -4,11 +4,7 @@ import {
   parseCreateCustomerRequest,
   parseGetCustomersRequest,
 } from "../src/parser";
-import {
-  CreateCustomerRequest,
-  GetCustomersRequest,
-  SubscriptionData,
-} from "../src/types";
+import { CreateCustomerRequest, GetCustomersRequest } from "../src/types";
 
 describe("Parser", () => {
   test("GetCustomersRequest", (t) => {
@@ -26,19 +22,36 @@ describe("Parser", () => {
       searchText: "john",
     };
     const result = parseGetCustomersRequest(request);
-    assert.deepStrictEqual(result, {
-      subscriptionStatus: "activeOnly",
-      planCode: ["PLAN_1", "PLAN_2"],
-      createdBeforeDate: "2023-11-05",
-      createdAfterDate: "2023-10-05",
-      canceledBeforeDate: "2023-11-05",
-      canceledAfterDate: "2023-10-05",
-      transactedBeforeDate: "2023-11-05",
-      transactedAfterDate: "2023-10-05",
-      orderBy: "name",
-      orderByDirection: "desc",
-      searchText: "john",
-    });
+
+    // Assert that the result is an instance of URLSearchParams
+    assert.ok(
+      result instanceof URLSearchParams,
+      "Result should be a URLSearchParams object"
+    );
+
+    // Optionally, you can also assert the contents of the URLSearchParams
+    const expectedParams = new URLSearchParams();
+    expectedParams.set("subscriptionStatus", "activeOnly");
+    expectedParams.append("planCode", "PLAN_1");
+    expectedParams.append("planCode", "PLAN_2");
+    expectedParams.set("createdBeforeDate", "2023-11-05");
+    expectedParams.set("createdAfterDate", "2023-10-05");
+    expectedParams.set("canceledBeforeDate", "2023-11-05");
+    expectedParams.set("canceledAfterDate", "2023-10-05");
+    expectedParams.set("transactedBeforeDate", "2023-11-05");
+    expectedParams.set("transactedAfterDate", "2023-10-05");
+    expectedParams.set("orderBy", "name");
+    expectedParams.set("orderByDirection", "desc");
+    expectedParams.set("searchText", "john");
+
+    // Iterate through the expected parameters and ensure they exist in the result
+    for (const [key, value] of expectedParams.entries()) {
+      assert.strictEqual(
+        result.getAll(key).includes(value),
+        true,
+        `Parameter ${key} should have value ${value}`
+      );
+    }
   });
 
   describe("CreateCustomerRequest", () => {
