@@ -13,12 +13,12 @@ export function customersParser(response: CustomersXmlParseResult): Customer[] {
     subscriptions: customer.subscriptions?.subscription?.map(
       (subscription) => ({
         ...subscription,
-        invoices: subscription.invoices.invoice?.map((invoice) => ({
+        invoices: subscription.invoices?.invoice.map((invoice) => ({
           ...invoice,
           charges: invoice.charges?.charge,
           transactions: invoice.transactions?.transaction,
         })),
-        plans: subscription.plans.plan?.map((plan) => ({
+        plans: subscription.plans?.plan.map((plan) => ({
           ...plan,
           items: plan.items?.item,
         })),
