@@ -5,6 +5,8 @@ import {
   parseCreateOneTimeInvoiceData,
   parseEditCustomerData,
   parseGetCustomersRequest,
+  parseIssueRefundRequest,
+  parseIssueVoidRequest,
   parseItemQuantityData,
   parseSetItemQuantityData,
   parseSubscriptionData,
@@ -433,18 +435,10 @@ export class Cheddar {
    * Refund a transaction on a billed invoice in the product
    */
   async issueRefund(request: IssueRefundRequest): Promise<any> {
-    const { idOrNumber } = request;
-    const isString = isNaN(Number(idOrNumber));
-
     const parseResult = await this.callApi({
       method: "POST",
       path: `invoices/refund/productCode/${this.productCode}`,
-      data: {
-        ...request,
-        ...(isString
-          ? { id: String(idOrNumber) }
-          : { number: Number(idOrNumber) }),
-      },
+      data: parseIssueRefundRequest(request),
     });
     if ("error" in parseResult) {
       throw parseResult.error;
@@ -459,18 +453,10 @@ export class Cheddar {
    * https://docs.getcheddar.com/#issue-a-void
    */
   async issueVoid(request: IssueVoidRequest): Promise<any> {
-    const { idOrNumber } = request;
-    const isString = isNaN(Number(idOrNumber));
-
     const parseResult = await this.callApi({
       method: "POST",
       path: `invoices/void/productCode/${this.productCode}`,
-      data: {
-        ...request,
-        ...(isString
-          ? { id: String(idOrNumber) }
-          : { number: Number(idOrNumber) }),
-      },
+      data: parseIssueVoidRequest(request),
     });
     if ("error" in parseResult) {
       throw parseResult.error;
@@ -484,18 +470,10 @@ export class Cheddar {
    * https://docs.getcheddar.com/#issue-a-void-or-refund
    */
   async issueVoidOrRefund(request: IssueVoidRequest): Promise<any> {
-    const { idOrNumber } = request;
-    const isString = isNaN(Number(idOrNumber));
-
     const parseResult = await this.callApi({
       method: "POST",
       path: `invoices/void-or-refund/productCode/${this.productCode}`,
-      data: {
-        ...request,
-        ...(isString
-          ? { id: String(idOrNumber) }
-          : { number: Number(idOrNumber) }),
-      },
+      data: parseIssueVoidRequest(request),
     });
     if ("error" in parseResult) {
       throw parseResult.error;
@@ -509,18 +487,10 @@ export class Cheddar {
    * https://docs.getcheddar.com/#send-or-resend-an-invoice-email
    */
   async resendInvoiceEmail(request: IssueVoidRequest): Promise<any> {
-    const { idOrNumber } = request;
-    const isString = isNaN(Number(idOrNumber));
-
     const parseResult = await this.callApi({
       method: "POST",
       path: `invoices/send-email/productCode/${this.productCode}`,
-      data: {
-        ...request,
-        ...(isString
-          ? { id: String(idOrNumber) }
-          : { number: Number(idOrNumber) }),
-      },
+      data: parseIssueVoidRequest(request),
     });
     if ("error" in parseResult) {
       throw parseResult.error;

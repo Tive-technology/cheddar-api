@@ -7,6 +7,8 @@ import {
   CustomersXmlParseResult,
   EditCustomerData,
   GetCustomersRequest,
+  IssueRefundRequest,
+  IssueVoidRequest,
   ItemData,
   ItemQuantityData,
   Plan,
@@ -240,6 +242,34 @@ export function parseCreateOneTimeInvoiceData(
   if (data.remoteAddress) {
     params["remoteAddress"] = data.remoteAddress;
   }
+  return params;
+}
+
+export function parseIssueVoidRequest(
+  request: IssueVoidRequest
+): Record<string, string> {
+  const params: Record<string, string> = {};
+
+  if (typeof request.idOrNumber === "number") {
+    params.id = request.idOrNumber.toString();
+  } else {
+    params.number = request.idOrNumber;
+  }
+
+  if (request.remoteAddress) {
+    params.remoteAddress = request.remoteAddress;
+  }
+
+  return params;
+}
+
+export function parseIssueRefundRequest(
+  request: IssueRefundRequest
+): Record<string, string> {
+  const params: Record<string, string> = parseIssueVoidRequest(request);
+
+  params.amount = request.amount.toString();
+
   return params;
 }
 

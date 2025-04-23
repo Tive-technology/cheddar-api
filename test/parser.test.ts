@@ -6,6 +6,7 @@ import {
   parseCreateOneTimeInvoiceData,
   parseEditCustomerData,
   parseGetCustomersRequest,
+  parseIssueRefundRequest,
   parseItemQuantityData,
   parseSetItemQuantityData,
 } from "../src/parser";
@@ -15,6 +16,7 @@ import {
   CreateOneTimeInvoiceData,
   EditCustomerData,
   GetCustomersRequest,
+  IssueRefundRequest,
   ItemQuantityData,
   SetItemQuantityData,
 } from "../src/types";
@@ -59,7 +61,7 @@ describe("Parser", () => {
 
     // Iterate through the expected parameters and ensure they exist in the result
     for (const [key, value] of expectedParams.entries()) {
-      assert.strictEqual(
+      assert.deepStrictEqual(
         result.getAll(key).includes(value),
         true,
         `Parameter ${key} should have value ${value}`
@@ -427,6 +429,58 @@ describe("Parser", () => {
         remoteAddress: "203.0.113.5",
       };
       assert.deepStrictEqual(parseCreateOneTimeInvoiceData(data), expected);
+    });
+  });
+
+  describe("parseIssueRefundRequest", () => {
+    test("should parse request with invoice ID", () => {
+      const request: IssueRefundRequest = {
+        idOrNumber: 12345,
+        amount: 10.0,
+      };
+      const expected: Record<string, string> = {
+        id: "12345",
+        amount: "10",
+      };
+      assert.deepStrictEqual(parseIssueRefundRequest(request), expected);
+    });
+
+    test("should parse request with invoice number", () => {
+      const request: IssueRefundRequest = {
+        idOrNumber: "INV-001",
+        amount: 25.5,
+      };
+      const expected: Record<string, string> = {
+        number: "INV-001",
+        amount: "25.5",
+      };
+      assert.deepStrictEqual(parseIssueRefundRequest(request), expected);
+    });
+
+    test("should parse request with remoteAddress", () => {
+      const request: IssueRefundRequest = {
+        idOrNumber: 67890,
+        amount: 5.0,
+        remoteAddress: "192.168.1.10",
+      };
+      const expected: Record<string, string> = {
+        id: "67890",
+        amount: "5",
+        remoteAddress: "192.168.1.10",
+      };
+      assert.deepStrictEqual(parseIssueRefundRequest(request), expected);
+    });
+
+    test("should handle zero amount", () => {
+      const request: IssueRefundRequest = {
+        idOrNumber: "INV-002",
+        amount: 0,
+      };
+      const expected: Record<string, string> = {
+        number: "INV-002",
+        amount: "0",
+      };
+      assert.deepStrictEqual(parseIssueRefundRequest(request), expected);
     });
   });
 });
