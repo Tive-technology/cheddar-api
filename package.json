@@ -1,13 +1,13 @@
 {
   "name": "@tive/cheddar",
-  "version": "0.2.6",
+  "version": "0.3.0",
   "author": "Victor Uvarov",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Tive-technology/node-cheddar-api"
+    "url": "https://github.com/Tive-technology/cheddar-api"
   },
   "description": "Wrapper for the Cheddar recurring billing system APIs",
-  "homepage": "https://github.com/Tive-technology/node-cheddar-api",
+  "homepage": "https://github.com/Tive-technology/cheddar-api",
   "keywords": [
     "getcheddar",
     "cheddargetter",
