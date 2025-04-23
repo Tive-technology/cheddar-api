@@ -6,7 +6,9 @@
     "include": [
       "LICENSE",
       "README.md",
-      "src/**/*.ts"
+      "src/**/*.ts",
+      "package-lock.json",
+      "package.json"
     ],
     "exclude": [
       "tests"
