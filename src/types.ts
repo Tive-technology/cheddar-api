@@ -312,8 +312,8 @@ export type Charge = {
   _id: string;
   _code: string;
   type: string;
-  quantity: string;
-  eachAmount: string;
+  quantity: number;
+  eachAmount: number;
   description: string;
   createdDatetime?: string;
 };
