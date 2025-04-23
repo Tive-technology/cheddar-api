@@ -71,17 +71,15 @@ All methods return a promise with the requested data in JSON format.
 
 # Running tests
 
-First add a config file (`config.json`) with all your Cheddar credentials:
+First add a config file (`.env`) with all your Cheddar credentials:
 
-```json
-{
-  "username": "EMAIL",
-  "password": "PASSWORD",
-  "productCode": "PRODUCTCODE",
-  "planCode": "PLANCODE",
-  "itemCode": "ITEMCODE",
-  "promoCode": "PROMOCODE"
-}
+```env
+TEST_USERNAME=
+TEST_PASSWORD=
+TEST_PRODUCT_CODE=
+TEST_PLAN_CODE=
+TEST_ITEM_CODE=
+TEST_PROMO_CODE=
 ```
 
 Now you can install all dependencies and run the tests:

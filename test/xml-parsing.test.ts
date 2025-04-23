@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test, { describe } from "node:test";
-import { cheddarXmlParser } from "../src/xmlParsing.ts";
+import { cheddarXmlParser } from "../src/xmlParsing";
 
 describe("XmlParser", () => {
   describe("Plans response", () => {

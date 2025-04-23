@@ -1,10 +1,10 @@
 {
-  "name": "@tive/cheddar",
-  "version": "0.6.4",
+  "name": "@tivetechnology/cheddar-api",
+  "version": "0.6.9",
   "author": "Victor Uvarov",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Tive-technology/cheddar-api"
+    "url": "git+https://github.com/Tive-technology/cheddar-api.git"
   },
   "description": "Wrapper for the Cheddar recurring billing system APIs",
   "homepage": "https://github.com/Tive-technology/cheddar-api",
@@ -16,6 +16,12 @@
     "api"
   ],
   "type": "module",
+  "files": [
+    "dist/",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
   "dependencies": {
     "fast-xml-parser": "^5.2.0"
   },
@@ -24,15 +30,14 @@
     "tsx": "^4.19.3",
     "typescript": "^5.8.3"
   },
-  "main": "lib/cheddar",
-  "files": [
-    "dist"
-  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "release": "npm run build && doctoc README.md && npm test && npm publish",
-    "test": "node --import tsx --test 'test/**/*.test.ts'"
+    "release": "npm run build && npm test && npm publish",
+    "test": "node --import tsx --test 'test/**/*.test.ts'",
+    "test:dev": "node --env-file=.env --import tsx  --test 'test/**/*.test.ts'"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -1,22 +1,22 @@
 import {
-  AddCustomChargeData,
-  ChargeData,
-  CreateCustomerRequest,
-  CreateOneTimeInvoiceData,
-  Customer,
-  CustomersXmlParseResult,
-  EditCustomerData,
-  GetCustomersRequest,
-  IssueRefundRequest,
-  IssueVoidRequest,
-  ItemData,
-  ItemQuantityData,
-  Plan,
-  PlansXmlParseResult,
-  Promotion,
-  PromotionsXmlParseResult,
-  SetItemQuantityData,
-  SubscriptionData,
+  type AddCustomChargeData,
+  type ChargeData,
+  type CreateCustomerRequest,
+  type CreateOneTimeInvoiceData,
+  type Customer,
+  type CustomersXmlParseResult,
+  type EditCustomerData,
+  type GetCustomersRequest,
+  type IssueRefundRequest,
+  type IssueVoidRequest,
+  type ItemData,
+  type ItemQuantityData,
+  type Plan,
+  type PlansXmlParseResult,
+  type Promotion,
+  type PromotionsXmlParseResult,
+  type SetItemQuantityData,
+  type SubscriptionData,
 } from "./types";
 import { formatDateYYYY_MM_DD } from "./utils";
 
@@ -72,7 +72,7 @@ export function parseGetCustomersRequest(
   ];
 
   for (const key in request) {
-    const value = request[key];
+    const value = request[key as keyof GetCustomersRequest];
 
     if (value === undefined) {
       continue;
