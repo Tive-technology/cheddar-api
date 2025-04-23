@@ -1,6 +1,8 @@
 import {
+  AddCustomChargeData,
   ChargeData,
   CreateCustomerRequest,
+  CreateOneTimeInvoiceData,
   Customer,
   CustomersXmlParseResult,
   EditCustomerData,
@@ -198,6 +200,45 @@ export function parseEditCustomerData(data: EditCustomerData): URLSearchParams {
         params.set(`metaData[${key}]`, data.metaData[key]);
       }
     }
+  }
+  return params;
+}
+
+export function parseAddCustomChargeData(
+  data: AddCustomChargeData
+): Record<string, string> {
+  const params: Record<string, string> = {};
+  params.chargeCode = data.chargeCode;
+  params.quantity = data.quantity.toString();
+  params.eachAmount = data.eachAmount.toString();
+  if (data.description) {
+    params.description = data.description;
+  }
+  if (data.invoicePeriod) {
+    params.invoicePeriod = data.invoicePeriod;
+  }
+  if (data.remoteAddress) {
+    params.remoteAddress = data.remoteAddress;
+  }
+  return params;
+}
+
+export function parseCreateOneTimeInvoiceData(
+  data: CreateOneTimeInvoiceData
+): Record<string, string> {
+  const params: Record<string, string> = {};
+  if (data.charges && data.charges.length > 0) {
+    data.charges.forEach((charge, index) => {
+      params[`charges[${index}][chargeCode]`] = charge.chargeCode;
+      params[`charges[${index}][quantity]`] = charge.quantity.toString();
+      params[`charges[${index}][eachAmount]`] = charge.eachAmount.toString();
+      if (charge.description) {
+        params[`charges[${index}][description]`] = charge.description;
+      }
+    });
+  }
+  if (data.remoteAddress) {
+    params["remoteAddress"] = data.remoteAddress;
   }
   return params;
 }

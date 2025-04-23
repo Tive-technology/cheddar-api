@@ -1,6 +1,8 @@
 import {
   customersParser,
+  parseAddCustomChargeData,
   parseCreateCustomerRequest,
+  parseCreateOneTimeInvoiceData,
   parseEditCustomerData,
   parseGetCustomersRequest,
   parseItemQuantityData,
@@ -355,7 +357,7 @@ export class Cheddar {
     const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/add-charge/productCode/${this.productCode}/code/${customerCode}`,
-      data,
+      data: parseAddCustomChargeData(data),
     });
     if ("error" in parseResult) {
       throw parseResult.error;
@@ -375,7 +377,7 @@ export class Cheddar {
     const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/delete-charge/productCode/${this.productCode}/code/${customerCode}`,
-      data: data,
+      data,
     });
     if ("error" in parseResult) {
       throw parseResult.error;
@@ -398,7 +400,7 @@ export class Cheddar {
     const parseResult = await this.callApi({
       method: "POST",
       path: `invoices/new/productCode/${this.productCode}/code/${customerCode}`,
-      data,
+      data: parseCreateOneTimeInvoiceData(data),
     });
     if ("error" in parseResult) {
       throw parseResult.error;
@@ -418,7 +420,7 @@ export class Cheddar {
     const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/run-outstanding/productCode/${this.productCode}/code/${customerCode}`,
-      data: data,
+      data,
     });
     if ("error" in parseResult) {
       throw parseResult.error;

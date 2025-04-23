@@ -561,21 +561,17 @@ export type EditSubscriptionRequest = SubscriptionData & {
   customerCode: string;
 };
 
-/**
- * Create a parallel one-time invoice and execute the transaction immediately
- * using the customer's current payment method in the product
- *
- * https://docs.getcheddar.com/#invoice-interactions
- */
-export type CreateOneTimeInvoiceRequest = {
+export interface CreateOneTimeInvoiceRequest extends CreateOneTimeInvoiceData {
   customerCode: string;
+}
+
+export type CreateOneTimeInvoiceData = {
   /**
    * An array of charges to include in the one-time invoice. Each object in the array represents a single charge.
    */
   charges: {
     /**
      * Your code for this charge. Limited to 36 characters.
-     * @maxLength 36
      */
     chargeCode: string;
     /**
@@ -598,13 +594,11 @@ export type CreateOneTimeInvoiceRequest = {
   remoteAddress?: string;
 };
 
-/**
- * Add an arbitrary charge or credit to the customer's current invoice in the product
- *
- * https://docs.getcheddar.com/#add-a-custom-charge-credit
- */
-export type AddCustomChargeRequest = {
+export interface AddCustomChargeRequest extends AddCustomChargeData {
   customerCode: string;
+}
+
+export type AddCustomChargeData = {
   /**
    * Your code for this charge. Limited to 36 characters.
    */
@@ -631,13 +625,11 @@ export type AddCustomChargeRequest = {
   remoteAddress?: string;
 };
 
-/**
- * Remove a charge or credit from the customer's current invoice in the product
- *
- * https://docs.getcheddar.com/#delete-a-custom-charge-credit
- */
-export type DeleteCustomChargeRequest = {
+export interface DeleteCustomChargeRequest extends DeleteCustomChargeData {
   customerCode: string;
+}
+
+export type DeleteCustomChargeData = {
   /**
    * Cheddar's ID for the charge/credit
    */
@@ -652,8 +644,11 @@ export type DeleteCustomChargeRequest = {
   remoteAddress?: string;
 };
 
-export type OutstandingInvoiceRequest = {
+export interface OutstandingInvoiceRequest extends OutstandingInvoiceData {
   customerCode: string;
+}
+
+export type OutstandingInvoiceData = {
   /**
    * 3-4 digits - The Card Verification Value (CCV).
    */
@@ -675,12 +670,12 @@ export type IssueVoidRequest = {
   remoteAddress?: string;
 };
 
-export type IssueRefundRequest = IssueVoidRequest & {
+export interface IssueRefundRequest extends IssueVoidRequest {
   /**
    * Required An amount less than or equal to the refundable amount. See notes.
    */
   amount: number;
-};
+}
 
 export type ResendInvoiceEmailRequest = {
   /**
@@ -702,32 +697,30 @@ export type CheddarApiStatusCode =
   | "500" // Internal Server Error
   | "502"; // Bad Gateway
 
-type InvoiceResponse = Omit<Invoice, "charges" | "transactions"> & {
+interface InvoiceResponse extends Omit<Invoice, "charges" | "transactions"> {
   charges?: { charge: Charge[] };
   transactions?: { transaction: Transaction[] };
-};
+}
 
-type PlanResponse = Omit<Plan, "items"> & {
+interface PlanResponse extends Omit<Plan, "items"> {
   items?: { item: PlanItem[] };
-};
+}
 
-type SubscriptionResponse = Omit<
-  Subscription,
-  "plans" | "items" | "invoices"
-> & {
+interface SubscriptionResponse
+  extends Omit<Subscription, "plans" | "items" | "invoices"> {
   plans?: { plan: PlanResponse[] };
   items?: { item: SubscriptionItem[] };
   invoices?: { invoice: InvoiceResponse[] };
-};
+}
 
-type CustomerResponse = Omit<Customer, "subscriptions"> & {
+interface CustomerResponse extends Omit<Customer, "subscriptions"> {
   subscriptions: { subscription: SubscriptionResponse[] };
-};
+}
 
-type PromotionResponse = Omit<Promotion, "incentives" | "coupons"> & {
+interface PromotionResponse extends Omit<Promotion, "incentives" | "coupons"> {
   incentives: { incentive: Incentive[] };
   coupons: { coupon: Coupon[] };
-};
+}
 
 export type CustomersXmlParseResult = {
   customers: { customer: CustomerResponse[] };
