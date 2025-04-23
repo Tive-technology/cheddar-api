@@ -71,9 +71,7 @@ export type CustomerData = {
   [key: string]: any;
 };
 
-export type ItemQuantityRequest = {
-  customerCode: string;
-  itemCode: string;
+export type ItemQuantityData = {
   /**
    * The positive amount accurate to up to 4 decimal places (if other that 1.0000)
    * that you wish to add/remove to the current usage for this item.
@@ -87,9 +85,19 @@ export type ItemQuantityRequest = {
   remoteAddress?: string;
 };
 
-export type SetItemQuantityRequest = ItemQuantityRequest & {
+export interface SetItemQuantityData extends ItemQuantityData {
   invoicePeriod?: InvoicePeriod;
-};
+}
+
+export interface ItemQuantityRequest extends ItemQuantityData {
+  customerCode: string;
+  itemCode: string;
+}
+
+export interface SetItemQuantityRequest extends SetItemQuantityData {
+  customerCode: string;
+  itemCode: string;
+}
 
 export type SubscriptionData = {
   planCode: string;
@@ -464,8 +472,11 @@ export type Coupon = {
   createdDatetime: string;
 };
 
-export type EditCustomerRequest = {
+export interface EditCustomerRequest extends EditCustomerData {
   code: string;
+}
+
+export type EditCustomerData = {
   /**
    * Limited to 20 characters.
    */
@@ -488,13 +499,12 @@ export type EditCustomerRequest = {
   notes?: string;
   /**
    * The rate for this customer if different than the configured default (e.g., 0.123).
-   * @pattern ^[-]?\d+(\.\d{1,3})?$ // Assuming up to 3 decimal places for tax rate
    */
   taxRate?: number;
   /**
    * 1 or 0.
    */
-  isTaxExempt?: 0 | 1;
+  isTaxExempt?: boolean;
   /**
    * Customer tax number if applicable. Limited to 32 characters.
    * @maxLength 32
@@ -504,7 +514,7 @@ export type EditCustomerRequest = {
    * Date or datetime in ISO 8601 format (e.g., 2011-08-01 or 2011-08-01T15:30:00+00:00).
    * @format date-time
    */
-  firstContactDatetime?: string;
+  firstContactDatetime?: Date;
   /**
    * A valid URL referer. Limited to 255 characters.
    * @maxLength 255

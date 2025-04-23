@@ -1,7 +1,10 @@
 import {
   customersParser,
   parseCreateCustomerRequest,
+  parseEditCustomerData,
   parseGetCustomersRequest,
+  parseItemQuantityData,
+  parseSetItemQuantityData,
   parseSubscriptionData,
   plansParser,
   promotionsParser,
@@ -62,7 +65,7 @@ export class Cheddar {
     method: "GET" | "POST";
     path: string;
     searchParams?: URLSearchParams;
-    data?: Record<string, any>;
+    data?: string[][] | Record<string, string> | string | URLSearchParams;
   }): Promise<{ result: T } | { error: CheddarError }> {
     // Encode the path, because some codes can contain spaces
     const encodedPath = encodeURI(path);
@@ -209,7 +212,7 @@ export class Cheddar {
     const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/edit-customer/productCode/${this.productCode}/code/${code}`,
-      data,
+      data: parseEditCustomerData(data),
     });
     if ("error" in parseResult) {
       throw parseResult.error;
@@ -300,7 +303,7 @@ export class Cheddar {
     const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/add-item-quantity/productCode/${this.productCode}/code/${customerCode}/itemCode/${itemCode}`,
-      data,
+      data: parseItemQuantityData(data),
     });
     if ("error" in parseResult) {
       throw parseResult.error;
@@ -318,7 +321,7 @@ export class Cheddar {
     const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/remove-item-quantity/productCode/${this.productCode}/code/${customerCode}/itemCode/${itemCode}`,
-      data,
+      data: parseItemQuantityData(data),
     });
     if ("error" in parseResult) {
       throw parseResult.error;
@@ -336,7 +339,7 @@ export class Cheddar {
     const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/set-item-quantity/productCode/${this.productCode}/code/${customerCode}/itemCode/${itemCode}`,
-      data,
+      data: parseSetItemQuantityData(data),
     });
     if ("error" in parseResult) {
       throw parseResult.error;

@@ -2,9 +2,18 @@ import assert from "node:assert/strict";
 import test, { describe } from "node:test";
 import {
   parseCreateCustomerRequest,
+  parseEditCustomerData,
   parseGetCustomersRequest,
+  parseItemQuantityData,
+  parseSetItemQuantityData,
 } from "../src/parser";
-import { CreateCustomerRequest, GetCustomersRequest } from "../src/types";
+import {
+  CreateCustomerRequest,
+  EditCustomerData,
+  GetCustomersRequest,
+  ItemQuantityData,
+  SetItemQuantityData,
+} from "../src/types";
 
 describe("Parser", () => {
   test("GetCustomersRequest", (t) => {
@@ -140,6 +149,84 @@ describe("Parser", () => {
         "subscription[ccCompany]": "VISA",
         "subscription[initialBillDate]": "2011-08-01T15:30:00.000Z",
       });
+    });
+  });
+
+  describe("parseEditCustomerData", () => {
+    test("full customer data", () => {
+      const data: EditCustomerData = {
+        firstName: "John",
+        lastName: "Smith",
+        email: "test@gmail.com",
+        company: "Google",
+        taxRate: 0.123,
+        isTaxExempt: true,
+        taxNumber: "123323232",
+        referer: "referer",
+        remoteAddress: "72.140.152.122",
+        firstContactDatetime: new Date("2023-11-05T10:30:00Z"),
+        campaignContent: "campaignContent",
+        campaignMedium: "campaignMedium",
+        campaignName: "campaignName",
+        campaignSource: "campaignSource",
+        campaignTerm: "campaignTerm",
+        metaData: {
+          customer_id: "cus_123456",
+          referrer_code: "refer888",
+        },
+      };
+      const result = parseEditCustomerData(data);
+
+      const params = new URLSearchParams();
+      params.set("firstName", "John");
+      params.set("lastName", "Smith");
+      params.set("email", "test@gmail.com");
+      params.set("company", "Google");
+      params.set("taxRate", "0.123");
+      params.set("isTaxExempt", "1");
+      params.set("taxNumber", "123323232");
+      params.set("referer", "referer");
+      params.set("remoteAddress", "72.140.152.122");
+      params.set("firstContactDatetime", "2023-11-05T10:30:00.000Z");
+      params.set("campaignContent", "campaignContent");
+      params.set("campaignMedium", "campaignMedium");
+      params.set("campaignName", "campaignName");
+      params.set("campaignSource", "campaignSource");
+      params.set("campaignTerm", "campaignTerm");
+      params.set("metaData[customer_id]", "cus_123456");
+      params.set("metaData[referrer_code]", "refer888");
+
+      for (const [key, value] of params.entries()) {
+        assert.strictEqual(
+          result.getAll(key).includes(value),
+          true,
+          `Parameter ${key} should have value ${value}`
+        );
+      }
+    });
+  });
+
+  test("parseItemQuantityData", () => {
+    const data: ItemQuantityData = {
+      quantity: 4.3232111,
+      remoteAddress: "72.140.152.122",
+    };
+    assert.deepStrictEqual(parseItemQuantityData(data), {
+      quantity: "4.3232",
+      remoteAddress: "72.140.152.122",
+    });
+  });
+
+  test("parseSetItemQuantityData", () => {
+    const data: SetItemQuantityData = {
+      quantity: 4.3232111,
+      remoteAddress: "72.140.152.122",
+      invoicePeriod: "outstanding",
+    };
+    assert.deepStrictEqual(parseSetItemQuantityData(data), {
+      quantity: "4.3232",
+      remoteAddress: "72.140.152.122",
+      invoicePeriod: "outstanding",
     });
   });
 });

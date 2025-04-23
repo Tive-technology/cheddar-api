@@ -3,12 +3,15 @@ import {
   CreateCustomerRequest,
   Customer,
   CustomersXmlParseResult,
+  EditCustomerData,
   GetCustomersRequest,
   ItemData,
+  ItemQuantityData,
   Plan,
   PlansXmlParseResult,
   Promotion,
   PromotionsXmlParseResult,
+  SetItemQuantityData,
   SubscriptionData,
 } from "./types";
 import { formatDateYYYY_MM_DD } from "./utils";
@@ -111,6 +114,92 @@ export function parseSubscriptionData(
       value instanceof Date ? value.toISOString() : value,
     ])
   );
+}
+
+export function parseItemQuantityData(
+  data: ItemQuantityData
+): Record<string, string> {
+  const result: Record<string, string> = {};
+  if (data.quantity) {
+    result.quantity = data.quantity.toFixed(4);
+  }
+  if (data.remoteAddress) {
+    result.remoteAddress = data.remoteAddress;
+  }
+  return result;
+}
+
+export function parseSetItemQuantityData(
+  data: SetItemQuantityData
+): Record<string, string> {
+  const result: Record<string, string> = {};
+  if (data.quantity) {
+    result.quantity = data.quantity.toFixed(4);
+  }
+  if (data.remoteAddress) {
+    result.remoteAddress = data.remoteAddress;
+  }
+  if (data.invoicePeriod) {
+    result.invoicePeriod = data.invoicePeriod;
+  }
+  return result;
+}
+
+export function parseEditCustomerData(data: EditCustomerData): URLSearchParams {
+  const params = new URLSearchParams();
+  if (data.firstName) {
+    params.set("firstName", data.firstName);
+  }
+  if (data.lastName) {
+    params.set("lastName", data.lastName);
+  }
+  if (data.email) {
+    params.set("email", data.email);
+  }
+  if (data.company) {
+    params.set("company", data.company);
+  }
+  if (data.taxRate !== undefined) {
+    params.set("taxRate", data.taxRate.toString());
+  }
+  if (data.isTaxExempt !== undefined) {
+    params.set("isTaxExempt", data.isTaxExempt ? "1" : "0");
+  }
+  if (data.taxNumber) {
+    params.set("taxNumber", data.taxNumber);
+  }
+  if (data.referer) {
+    params.set("referer", data.referer);
+  }
+  if (data.remoteAddress) {
+    params.set("remoteAddress", data.remoteAddress);
+  }
+  if (data.firstContactDatetime) {
+    params.set("firstContactDatetime", data.firstContactDatetime.toISOString());
+  }
+  if (data.campaignContent) {
+    params.set("campaignContent", data.campaignContent);
+  }
+  if (data.campaignMedium) {
+    params.set("campaignMedium", data.campaignMedium);
+  }
+  if (data.campaignName) {
+    params.set("campaignName", data.campaignName);
+  }
+  if (data.campaignSource) {
+    params.set("campaignSource", data.campaignSource);
+  }
+  if (data.campaignTerm) {
+    params.set("campaignTerm", data.campaignTerm);
+  }
+  if (data.metaData) {
+    for (const key in data.metaData) {
+      if (Object.prototype.hasOwnProperty.call(data.metaData, key)) {
+        params.set(`metaData[${key}]`, data.metaData[key]);
+      }
+    }
+  }
+  return params;
 }
 
 function parseChargesData(charges: ChargeData[]): Record<string, string> {
