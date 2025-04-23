@@ -1,14 +1,21 @@
 import {
+  AddCustomChargeData,
   ChargeData,
   CreateCustomerRequest,
+  CreateOneTimeInvoiceData,
   Customer,
   CustomersXmlParseResult,
+  EditCustomerData,
   GetCustomersRequest,
+  IssueRefundRequest,
+  IssueVoidRequest,
   ItemData,
+  ItemQuantityData,
   Plan,
   PlansXmlParseResult,
   Promotion,
   PromotionsXmlParseResult,
+  SetItemQuantityData,
   SubscriptionData,
 } from "./types";
 import { formatDateYYYY_MM_DD } from "./utils";
@@ -111,6 +118,159 @@ export function parseSubscriptionData(
       value instanceof Date ? value.toISOString() : value,
     ])
   );
+}
+
+export function parseItemQuantityData(
+  data: ItemQuantityData
+): Record<string, string> {
+  const result: Record<string, string> = {};
+  if (data.quantity) {
+    result.quantity = data.quantity.toFixed(4);
+  }
+  if (data.remoteAddress) {
+    result.remoteAddress = data.remoteAddress;
+  }
+  return result;
+}
+
+export function parseSetItemQuantityData(
+  data: SetItemQuantityData
+): Record<string, string> {
+  const result: Record<string, string> = {};
+  if (data.quantity) {
+    result.quantity = data.quantity.toFixed(4);
+  }
+  if (data.remoteAddress) {
+    result.remoteAddress = data.remoteAddress;
+  }
+  if (data.invoicePeriod) {
+    result.invoicePeriod = data.invoicePeriod;
+  }
+  return result;
+}
+
+export function parseEditCustomerData(data: EditCustomerData): URLSearchParams {
+  const params = new URLSearchParams();
+  if (data.firstName) {
+    params.set("firstName", data.firstName);
+  }
+  if (data.lastName) {
+    params.set("lastName", data.lastName);
+  }
+  if (data.email) {
+    params.set("email", data.email);
+  }
+  if (data.company) {
+    params.set("company", data.company);
+  }
+  if (data.taxRate !== undefined) {
+    params.set("taxRate", data.taxRate.toString());
+  }
+  if (data.isTaxExempt !== undefined) {
+    params.set("isTaxExempt", data.isTaxExempt ? "1" : "0");
+  }
+  if (data.taxNumber) {
+    params.set("taxNumber", data.taxNumber);
+  }
+  if (data.referer) {
+    params.set("referer", data.referer);
+  }
+  if (data.remoteAddress) {
+    params.set("remoteAddress", data.remoteAddress);
+  }
+  if (data.firstContactDatetime) {
+    params.set("firstContactDatetime", data.firstContactDatetime.toISOString());
+  }
+  if (data.campaignContent) {
+    params.set("campaignContent", data.campaignContent);
+  }
+  if (data.campaignMedium) {
+    params.set("campaignMedium", data.campaignMedium);
+  }
+  if (data.campaignName) {
+    params.set("campaignName", data.campaignName);
+  }
+  if (data.campaignSource) {
+    params.set("campaignSource", data.campaignSource);
+  }
+  if (data.campaignTerm) {
+    params.set("campaignTerm", data.campaignTerm);
+  }
+  if (data.metaData) {
+    for (const key in data.metaData) {
+      if (Object.prototype.hasOwnProperty.call(data.metaData, key)) {
+        params.set(`metaData[${key}]`, data.metaData[key]);
+      }
+    }
+  }
+  return params;
+}
+
+export function parseAddCustomChargeData(
+  data: AddCustomChargeData
+): Record<string, string> {
+  const params: Record<string, string> = {};
+  params.chargeCode = data.chargeCode;
+  params.quantity = data.quantity.toString();
+  params.eachAmount = data.eachAmount.toString();
+  if (data.description) {
+    params.description = data.description;
+  }
+  if (data.invoicePeriod) {
+    params.invoicePeriod = data.invoicePeriod;
+  }
+  if (data.remoteAddress) {
+    params.remoteAddress = data.remoteAddress;
+  }
+  return params;
+}
+
+export function parseCreateOneTimeInvoiceData(
+  data: CreateOneTimeInvoiceData
+): Record<string, string> {
+  const params: Record<string, string> = {};
+  if (data.charges && data.charges.length > 0) {
+    data.charges.forEach((charge, index) => {
+      params[`charges[${index}][chargeCode]`] = charge.chargeCode;
+      params[`charges[${index}][quantity]`] = charge.quantity.toString();
+      params[`charges[${index}][eachAmount]`] = charge.eachAmount.toString();
+      if (charge.description) {
+        params[`charges[${index}][description]`] = charge.description;
+      }
+    });
+  }
+  if (data.remoteAddress) {
+    params["remoteAddress"] = data.remoteAddress;
+  }
+  return params;
+}
+
+export function parseIssueVoidRequest(
+  request: IssueVoidRequest
+): Record<string, string> {
+  const params: Record<string, string> = {};
+
+  if (typeof request.idOrNumber === "number") {
+    params.id = request.idOrNumber.toString();
+  } else {
+    params.number = request.idOrNumber;
+  }
+
+  if (request.remoteAddress) {
+    params.remoteAddress = request.remoteAddress;
+  }
+
+  return params;
+}
+
+export function parseIssueRefundRequest(
+  request: IssueRefundRequest
+): Record<string, string> {
+  const params: Record<string, string> = parseIssueVoidRequest(request);
+
+  params.amount = request.amount.toString();
+
+  return params;
 }
 
 function parseChargesData(charges: ChargeData[]): Record<string, string> {

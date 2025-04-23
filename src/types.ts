@@ -71,9 +71,7 @@ export type CustomerData = {
   [key: string]: any;
 };
 
-export type ItemQuantityRequest = {
-  customerCode: string;
-  itemCode: string;
+export type ItemQuantityData = {
   /**
    * The positive amount accurate to up to 4 decimal places (if other that 1.0000)
    * that you wish to add/remove to the current usage for this item.
@@ -87,9 +85,19 @@ export type ItemQuantityRequest = {
   remoteAddress?: string;
 };
 
-export type SetItemQuantityRequest = ItemQuantityRequest & {
+export interface SetItemQuantityData extends ItemQuantityData {
   invoicePeriod?: InvoicePeriod;
-};
+}
+
+export interface ItemQuantityRequest extends ItemQuantityData {
+  customerCode: string;
+  itemCode: string;
+}
+
+export interface SetItemQuantityRequest extends SetItemQuantityData {
+  customerCode: string;
+  itemCode: string;
+}
 
 export type SubscriptionData = {
   planCode: string;
@@ -464,8 +472,11 @@ export type Coupon = {
   createdDatetime: string;
 };
 
-export type EditCustomerRequest = {
+export interface EditCustomerRequest extends EditCustomerData {
   code: string;
+}
+
+export type EditCustomerData = {
   /**
    * Limited to 20 characters.
    */
@@ -488,13 +499,12 @@ export type EditCustomerRequest = {
   notes?: string;
   /**
    * The rate for this customer if different than the configured default (e.g., 0.123).
-   * @pattern ^[-]?\d+(\.\d{1,3})?$ // Assuming up to 3 decimal places for tax rate
    */
   taxRate?: number;
   /**
    * 1 or 0.
    */
-  isTaxExempt?: 0 | 1;
+  isTaxExempt?: boolean;
   /**
    * Customer tax number if applicable. Limited to 32 characters.
    * @maxLength 32
@@ -504,7 +514,7 @@ export type EditCustomerRequest = {
    * Date or datetime in ISO 8601 format (e.g., 2011-08-01 or 2011-08-01T15:30:00+00:00).
    * @format date-time
    */
-  firstContactDatetime?: string;
+  firstContactDatetime?: Date;
   /**
    * A valid URL referer. Limited to 255 characters.
    * @maxLength 255
@@ -551,21 +561,17 @@ export type EditSubscriptionRequest = SubscriptionData & {
   customerCode: string;
 };
 
-/**
- * Create a parallel one-time invoice and execute the transaction immediately
- * using the customer's current payment method in the product
- *
- * https://docs.getcheddar.com/#invoice-interactions
- */
-export type CreateOneTimeInvoiceRequest = {
+export interface CreateOneTimeInvoiceRequest extends CreateOneTimeInvoiceData {
   customerCode: string;
+}
+
+export type CreateOneTimeInvoiceData = {
   /**
    * An array of charges to include in the one-time invoice. Each object in the array represents a single charge.
    */
   charges: {
     /**
      * Your code for this charge. Limited to 36 characters.
-     * @maxLength 36
      */
     chargeCode: string;
     /**
@@ -588,13 +594,11 @@ export type CreateOneTimeInvoiceRequest = {
   remoteAddress?: string;
 };
 
-/**
- * Add an arbitrary charge or credit to the customer's current invoice in the product
- *
- * https://docs.getcheddar.com/#add-a-custom-charge-credit
- */
-export type AddCustomChargeRequest = {
+export interface AddCustomChargeRequest extends AddCustomChargeData {
   customerCode: string;
+}
+
+export type AddCustomChargeData = {
   /**
    * Your code for this charge. Limited to 36 characters.
    */
@@ -621,13 +625,11 @@ export type AddCustomChargeRequest = {
   remoteAddress?: string;
 };
 
-/**
- * Remove a charge or credit from the customer's current invoice in the product
- *
- * https://docs.getcheddar.com/#delete-a-custom-charge-credit
- */
-export type DeleteCustomChargeRequest = {
+export interface DeleteCustomChargeRequest extends DeleteCustomChargeData {
   customerCode: string;
+}
+
+export type DeleteCustomChargeData = {
   /**
    * Cheddar's ID for the charge/credit
    */
@@ -642,8 +644,11 @@ export type DeleteCustomChargeRequest = {
   remoteAddress?: string;
 };
 
-export type OutstandingInvoiceRequest = {
+export interface OutstandingInvoiceRequest extends OutstandingInvoiceData {
   customerCode: string;
+}
+
+export type OutstandingInvoiceData = {
   /**
    * 3-4 digits - The Card Verification Value (CCV).
    */
@@ -665,12 +670,12 @@ export type IssueVoidRequest = {
   remoteAddress?: string;
 };
 
-export type IssueRefundRequest = IssueVoidRequest & {
+export interface IssueRefundRequest extends IssueVoidRequest {
   /**
    * Required An amount less than or equal to the refundable amount. See notes.
    */
   amount: number;
-};
+}
 
 export type ResendInvoiceEmailRequest = {
   /**
@@ -692,32 +697,30 @@ export type CheddarApiStatusCode =
   | "500" // Internal Server Error
   | "502"; // Bad Gateway
 
-type InvoiceResponse = Omit<Invoice, "charges" | "transactions"> & {
+interface InvoiceResponse extends Omit<Invoice, "charges" | "transactions"> {
   charges?: { charge: Charge[] };
   transactions?: { transaction: Transaction[] };
-};
+}
 
-type PlanResponse = Omit<Plan, "items"> & {
+interface PlanResponse extends Omit<Plan, "items"> {
   items?: { item: PlanItem[] };
-};
+}
 
-type SubscriptionResponse = Omit<
-  Subscription,
-  "plans" | "items" | "invoices"
-> & {
+interface SubscriptionResponse
+  extends Omit<Subscription, "plans" | "items" | "invoices"> {
   plans?: { plan: PlanResponse[] };
   items?: { item: SubscriptionItem[] };
   invoices?: { invoice: InvoiceResponse[] };
-};
+}
 
-type CustomerResponse = Omit<Customer, "subscriptions"> & {
+interface CustomerResponse extends Omit<Customer, "subscriptions"> {
   subscriptions: { subscription: SubscriptionResponse[] };
-};
+}
 
-type PromotionResponse = Omit<Promotion, "incentives" | "coupons"> & {
+interface PromotionResponse extends Omit<Promotion, "incentives" | "coupons"> {
   incentives: { incentive: Incentive[] };
   coupons: { coupon: Coupon[] };
-};
+}
 
 export type CustomersXmlParseResult = {
   customers: { customer: CustomerResponse[] };

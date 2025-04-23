@@ -1,7 +1,14 @@
 import {
   customersParser,
+  parseAddCustomChargeData,
   parseCreateCustomerRequest,
+  parseCreateOneTimeInvoiceData,
+  parseEditCustomerData,
   parseGetCustomersRequest,
+  parseIssueRefundRequest,
+  parseIssueVoidRequest,
+  parseItemQuantityData,
+  parseSetItemQuantityData,
   parseSubscriptionData,
   plansParser,
   promotionsParser,
@@ -62,7 +69,7 @@ export class Cheddar {
     method: "GET" | "POST";
     path: string;
     searchParams?: URLSearchParams;
-    data?: Record<string, any>;
+    data?: string[][] | Record<string, string> | string | URLSearchParams;
   }): Promise<{ result: T } | { error: CheddarError }> {
     // Encode the path, because some codes can contain spaces
     const encodedPath = encodeURI(path);
@@ -209,7 +216,7 @@ export class Cheddar {
     const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/edit-customer/productCode/${this.productCode}/code/${code}`,
-      data,
+      data: parseEditCustomerData(data),
     });
     if ("error" in parseResult) {
       throw parseResult.error;
@@ -300,7 +307,7 @@ export class Cheddar {
     const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/add-item-quantity/productCode/${this.productCode}/code/${customerCode}/itemCode/${itemCode}`,
-      data,
+      data: parseItemQuantityData(data),
     });
     if ("error" in parseResult) {
       throw parseResult.error;
@@ -318,7 +325,7 @@ export class Cheddar {
     const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/remove-item-quantity/productCode/${this.productCode}/code/${customerCode}/itemCode/${itemCode}`,
-      data,
+      data: parseItemQuantityData(data),
     });
     if ("error" in parseResult) {
       throw parseResult.error;
@@ -336,7 +343,7 @@ export class Cheddar {
     const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/set-item-quantity/productCode/${this.productCode}/code/${customerCode}/itemCode/${itemCode}`,
-      data,
+      data: parseSetItemQuantityData(data),
     });
     if ("error" in parseResult) {
       throw parseResult.error;
@@ -352,7 +359,7 @@ export class Cheddar {
     const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/add-charge/productCode/${this.productCode}/code/${customerCode}`,
-      data,
+      data: parseAddCustomChargeData(data),
     });
     if ("error" in parseResult) {
       throw parseResult.error;
@@ -372,7 +379,7 @@ export class Cheddar {
     const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/delete-charge/productCode/${this.productCode}/code/${customerCode}`,
-      data: data,
+      data,
     });
     if ("error" in parseResult) {
       throw parseResult.error;
@@ -395,7 +402,7 @@ export class Cheddar {
     const parseResult = await this.callApi({
       method: "POST",
       path: `invoices/new/productCode/${this.productCode}/code/${customerCode}`,
-      data,
+      data: parseCreateOneTimeInvoiceData(data),
     });
     if ("error" in parseResult) {
       throw parseResult.error;
@@ -415,7 +422,7 @@ export class Cheddar {
     const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "POST",
       path: `customers/run-outstanding/productCode/${this.productCode}/code/${customerCode}`,
-      data: data,
+      data,
     });
     if ("error" in parseResult) {
       throw parseResult.error;
@@ -428,18 +435,10 @@ export class Cheddar {
    * Refund a transaction on a billed invoice in the product
    */
   async issueRefund(request: IssueRefundRequest): Promise<any> {
-    const { idOrNumber } = request;
-    const isString = isNaN(Number(idOrNumber));
-
     const parseResult = await this.callApi({
       method: "POST",
       path: `invoices/refund/productCode/${this.productCode}`,
-      data: {
-        ...request,
-        ...(isString
-          ? { id: String(idOrNumber) }
-          : { number: Number(idOrNumber) }),
-      },
+      data: parseIssueRefundRequest(request),
     });
     if ("error" in parseResult) {
       throw parseResult.error;
@@ -454,18 +453,10 @@ export class Cheddar {
    * https://docs.getcheddar.com/#issue-a-void
    */
   async issueVoid(request: IssueVoidRequest): Promise<any> {
-    const { idOrNumber } = request;
-    const isString = isNaN(Number(idOrNumber));
-
     const parseResult = await this.callApi({
       method: "POST",
       path: `invoices/void/productCode/${this.productCode}`,
-      data: {
-        ...request,
-        ...(isString
-          ? { id: String(idOrNumber) }
-          : { number: Number(idOrNumber) }),
-      },
+      data: parseIssueVoidRequest(request),
     });
     if ("error" in parseResult) {
       throw parseResult.error;
@@ -479,18 +470,10 @@ export class Cheddar {
    * https://docs.getcheddar.com/#issue-a-void-or-refund
    */
   async issueVoidOrRefund(request: IssueVoidRequest): Promise<any> {
-    const { idOrNumber } = request;
-    const isString = isNaN(Number(idOrNumber));
-
     const parseResult = await this.callApi({
       method: "POST",
       path: `invoices/void-or-refund/productCode/${this.productCode}`,
-      data: {
-        ...request,
-        ...(isString
-          ? { id: String(idOrNumber) }
-          : { number: Number(idOrNumber) }),
-      },
+      data: parseIssueVoidRequest(request),
     });
     if ("error" in parseResult) {
       throw parseResult.error;
@@ -504,18 +487,10 @@ export class Cheddar {
    * https://docs.getcheddar.com/#send-or-resend-an-invoice-email
    */
   async resendInvoiceEmail(request: IssueVoidRequest): Promise<any> {
-    const { idOrNumber } = request;
-    const isString = isNaN(Number(idOrNumber));
-
     const parseResult = await this.callApi({
       method: "POST",
       path: `invoices/send-email/productCode/${this.productCode}`,
-      data: {
-        ...request,
-        ...(isString
-          ? { id: String(idOrNumber) }
-          : { number: Number(idOrNumber) }),
-      },
+      data: parseIssueVoidRequest(request),
     });
     if ("error" in parseResult) {
       throw parseResult.error;
