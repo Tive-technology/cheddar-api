@@ -325,7 +325,7 @@ export type Transaction = {
   _code: string;
   parentId?: string;
   gatewayToken?: string;
-  gatewayAccount: TransactionGatewayAccount;
+  gatewayAccount?: TransactionGatewayAccount;
   amount: number;
   memo: string;
   response: string;
@@ -351,7 +351,7 @@ export type SubscriptionItem = {
   _code: string;
   name: string;
   quantity?: number;
-  createdDatetime: string;
+  createdDatetime?: string;
   modifiedDatetime?: string;
 };
 
