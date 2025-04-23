@@ -1,7 +1,9 @@
 import * as qs from "node:querystring";
 import {
   customersParser,
+  parseCreateCustomerRequest,
   parseGetCustomersRequest,
+  parseSubscriptionData,
   plansParser,
   promotionsParser,
 } from "./parser";
@@ -28,11 +30,7 @@ import {
   PromotionsXmlParseResult,
   SetItemQuantityRequest,
 } from "./types";
-import {
-  makeAuthHeader,
-  parseCreateCustomerRequest,
-  parseSubscriptionData,
-} from "./utils";
+import { makeAuthHeader } from "./utils";
 import { handleXmlError, parseResult } from "./xmlParsing";
 
 const BASE_URI = "https://getcheddar.com:443/xml";

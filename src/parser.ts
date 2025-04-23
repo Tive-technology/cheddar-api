@@ -1,11 +1,15 @@
 import {
+  ChargeData,
+  CreateCustomerRequest,
   Customer,
   CustomersXmlParseResult,
   GetCustomersRequest,
+  ItemData,
   Plan,
   PlansXmlParseResult,
   Promotion,
   PromotionsXmlParseResult,
+  SubscriptionData,
 } from "./types";
 import { formatDateYYYY_MM_DD } from "./utils";
 
@@ -79,4 +83,48 @@ export function parseGetCustomersRequest(
     params.transactedAfterDate = formatDateYYYY_MM_DD(transactedAfterDate);
   }
   return params;
+}
+
+export function parseCreateCustomerRequest(request: CreateCustomerRequest) {
+  const { firstContactDatetime, subscription, charges, items, ...data } =
+    request;
+  const params: Record<string, any> = {
+    ...data,
+    ...(subscription && parseSubscriptionData(subscription)),
+    ...(charges && parseChargesData(charges)),
+    ...(items && parseItemsData(items)),
+  };
+
+  if (firstContactDatetime) {
+    params.firstContactDatetime = formatDateYYYY_MM_DD(firstContactDatetime);
+  }
+
+  return params;
+}
+
+export function parseSubscriptionData(subscription: SubscriptionData) {
+  return Object.fromEntries(
+    Object.entries(subscription).map(([key, value]) => [
+      `subscription[${key}]`,
+      value,
+    ])
+  );
+}
+
+function parseChargesData(charges: ChargeData[]) {
+  return charges.reduce((combinedCharges, charge) => {
+    for (const key in charge) {
+      combinedCharges[`charges[${charge.chargeCode}][${key}]`] = charge[key];
+    }
+    return combinedCharges;
+  }, {});
+}
+
+function parseItemsData(items: ItemData[]) {
+  return items.reduce((combinedItems, items) => {
+    for (const key in items) {
+      combinedItems[`items[${items.itemCode}][${key}]`] = items[key];
+    }
+    return combinedItems;
+  }, {});
 }

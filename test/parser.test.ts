@@ -1,10 +1,17 @@
 import assert from "node:assert/strict";
 import test, { describe } from "node:test";
-import { parseGetCustomersRequest } from "../src/parser";
-import { GetCustomersRequest } from "../src/types";
+import {
+  parseCreateCustomerRequest,
+  parseGetCustomersRequest,
+} from "../src/parser";
+import {
+  CreateCustomerRequest,
+  GetCustomersRequest,
+  SubscriptionData,
+} from "../src/types";
 
 describe("Parser", () => {
-  test("getCustomersRequestParser", (t) => {
+  test("GetCustomersRequest", (t) => {
     const request: GetCustomersRequest = {
       subscriptionStatus: "activeOnly",
       planCode: ["PLAN_1", "PLAN_2"],
@@ -31,6 +38,64 @@ describe("Parser", () => {
       orderBy: "name",
       orderByDirection: "desc",
       searchText: "john",
+    });
+  });
+
+  describe("CreateCustomerRequest", () => {
+    test("minimal create request", (t) => {
+      const request: CreateCustomerRequest = {
+        code: "CUSTOMER_CODE",
+        firstName: "firstName",
+        lastName: "lastName",
+        email: "test@gmail.com",
+      };
+      assert.deepStrictEqual(parseCreateCustomerRequest(request), {
+        code: "CUSTOMER_CODE",
+        firstName: "firstName",
+        lastName: "lastName",
+        email: "test@gmail.com",
+      });
+    });
+
+    test("full create request", (t) => {
+      const request: CreateCustomerRequest = {
+        code: "CUSTOMER_CODE",
+        firstName: "firstName",
+        lastName: "lastName",
+        email: "test@gmail.com",
+        gatewayToken: "gatewayToken",
+        company: "test-company",
+        firstContactDatetime: new Date("2023-10-05T10:30:00Z"),
+        subscription: {
+          planCode: "PLAN_CODE",
+          method: "cc",
+          ccNumber: "4111111111111111",
+          ccExpiration: "12/2030",
+          ccType: "visa",
+          ccCardCode: "123",
+          ccFirstName: "FName",
+          ccLastName: "LName",
+          ccZip: "95123",
+        },
+      };
+      assert.deepStrictEqual(parseCreateCustomerRequest(request), {
+        code: "CUSTOMER_CODE",
+        firstName: "firstName",
+        lastName: "lastName",
+        email: "test@gmail.com",
+        gatewayToken: "gatewayToken",
+        company: "test-company",
+        firstContactDatetime: "2023-10-05",
+        "subscription[planCode]": "PLAN_CODE",
+        "subscription[method]": "cc",
+        "subscription[ccNumber]": "4111111111111111",
+        "subscription[ccExpiration]": "12/2030",
+        "subscription[ccType]": "visa",
+        "subscription[ccCardCode]": "123",
+        "subscription[ccFirstName]": "FName",
+        "subscription[ccLastName]": "LName",
+        "subscription[ccZip]": "95123",
+      });
     });
   });
 });
