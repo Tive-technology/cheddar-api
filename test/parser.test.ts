@@ -11,14 +11,14 @@ import {
   parseSetItemQuantityData,
 } from "../src/parser";
 import {
-  AddCustomChargeData,
-  CreateCustomerRequest,
-  CreateOneTimeInvoiceData,
-  EditCustomerData,
-  GetCustomersRequest,
-  IssueRefundRequest,
-  ItemQuantityData,
-  SetItemQuantityData,
+  type AddCustomChargeData,
+  type CreateCustomerRequest,
+  type CreateOneTimeInvoiceData,
+  type EditCustomerData,
+  type GetCustomersRequest,
+  type IssueRefundRequest,
+  type ItemQuantityData,
+  type SetItemQuantityData,
 } from "../src/types";
 
 describe("Parser", () => {

@@ -9,10 +9,6 @@ export class CheddarError extends Error {
     this.id = id;
     this.code = code;
     this.auxCode = auxCode;
-
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, CheddarError);
-    }
   }
 }
 

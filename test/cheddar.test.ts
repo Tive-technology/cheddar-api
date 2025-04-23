@@ -1,8 +1,15 @@
 import assert from "node:assert/strict";
 import test, { beforeEach, describe } from "node:test";
-import config from "../config.json";
-import { Cheddar } from "../src/index.ts";
-import { SubscriptionData } from "../src/types.ts";
+import { Cheddar, type SubscriptionData } from "../src/index";
+
+const {
+  TEST_USERNAME,
+  TEST_PASSWORD,
+  TEST_PRODUCT_CODE,
+  TEST_PLAN_CODE,
+  TEST_ITEM_CODE,
+  TEST_PROMO_CODE,
+} = process.env;
 
 describe("Cheddar", {}, () => {
   let cheddar: Cheddar;
@@ -10,7 +17,11 @@ describe("Cheddar", {}, () => {
   const customerCode = "test-customer-code";
 
   beforeEach(() => {
-    cheddar = new Cheddar(config);
+    cheddar = new Cheddar({
+      username: TEST_USERNAME,
+      password: TEST_PASSWORD,
+      productCode: TEST_PRODUCT_CODE,
+    });
   });
 
   describe("Pricing Plans", () => {
@@ -27,8 +38,8 @@ describe("Cheddar", {}, () => {
 
     describe("#getPlan", function () {
       test("should return a single plan", async () => {
-        const plan = await cheddar.getPlan(config.planCode);
-        assert.strictEqual(plan?._code, config.planCode);
+        const plan = await cheddar.getPlan(TEST_PLAN_CODE);
+        assert.strictEqual(plan?._code, TEST_PLAN_CODE);
       });
 
       test("should return null if plan not found", async () => {
@@ -64,7 +75,7 @@ describe("Cheddar", {}, () => {
     describe("#createCustomer", () => {
       test("it should create a customer", async () => {
         const subscriptionData: SubscriptionData = {
-          planCode: config.planCode,
+          planCode: TEST_PLAN_CODE,
           method: "cc",
           ccNumber: "4111111111111111",
           ccExpiration: "12/2030",
@@ -124,7 +135,7 @@ describe("Cheddar", {}, () => {
     describe("#editSubscription", () => {
       test("updates the customers subscription", async () => {
         const subscriptionData: SubscriptionData = {
-          planCode: config.planCode,
+          planCode: TEST_PLAN_CODE,
           method: "cc",
           ccNumber: "4111111111111111",
           ccExpiration: "12/2030",
@@ -141,7 +152,7 @@ describe("Cheddar", {}, () => {
         assert.strictEqual(customer._code, customerCode);
         assert.strictEqual(
           customer.subscriptions![0].plans![0]._code,
-          config.planCode
+          TEST_PLAN_CODE
         );
       });
     });
@@ -152,11 +163,11 @@ describe("Cheddar", {}, () => {
       test("increments the tracked item by 3", async () => {
         const customer = await cheddar.addItem({
           customerCode,
-          itemCode: config.itemCode,
+          itemCode: TEST_ITEM_CODE,
           quantity: 3,
         });
         const item = customer.subscriptions![0].invoices![0].charges!.find(
-          (charge) => charge._code === config.itemCode
+          (charge) => charge._code === TEST_ITEM_CODE
         );
         assert.strictEqual(item!.quantity, 3);
       });
@@ -166,11 +177,11 @@ describe("Cheddar", {}, () => {
       test("decrements the tracked item by 3", async () => {
         const customer = await cheddar.removeItem({
           customerCode,
-          itemCode: config.itemCode,
+          itemCode: TEST_ITEM_CODE,
           quantity: 3,
         });
         const item = customer.subscriptions![0].invoices![0].charges!.find(
-          (charge) => charge._code === config.itemCode
+          (charge) => charge._code === TEST_ITEM_CODE
         );
         assert.strictEqual(item!.quantity, 0);
       });
@@ -180,11 +191,11 @@ describe("Cheddar", {}, () => {
       test("decrements the tracked item by 3", async () => {
         const customer = await cheddar.setItem({
           customerCode,
-          itemCode: config.itemCode,
+          itemCode: TEST_ITEM_CODE,
           quantity: 8,
         });
         const item = customer.subscriptions![0].invoices![0].charges!.find(
-          (charge) => charge._code === config.itemCode
+          (charge) => charge._code === TEST_ITEM_CODE
         );
         assert.strictEqual(item!.quantity, 8);
       });
@@ -225,8 +236,8 @@ describe("Cheddar", {}, () => {
       });
 
       test("gets valid promotion", async () => {
-        const promotion = await cheddar.getPromotion(config.promoCode);
-        assert.strictEqual(promotion!.coupons![0]._code, config.promoCode);
+        const promotion = await cheddar.getPromotion(TEST_PROMO_CODE);
+        assert.strictEqual(promotion!.coupons![0]._code, TEST_PROMO_CODE);
       });
 
       test("gets invalid promotion", async () => {

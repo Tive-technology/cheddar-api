@@ -1,5 +1,5 @@
 import { XMLParser } from "fast-xml-parser";
-import { CheddarError, ErrorType } from "./types";
+import { CheddarError, type ErrorType } from "./types";
 
 const alwaysArray = [
   "plans.plan",
