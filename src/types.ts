@@ -100,7 +100,7 @@ export type SubscriptionData = {
   /**
    * Date or datetime in ISO 8601 format. (e.g., 2011-08-01 or 2011-08-01T15:30:00+00:00). Date on which you would like the customers first invoice to be billable. This option overrides the pricing plan default. Must either be today's date (run invoice immediately) or a future date.
    */
-  initialBillDate?: string;
+  initialBillDate?: Date;
   /**
    * "cc" (default) or "paypal"
    */

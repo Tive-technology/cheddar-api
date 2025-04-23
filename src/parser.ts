@@ -102,29 +102,38 @@ export function parseCreateCustomerRequest(request: CreateCustomerRequest) {
   return params;
 }
 
-export function parseSubscriptionData(subscription: SubscriptionData) {
+export function parseSubscriptionData(
+  subscription: SubscriptionData
+): Record<string, string> {
   return Object.fromEntries(
     Object.entries(subscription).map(([key, value]) => [
       `subscription[${key}]`,
-      value,
+      value instanceof Date ? value.toISOString() : value,
     ])
   );
 }
 
-function parseChargesData(charges: ChargeData[]) {
+function parseChargesData(charges: ChargeData[]): Record<string, string> {
   return charges.reduce((combinedCharges, charge) => {
     for (const key in charge) {
-      combinedCharges[`charges[${charge.chargeCode}][${key}]`] = charge[key];
+      const value = charge[key as keyof ChargeData];
+      if (value) {
+        combinedCharges[`charges[${charge.chargeCode}][${key}]`] =
+          String(value);
+      }
     }
     return combinedCharges;
-  }, {});
+  }, {} as Record<string, string>);
 }
 
-function parseItemsData(items: ItemData[]) {
+function parseItemsData(items: ItemData[]): Record<string, string> {
   return items.reduce((combinedItems, items) => {
     for (const key in items) {
-      combinedItems[`items[${items.itemCode}][${key}]`] = items[key];
+      const value = items[key as keyof ItemData];
+      if (value) {
+        combinedItems[`items[${items.itemCode}][${key}]`] = String(value);
+      }
     }
     return combinedItems;
-  }, {});
+  }, {} as Record<string, string>);
 }

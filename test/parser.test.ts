@@ -70,13 +70,12 @@ describe("Parser", () => {
       });
     });
 
-    test("full create request", (t) => {
+    test("create request with subscription + cc", (t) => {
       const request: CreateCustomerRequest = {
         code: "CUSTOMER_CODE",
         firstName: "firstName",
         lastName: "lastName",
         email: "test@gmail.com",
-        gatewayToken: "gatewayToken",
         company: "test-company",
         firstContactDatetime: new Date("2023-10-05T10:30:00Z"),
         subscription: {
@@ -96,7 +95,6 @@ describe("Parser", () => {
         firstName: "firstName",
         lastName: "lastName",
         email: "test@gmail.com",
-        gatewayToken: "gatewayToken",
         company: "test-company",
         firstContactDatetime: "2023-10-05",
         "subscription[planCode]": "PLAN_CODE",
@@ -108,6 +106,39 @@ describe("Parser", () => {
         "subscription[ccFirstName]": "FName",
         "subscription[ccLastName]": "LName",
         "subscription[ccZip]": "95123",
+      });
+    });
+
+    test("create request with subscription + gatewayToken", (t) => {
+      const request: CreateCustomerRequest = {
+        code: "CUSTOMER_CODE",
+        firstName: "firstName",
+        lastName: "lastName",
+        email: "test@gmail.com",
+        company: "test-company",
+        firstContactDatetime: new Date("2023-10-05T10:30:00Z"),
+        subscription: {
+          planCode: "PLAN_CODE",
+          gatewayToken: "cus_P1a2b3c4d5e6f7",
+          ccLastFour: "1234",
+          ccType: "visa",
+          ccCompany: "VISA",
+          initialBillDate: new Date("2011-08-01T15:30:00Z"),
+        },
+      };
+      assert.deepStrictEqual(parseCreateCustomerRequest(request), {
+        code: "CUSTOMER_CODE",
+        firstName: "firstName",
+        lastName: "lastName",
+        email: "test@gmail.com",
+        company: "test-company",
+        firstContactDatetime: "2023-10-05",
+        "subscription[planCode]": "PLAN_CODE",
+        "subscription[gatewayToken]": "cus_P1a2b3c4d5e6f7",
+        "subscription[ccLastFour]": "1234",
+        "subscription[ccType]": "visa",
+        "subscription[ccCompany]": "VISA",
+        "subscription[initialBillDate]": "2011-08-01T15:30:00.000Z",
       });
     });
   });
