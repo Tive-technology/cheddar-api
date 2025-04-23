@@ -330,7 +330,7 @@ export type Transaction = {
   parentId?: string;
   gatewayToken?: string;
   gatewayAccount: TransactionGatewayAccount;
-  amount: string;
+  amount: number;
   memo: string;
   response: string;
   responseReason?: string;
