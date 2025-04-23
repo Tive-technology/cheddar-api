@@ -23,4 +23,4 @@ jobs:
         run: npm install
 
       - name: Publish to JSR
-        run: deno publish
+        run: npx jsr publish
