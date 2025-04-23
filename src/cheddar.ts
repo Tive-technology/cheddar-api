@@ -1,4 +1,3 @@
-import * as qs from "node:querystring";
 import {
   customersParser,
   parseCreateCustomerRequest,
@@ -57,45 +56,32 @@ export class Cheddar {
   private async callApi<T>({
     method,
     path,
-    params,
+    searchParams,
     data,
   }: {
     method: "GET" | "POST";
     path: string;
-    params?: any;
+    searchParams?: URLSearchParams;
     data?: Record<string, any>;
   }): Promise<{ result: T } | { error: CheddarError }> {
     // Encode the path, because some codes can contain spaces
     const encodedPath = encodeURI(path);
+    const url = new URL(`${BASE_URI}/${encodedPath}`);
+
+    if (searchParams) {
+      url.search = searchParams.toString();
+    }
 
     const requestConfig: RequestInit = {
       headers: {
         authorization: this.authorizationHeader,
         ...(data && { "Content-Type": "application/x-www-form-urlencoded" }),
       },
-      body: data ? qs.stringify(data) : undefined,
+      body: data ? new URLSearchParams(data).toString() : undefined,
       method,
     };
 
-    const searchParams = new URLSearchParams();
-    if (params) {
-      for (const key in params) {
-        if (Object.prototype.hasOwnProperty.call(params, key)) {
-          const value = params[key];
-          if (Array.isArray(value)) {
-            value.forEach((v) => searchParams.append(key, v));
-          } else {
-            searchParams.append(key, value);
-          }
-        }
-      }
-    }
-
-    const url = `${BASE_URI}/${encodedPath}`;
-    const fullUrl =
-      searchParams.size > 0 ? `${url}?${searchParams.toString()}` : url;
-
-    const response = await fetch(fullUrl, requestConfig);
+    const response = await fetch(url, requestConfig);
     const text = await response.text();
     if (!response.ok) {
       return { error: handleXmlError(text) };
@@ -148,7 +134,7 @@ export class Cheddar {
     const parseResult = await this.callApi<CustomersXmlParseResult>({
       method: "GET",
       path: `customers/get/productCode/${this.productCode}`,
-      params: parseGetCustomersRequest(request),
+      searchParams: parseGetCustomersRequest(request),
     });
     if ("error" in parseResult) {
       if (parseResult.error.code === 404) {

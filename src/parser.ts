@@ -53,35 +53,35 @@ export function promotionsParser(
 
 export function parseGetCustomersRequest(
   request: GetCustomersRequest
-): Record<string, any> {
-  const params: Record<string, any> = { ...request };
-  const {
-    createdBeforeDate,
-    createdAfterDate,
-    canceledBeforeDate,
-    canceledAfterDate,
-    transactedBeforeDate,
-    transactedAfterDate,
-  } = request;
+): URLSearchParams {
+  const params = new URLSearchParams();
+  const dateFields = [
+    "createdBeforeDate",
+    "createdAfterDate",
+    "canceledBeforeDate",
+    "canceledAfterDate",
+    "transactedBeforeDate",
+    "transactedAfterDate",
+  ];
 
-  if (createdBeforeDate) {
-    params.createdBeforeDate = formatDateYYYY_MM_DD(createdBeforeDate);
+  for (const key in request) {
+    const value = request[key];
+
+    if (value === undefined) {
+      continue;
+    }
+
+    if (Array.isArray(value)) {
+      for (const code of value) {
+        params.append(key, code);
+      }
+    } else if (dateFields.includes(key) && value instanceof Date) {
+      params.set(key, formatDateYYYY_MM_DD(value));
+    } else {
+      params.set(key, String(value));
+    }
   }
-  if (createdAfterDate) {
-    params.createdAfterDate = formatDateYYYY_MM_DD(createdAfterDate);
-  }
-  if (canceledBeforeDate) {
-    params.canceledBeforeDate = formatDateYYYY_MM_DD(canceledBeforeDate);
-  }
-  if (canceledAfterDate) {
-    params.canceledAfterDate = formatDateYYYY_MM_DD(canceledAfterDate);
-  }
-  if (transactedBeforeDate) {
-    params.transactedBeforeDate = formatDateYYYY_MM_DD(transactedBeforeDate);
-  }
-  if (transactedAfterDate) {
-    params.transactedAfterDate = formatDateYYYY_MM_DD(transactedAfterDate);
-  }
+
   return params;
 }
 
