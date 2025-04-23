@@ -35,22 +35,6 @@ export type CheddarConfig = {
   productCode: string;
 };
 
-export type QueryParams = {
-  [key: string]:
-    | string
-    | number
-    | boolean
-    | string[]
-    | number[]
-    | { start: string; end: string }
-    | undefined;
-  productCode?: string;
-  productId?: string;
-  startDate?: string;
-  endDate?: string;
-  dateRange?: { start: string; end: string };
-};
-
 export type GetCustomersRequest = {
   subscriptionStatus?: "activeOnly" | "canceledOnly";
   /**
