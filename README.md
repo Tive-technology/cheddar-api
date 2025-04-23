@@ -1,6 +1,6 @@
-## Node.js Cheddar API wrapper
+## JavaScript Cheddar API wrapper
 
-This module will simplify the process of integrating [Cheddar](https://www.getcheddar.com/) into your existing node.js apps.
+This module will simplify the process of integrating [Cheddar](https://www.getcheddar.com/) into your existing JavaScript apps.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -10,7 +10,6 @@ This module will simplify the process of integrating [Cheddar](https://www.getch
 - [Installation](#installation)
 - [Basic usage](#basic-usage)
 - [Implemented methods](#implemented-methods)
-- [Using a proxy](#using-a-proxy)
 - [Running tests](#running-tests)
 - [Credits](#credits)
 
@@ -65,7 +64,7 @@ const plans = await cheddar.getPlans();
 - `issueVoid(issueVoidRequest)`
 - `issueVoidOrRefund(issueVoidRequest)`
 - `resendInvoiceEmail(issueVoidRequest)`
-- `getPromotions([query])`
+- `getPromotions()`
 - `getPromotion(promotionCode)`
 
 All methods return a promise with the requested data in JSON format.
@@ -94,8 +93,7 @@ npm test
 
 > **WARNING:** Only run the tests on a development account to prevent any side effects in production
 
-> **NOTE**: Not all API calls have been fully tested yet.
-
 # Credits
 
 Original work was done by [Kevin Smith](https://github.com/respectTheCode).
+Ported to typescript by [Victor Uvarov](https://github.com/victortive).
