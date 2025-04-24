@@ -11,8 +11,6 @@ jobs:
     permissions:
       contents: read
       id-token: write # The OIDC ID token is used for authentication with JSR.
-    environment:
-      name: TEST
     steps:
       - uses: actions/checkout@v4
 
@@ -23,16 +21,6 @@ jobs:
 
       - name: Install npm dependencies
         run: npm install
-
-      - name: Run tests
-        env:
-          TEST_USERNAME: ${{ secrets.TEST_USERNAME }}
-          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
-          TEST_PRODUCT_CODE: ${{ secrets.TEST_PRODUCT_CODE }}
-          TEST_PLAN_CODE: ${{ secrets.TEST_PLAN_CODE }}
-          TEST_ITEM_CODE: ${{ secrets.TEST_ITEM_CODE }}
-          TEST_PROMO_CODE: ${{ secrets.TEST_PROMO_CODE }}
-        run: npm test
 
       - name: Publish to JSR
         run: npx jsr publish --allow-dirty

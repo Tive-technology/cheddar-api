@@ -9,6 +9,9 @@
       "src/**/*.ts",
       "package-lock.json",
       "package.json"
+    ],
+    "exclude": [
+      "tests"
     ]
   }
 }
