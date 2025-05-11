@@ -1,6 +1,6 @@
 {
   "name": "@tive/cheddar",
-  "version": "0.6.13",
+  "version": "0.6.14",
   "exports": "./src/index.ts",
   "publish": {
     "include": [
