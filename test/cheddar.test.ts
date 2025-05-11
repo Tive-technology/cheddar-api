@@ -50,28 +50,6 @@ describe("Cheddar", {}, () => {
   });
 
   describe("Customers", () => {
-    describe("#getCustomers", () => {
-      test("should return an array of customers", async () => {
-        const customers = await cheddar.getCustomers({});
-        assert.ok(Array.isArray(customers), "customers should be an array");
-        assert.ok(
-          customers.length >= 1,
-          "customers array should have at least one element"
-        );
-      });
-
-      test("searching customers should return an array of customers", async () => {
-        const customers = await cheddar.getCustomers({
-          searchText: "test@example.com",
-        });
-        assert.ok(Array.isArray(customers), "customers should be an array");
-        assert.ok(
-          customers.length >= 1,
-          "customers array should have at least one element"
-        );
-      });
-    });
-
     describe("#createCustomer", () => {
       test("it should create a customer", async () => {
         const subscriptionData: SubscriptionData = {
@@ -97,6 +75,28 @@ describe("Cheddar", {}, () => {
         assert.strictEqual(customer.lastName, "LName");
         assert.strictEqual(customer.email, "test@example.com");
         assert.strictEqual(customer.subscriptions?.length, 1);
+      });
+    });
+
+    describe("#getCustomers", () => {
+      test("should return an array of customers", async () => {
+        const customers = await cheddar.getCustomers({});
+        assert.ok(Array.isArray(customers), "customers should be an array");
+        assert.ok(
+          customers.length >= 1,
+          "customers array should have at least one element"
+        );
+      });
+
+      test("searching customers should return an array of customers", async () => {
+        const customers = await cheddar.getCustomers({
+          search: "test@example.com",
+        });
+        assert.ok(Array.isArray(customers), "customers should be an array");
+        assert.ok(
+          customers.length >= 1,
+          "customers array should have at least one element"
+        );
       });
     });
 

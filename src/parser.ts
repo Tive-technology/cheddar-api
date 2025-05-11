@@ -18,44 +18,64 @@ import {
   type SetItemQuantityData,
   type SubscriptionData,
 } from "./types";
-import { formatDateYYYY_MM_DD } from "./utils";
+import { formatDateYYYY_MM_DD, removeEmptyStrings } from "./utils";
 
 export function customersParser(response: CustomersXmlParseResult): Customer[] {
-  return response.customers.customer.map((customer) => ({
-    ...customer,
-    subscriptions: customer.subscriptions?.subscription?.map(
-      (subscription) => ({
-        ...subscription,
-        invoices: subscription.invoices?.invoice.map((invoice) => ({
-          ...invoice,
-          charges: invoice.charges?.charge,
-          transactions: invoice.transactions?.transaction,
-        })),
-        plans: subscription.plans?.plan.map((plan) => ({
-          ...plan,
-          items: plan.items?.item,
-        })),
-        items: subscription.items?.item,
-      })
-    ),
-  }));
+  return response.customers.customer.map((customer) =>
+    removeEmptyStrings({
+      ...customer,
+      subscriptions: customer.subscriptions?.subscription?.map((subscription) =>
+        removeEmptyStrings({
+          ...subscription,
+          invoices: subscription.invoices?.invoice.map((invoice) =>
+            removeEmptyStrings({
+              ...invoice,
+              charges: invoice.charges?.charge?.map((charge) =>
+                removeEmptyStrings(charge)
+              ),
+              transactions: invoice.transactions?.transaction?.map(
+                (transaction) => removeEmptyStrings(transaction)
+              ),
+            })
+          ),
+          plans: subscription.plans?.plan.map((plan) =>
+            removeEmptyStrings({
+              ...plan,
+              items: plan.items?.item?.map((item) => removeEmptyStrings(item)),
+            })
+          ),
+          items: subscription.items?.item?.map((item) =>
+            removeEmptyStrings(item)
+          ),
+        })
+      ),
+    })
+  );
 }
 
 export function plansParser(response: PlansXmlParseResult): Plan[] {
-  return response.plans.plan.map((plan) => ({
-    ...plan,
-    items: plan.items?.item,
-  }));
+  return response.plans.plan.map((plan) =>
+    removeEmptyStrings({
+      ...plan,
+      items: plan.items?.item.map((item) => removeEmptyStrings(item)),
+    })
+  );
 }
 
 export function promotionsParser(
   response: PromotionsXmlParseResult
 ): Promotion[] {
-  return response.promotions.promotion.map((promotion) => ({
-    ...promotion,
-    incentives: promotion.incentives?.incentive,
-    coupons: promotion.coupons?.coupon,
-  }));
+  return response.promotions.promotion.map((promotion) =>
+    removeEmptyStrings({
+      ...promotion,
+      incentives: promotion.incentives?.incentive.map((incentive) =>
+        removeEmptyStrings(incentive)
+      ),
+      coupons: promotion.coupons?.coupon.map((coupon) =>
+        removeEmptyStrings(coupon)
+      ),
+    })
+  );
 }
 
 export function parseGetCustomersRequest(
