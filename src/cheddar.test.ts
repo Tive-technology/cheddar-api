@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test, { beforeEach, describe } from "node:test";
-import { Cheddar, type SubscriptionData } from "../src/index";
+import { Cheddar, type SubscriptionData } from "./index";
 
 const {
   TEST_USERNAME,

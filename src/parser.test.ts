@@ -9,7 +9,7 @@ import {
   parseIssueRefundRequest,
   parseItemQuantityData,
   parseSetItemQuantityData,
-} from "../src/parser";
+} from "./parser";
 import {
   type AddCustomChargeData,
   type CreateCustomerRequest,
@@ -19,7 +19,7 @@ import {
   type IssueRefundRequest,
   type ItemQuantityData,
   type SetItemQuantityData,
-} from "../src/types";
+} from "./types";
 
 describe("Parser", () => {
   test("GetCustomersRequest", (t) => {
