@@ -4,7 +4,7 @@ import {
   formatDateYYYY_MM_DD,
   makeAuthHeader,
   removeEmptyStrings,
-} from "../src/utils";
+} from "./utils";
 
 describe("utils", () => {
   test("makeAuthHeader", (t) => {

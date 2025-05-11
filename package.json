@@ -37,8 +37,8 @@
     "build": "tsc",
     "release": "npm run build && npm run test && npm publish",
     "release:dev": "npm run build && npm run test:dev && npm publish",
-    "test": "node --import tsx --test 'test/**/*.test.ts'",
-    "test:dev": "node --env-file=.env --import tsx  --test 'test/**/*.test.ts'"
+    "test": "node --import tsx --test 'src/**/*.test.ts'",
+    "test:dev": "node --env-file=.env --import tsx  --test 'src/**/*.test.ts'"
   },
   "engines": {
     "node": ">=18.0.0"
