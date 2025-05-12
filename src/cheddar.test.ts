@@ -156,6 +156,35 @@ describe("Cheddar", {}, () => {
         );
       });
     });
+
+    describe("#editCustomerAndSubscription", () => {
+      test("updates the customers subscription", async () => {
+        await cheddar.cancelSubscription(customerCode);
+
+        const subscriptionData: SubscriptionData = {
+          planCode: TEST_PLAN_CODE,
+          method: "cc",
+          ccNumber: "4111111111111111",
+          ccExpiration: "12/2030",
+          ccType: "visa",
+          ccCardCode: "123",
+          ccFirstName: "FName",
+          ccLastName: "LName",
+          ccZip: "95123",
+        };
+        const customer = await cheddar.editCustomerAndSubscription({
+          customerCode,
+          firstName: "Updated First Name",
+          subscription: subscriptionData,
+        });
+        assert.strictEqual(customer._code, customerCode);
+        assert.strictEqual(customer.firstName, "Updated First Name");
+        assert.strictEqual(
+          customer.subscriptions![0].plans![0]._code,
+          TEST_PLAN_CODE,
+        );
+      });
+    });
   });
 
   describe("Tracked Items", () => {

@@ -3,6 +3,7 @@ import {
   parseAddCustomChargeData,
   parseCreateCustomerRequest,
   parseCreateOneTimeInvoiceData,
+  parseCustomerAndSubscriptionData,
   parseEditCustomerData,
   parseGetCustomersRequest,
   parseIssueRefundRequest,
@@ -271,20 +272,40 @@ export class Cheddar {
   }
 
   /**
-   * Update a Customer and Subscription
+   * Update a Customer and Subscription.
    *
-   * @throws A {@link CheddarError} if the API call fails
+   * @example
+   * ```typescript
+   * const subscriptionData: SubscriptionData = {
+   *   planCode: TEST_PLAN_CODE,
+   *   method: "cc",
+   *   ccNumber: "4111111111111111",
+   *   ccExpiration: "12/2030",
+   *   ccType: "visa",
+   *   ccCardCode: "123",
+   *   ccFirstName: "FName",
+   *   ccLastName: "LName",
+   *   ccZip: "95123",
+   * };
    *
-   * @see https://docs.getcheddar.com/#update-a-customer-and-subscription
+   * const customer = await cheddar.editCustomerAndSubscription({
+   *   customerCode,
+   *   firstName: "Updated First Name",
+   *   subscription: subscriptionData,
+   * });
+   * ```
+   *
+   * @throws A {@link CheddarError} If the API call fails.
+   * @see {@link https://docs.getcheddar.com/#update-a-customer-and-subscription}
    */
   async editCustomerAndSubscription(
-    request: EditCustomerSubscriptionRequest
+    request: EditCustomerSubscriptionRequest,
   ): Promise<Customer> {
     const { customerCode, ...data } = request;
     const parseResult = await this.callApi<CustomersXmlResult>({
       method: "POST",
       path: `customers/edit/productCode/${this.productCode}/code/${customerCode}`,
-      data,
+      data: parseCustomerAndSubscriptionData(data),
     });
     if ("error" in parseResult) {
       throw parseResult.error;
@@ -591,7 +612,7 @@ export class Cheddar {
    * @see https://docs.getcheddar.com/#delete-a-custom-charge-credit
    */
   async deleteCustomCharge(
-    request: DeleteCustomChargeRequest
+    request: DeleteCustomChargeRequest,
   ): Promise<Customer> {
     const { customerCode, ...data } = request;
     const parseResult = await this.callApi<CustomersXmlResult>({
@@ -632,7 +653,7 @@ export class Cheddar {
    * @see https://docs.getcheddar.com/#invoice-interactions
    */
   async createOneTimeInvoice(
-    request: CreateOneTimeInvoiceRequest
+    request: CreateOneTimeInvoiceRequest,
   ): Promise<any> {
     const { customerCode, ...data } = request;
     const parseResult = await this.callApi({
@@ -664,7 +685,7 @@ export class Cheddar {
    * @see https://docs.getcheddar.com/#run-an-outstanding-invoice
    */
   async runOutstandingInvoice(
-    request: OutstandingInvoiceRequest
+    request: OutstandingInvoiceRequest,
   ): Promise<Customer> {
     const { customerCode, ...data } = request;
     const parseResult = await this.callApi<CustomersXmlResult>({
