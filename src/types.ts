@@ -63,6 +63,8 @@ export type GetCustomersRequest = {
   search?: string;
 };
 
+type CCType = "visa" | "mc" | "disc" | "amex" | "diners" | "jcb" | "unk";
+
 export type CustomerData = {
   code: string;
   firstName?: string;
@@ -136,7 +138,7 @@ export type SubscriptionData = {
    * Conditional visa, mc, disc, amex, diners, jcb, unk.
    * If you specify a subscription[gatewayToken], this is required.
    */
-  ccType?: "visa" | "mc" | "disc" | "amex" | "diners" | "jcb" | "unk";
+  ccType?: CCType;
   /**
    * Conditional Numbers only -- last four digits of credit/debit card number.
    * If you specify a subscription[gatewayToken], this is required.
@@ -304,9 +306,30 @@ export type CreateCustomerRequest = {
   remoteAddress?: string;
 };
 
-export type EditCustomerSubscriptionRequest = {
+export type EditCustomerSubscriptionData = {
+  gatewayToken?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  company?: string;
+  notes?: string;
+  taxRate?: number;
+  isTaxExempt?: boolean;
+  taxNumber?: string;
+  firstContactDatetime?: Date;
+  referer?: string;
+  campaignTerm?: string;
+  campaignName?: string;
+  campaignSource?: string;
+  campaignMedium?: string;
+  campaignContent?: string;
+  metaData?: Record<string, string>;
+  subscription?: SubscriptionData;
+  remoteAddress?: string;
+};
+
+export type EditCustomerSubscriptionRequest = EditCustomerSubscriptionData & {
   customerCode: string;
-  [key: string]: string;
 };
 
 export type Charge = {

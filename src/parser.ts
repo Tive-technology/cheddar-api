@@ -6,6 +6,7 @@ import {
   type Customer,
   type CustomersXmlResult,
   type EditCustomerData,
+  type EditCustomerSubscriptionData,
   type GetCustomersRequest,
   type IssueRefundRequest,
   type IssueVoidRequest,
@@ -124,6 +125,86 @@ export function parseCreateCustomerRequest(request: CreateCustomerRequest) {
     params.firstContactDatetime = formatDateYYYY_MM_DD(firstContactDatetime);
   }
 
+  return params;
+}
+
+export function parseCustomerAndSubscriptionData(
+  request: EditCustomerSubscriptionData,
+) {
+  const params = new URLSearchParams();
+  if (request.gatewayToken) {
+    params.set("gatewayToken", request.gatewayToken);
+  }
+  if (request.firstName) {
+    params.set("firstName", request.firstName);
+  }
+  if (request.lastName) {
+    params.set("lastName", request.lastName);
+  }
+  if (request.email) {
+    params.set("email", request.email);
+  }
+  if (request.company) {
+    params.set("company", request.company);
+  }
+  if (request.notes) {
+    params.set("notes", request.notes);
+  }
+  if (request.taxRate !== undefined) {
+    params.set("taxRate", request.taxRate.toString());
+  }
+  if (request.isTaxExempt !== undefined) {
+    params.set("isTaxExempt", request.isTaxExempt ? "1" : "0");
+  }
+  if (request.taxNumber) {
+    params.set("taxNumber", request.taxNumber);
+  }
+  if (request.firstContactDatetime) {
+    params.set(
+      "firstContactDatetime",
+      request.firstContactDatetime.toISOString(),
+    );
+  }
+  if (request.referer) {
+    params.set("referer", request.referer);
+  }
+  if (request.remoteAddress) {
+    params.set("remoteAddress", request.remoteAddress);
+  }
+  if (request.firstContactDatetime) {
+    params.set(
+      "firstContactDatetime",
+      request.firstContactDatetime.toISOString(),
+    );
+  }
+  if (request.campaignContent) {
+    params.set("campaignContent", request.campaignContent);
+  }
+  if (request.campaignMedium) {
+    params.set("campaignMedium", request.campaignMedium);
+  }
+  if (request.campaignName) {
+    params.set("campaignName", request.campaignName);
+  }
+  if (request.campaignSource) {
+    params.set("campaignSource", request.campaignSource);
+  }
+  if (request.campaignTerm) {
+    params.set("campaignTerm", request.campaignTerm);
+  }
+  if (request.metaData) {
+    for (const key in request.metaData) {
+      if (Object.prototype.hasOwnProperty.call(request.metaData, key)) {
+        params.set(`metaData[${key}]`, request.metaData[key]);
+      }
+    }
+  }
+  if (request.subscription) {
+    const parsed = parseSubscriptionData(request.subscription);
+    for (const [key, value] of Object.entries(parsed)) {
+      params.set(key, value);
+    }
+  }
   return params;
 }
 
