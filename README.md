@@ -17,8 +17,8 @@ This module will simplify the process of integrating [Cheddar](https://www.getch
 
 # Installation
 
-```
-npx jsr add @tive/cheddar
+```bash
+npm i @tivetechnology/cheddar-api
 ```
 
 # Basic usage
