@@ -41,7 +41,7 @@ describe("Parser", () => {
     // Assert that the result is an instance of URLSearchParams
     assert.ok(
       result instanceof URLSearchParams,
-      "Result should be a URLSearchParams object"
+      "Result should be a URLSearchParams object",
     );
 
     // Optionally, you can also assert the contents of the URLSearchParams
@@ -64,7 +64,7 @@ describe("Parser", () => {
       assert.deepStrictEqual(
         result.getAll(key).includes(value),
         true,
-        `Parameter ${key} should have value ${value}`
+        `Parameter ${key} should have value ${value}`,
       );
     }
   });
@@ -206,7 +206,7 @@ describe("Parser", () => {
         assert.strictEqual(
           result.getAll(key).includes(value),
           true,
-          `Parameter ${key} should have value ${value}`
+          `Parameter ${key} should have value ${value}`,
         );
       }
     });

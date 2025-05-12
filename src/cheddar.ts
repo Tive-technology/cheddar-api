@@ -20,7 +20,7 @@ import {
   type CreateCustomerRequest,
   type CreateOneTimeInvoiceRequest,
   type Customer,
-  type CustomersXmlParseResult,
+  type CustomersXmlResult,
   type DeleteCustomChargeRequest,
   type EditCustomerRequest,
   type EditCustomerSubscriptionRequest,
@@ -31,9 +31,9 @@ import {
   type ItemQuantityRequest,
   type OutstandingInvoiceRequest,
   type Plan,
-  type PlansXmlParseResult,
+  type PlansXmlResult,
   type Promotion,
-  type PromotionsXmlParseResult,
+  type PromotionsXmlResult,
   type SetItemQuantityRequest,
 } from "./types";
 import { makeAuthHeader } from "./utils";
@@ -98,12 +98,22 @@ export class Cheddar {
   }
 
   /**
-   * Get all pricing plan data from the product
+   * Get all pricing plans
    *
-   * https://docs.getcheddar.com/#get-all-pricing-plans
+   * @example
+   * ```typescript
+   * const cheddar = new Cheddar({...});
+   * const plans = await cheddar.getPlans();
+   * console.log(plans);
+   * ```
+   *
+   * @returns A promise that resolves to an array of {@link Plan} objects
+   * @throws A {@link CheddarError} if the API call fails
+   *
+   * @see https://docs.getcheddar.com/#get-all-pricing-plans
    */
   async getPlans(): Promise<Plan[]> {
-    const parseResult = await this.callApi<PlansXmlParseResult>({
+    const parseResult = await this.callApi<PlansXmlResult>({
       method: "GET",
       path: `plans/get/productCode/${this.productCode}`,
     });
@@ -114,12 +124,27 @@ export class Cheddar {
   }
 
   /**
-   * Get the pricing plan data from the product
+   * Get a Single Pricing Plan
    *
-   * https://docs.getcheddar.com/#get-a-single-pricing-plan
+   * @example
+   * ```typescript
+   * const cheddar = new Cheddar({...});
+   * const plan = await cheddar.getPlan("PLAN_CODE");
+   * if (plan) {
+   *   console.log(plan);
+   * } else {
+   *   console.log("Plan not found.");
+   * }
+   * ```
+   *
+   * @param code - The unique code of the pricing plan to retrieve
+   * @returns A promise that resolves to the {@link Plan} object, or `null` if the plan is not found
+   * @throws A {@link CheddarError} if the API call fails with a non-404 status code
+   *
+   * @see https://docs.getcheddar.com/#get-a-single-pricing-plan
    */
   async getPlan(code: string): Promise<Plan | null> {
-    const parseResult = await this.callApi<PlansXmlParseResult>({
+    const parseResult = await this.callApi<PlansXmlResult>({
       method: "GET",
       path: `plans/get/productCode/${this.productCode}/code/${code}`,
     });
@@ -133,12 +158,26 @@ export class Cheddar {
   }
 
   /**
-   * Get all customer data from the product
+   * Get All Customers
    *
-   * https://docs.getcheddar.com/#get-all-customers
+   * @example
+   * ```typescript
+   * const cheddar = new Cheddar({...});
+   * const request: GetCustomersRequest = {
+   *   search: "test@example.com",
+   * };
+   * const customers = await cheddar.getCustomers(request);
+   * console.log(customers);
+   * ```
+   *
+   * @param request - The search criteria, formatted as a {@link GetCustomersRequest}
+   * @returns A promise that resolves to an array of {@link Customer} objects
+   * @throws A {@link CheddarError} if the API call fails
+   *
+   * @see https://docs.getcheddar.com/#get-all-customers
    */
   async getCustomers(request: GetCustomersRequest): Promise<Customer[]> {
-    const parseResult = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlResult>({
       method: "GET",
       path: `customers/get/productCode/${this.productCode}`,
       searchParams: parseGetCustomersRequest(request),
@@ -153,10 +192,27 @@ export class Cheddar {
   }
 
   /**
-   * Get a Single Customer
+   * Get a single customer
+   *
+   * @example
+   * ```typescript
+   * const cheddar = new Cheddar({...});
+   * const customer = await cheddar.getCustomer("CUSTOMER_CODE");
+   * if (customer) {
+   *   console.log(customer);
+   * } else {
+   *   console.log("Customer not found.");
+   * }
+   * ```
+   *
+   * @param code - The unique code of the customer to retrieve
+   * @returns A promise that resolves to the {@link Customer} object, or `null` if the customer is not found
+   * @throws A {@link CheddarError} if the API call fails
+   *
+   * @see https://docs.getcheddar.com/#get-a-single-customer
    */
   async getCustomer(code: string): Promise<Customer | null> {
-    const parseResult = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlResult>({
       method: "GET",
       path: `customers/get/productCode/${this.productCode}/code/${code}`,
     });
@@ -172,10 +228,38 @@ export class Cheddar {
   /**
    * Create a new customer in the product and subscribe the customer to a pricing plan.
    *
-   * https://docs.getcheddar.com/#create-a-new-customer
+   * @example
+   * ```typescript
+   * const subscriptionData: SubscriptionData = {
+   *   planCode: "PLAN_CODE",
+   *   method: "cc",
+   *   ccNumber: "4111111111111111",
+   *   ccExpiration: "12/2030",
+   *   ccType: "visa",
+   *   ccCardCode: "123",
+   *   ccFirstName: "FName",
+   *   ccLastName: "LName",
+   *   ccZip: "95123",
+   * };
+   *
+   * const cheddar = new Cheddar({...});
+   * const customer = await cheddar.createCustomer({
+   *   code: "CUSTOMER_CODE",
+   *   firstName: "FName",
+   *   lastName: "LName",
+   *   email: "test@example.com",
+   *   subscription: subscriptionData,
+   * });
+   * ```
+   *
+   * @param request - The customer details and subscription data, formatted as a {@link CreateCustomerRequest}
+   * @returns A promise that resolves to the newly created {@link Customer} object
+   * @throws A {@link CheddarError} if the API call fails
+   *
+   * @see https://docs.getcheddar.com/#create-a-new-customer
    */
   async createCustomer(request: CreateCustomerRequest): Promise<Customer> {
-    const parseResult = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlResult>({
       method: "POST",
       path: `customers/new/productCode/${this.productCode}`,
       data: parseCreateCustomerRequest(request),
@@ -189,13 +273,15 @@ export class Cheddar {
   /**
    * Update a Customer and Subscription
    *
-   * https://docs.getcheddar.com/#update-a-customer-and-subscription
+   * @throws A {@link CheddarError} if the API call fails
+   *
+   * @see https://docs.getcheddar.com/#update-a-customer-and-subscription
    */
   async editCustomerAndSubscription(
     request: EditCustomerSubscriptionRequest
-  ): Promise<any> {
+  ): Promise<Customer> {
     const { customerCode, ...data } = request;
-    const parseResult = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlResult>({
       method: "POST",
       path: `customers/edit/productCode/${this.productCode}/code/${customerCode}`,
       data,
@@ -209,11 +295,25 @@ export class Cheddar {
   /**
    * Update a Customer Only
    *
-   * https://docs.getcheddar.com/#update-a-customer-only
+   *
+   * @example
+   * ```typescript
+   * const cheddar = new Cheddar({...});
+   * const customer = await cheddar.editCustomer({
+   *   code: customerCode,
+   *   firstName: "updatedFirstName",
+   * });
+   * ```
+   *
+   * @param request - The customer data to update
+   * @returns The updated {@link Customer}
+   * @throws A {@link CheddarError} if the API call fails
+   *
+   * @see https://docs.getcheddar.com/#update-a-customer-only
    */
   async editCustomer(request: EditCustomerRequest): Promise<Customer> {
     const { code, ...data } = request;
-    const parseResult = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlResult>({
       method: "POST",
       path: `customers/edit-customer/productCode/${this.productCode}/code/${code}`,
       data: parseEditCustomerData(data),
@@ -225,13 +325,37 @@ export class Cheddar {
   }
 
   /**
-   * Update an existing customer's subscription information in the product
+   * Update an existing customer's subscription information in the product.
    *
-   * https://docs.getcheddar.com/#update-a-subscription-only
+   * @example
+   * ```typescript
+   * const subscriptionData: SubscriptionData = {
+   *   planCode: "PLAN_CODE",
+   *   method: "cc",
+   *   ccNumber: "4111111111111111",
+   *   ccExpiration: "12/2030",
+   *   ccType: "visa",
+   *   ccCardCode: "123",
+   *   ccFirstName: "FName",
+   *   ccLastName: "LName",
+   *   ccZip: "95123",
+   * };
+   *
+   * const cheddar = new Cheddar({...});
+   * const customer = await cheddar.editSubscription({
+   *   customerCode: "CUSTOMER_CODE",
+   *   ...subscriptionData,
+   * });
+   * ```
+   *
+   * @param request - The customer & subscription {@link EditSubscriptionRequest}
+   * @throws A {@link CheddarError} if the API call fails
+   *
+   * @see https://docs.getcheddar.com/#update-a-subscription-only
    */
   async editSubscription(request: EditSubscriptionRequest): Promise<Customer> {
     const { customerCode, ...data } = request;
-    const parseResult = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlResult>({
       method: "POST",
       path: `customers/edit-subscription/productCode/${this.productCode}/code/${customerCode}`,
       data: parseSubscriptionData(data),
@@ -245,7 +369,15 @@ export class Cheddar {
   /**
    * Delete an existing customer in the product
    *
-   * https://docs.getcheddar.com/#delete-a-customer
+   * @example
+   * ```typescript
+   * const cheddar = new Cheddar({...});
+   * const customer = await cheddar.deleteCustomer("CUSTOMER_CODE");
+   * ```
+   *
+   * @throws A {@link CheddarError} if the API call fails
+   *
+   * @see https://docs.getcheddar.com/#delete-a-customer
    */
   async deleteCustomer(code: string): Promise<any> {
     const parseResult = await this.callApi({
@@ -264,7 +396,16 @@ export class Cheddar {
    * **Warning** - This will delete all customers and all related data in Cheddar.
    * This method is disabled in production accounts.
    *
-   * https://docs.getcheddar.com/#delete-all-customers
+   * @example
+   * ```typescript
+   * const cheddar = new Cheddar({...});
+   * const timestamp = Math.floor(Date.now() / 1000);
+   * const result = await cheddar.deleteAllCustomers(timestamp);
+   * ```
+   *
+   * @throws A {@link CheddarError} if the API call fails
+   *
+   * @see https://docs.getcheddar.com/#delete-all-customers
    */
   async deleteAllCustomers(unixtimestamp: number): Promise<any> {
     const parseResult = await this.callApi({
@@ -284,10 +425,18 @@ export class Cheddar {
    * If you would like to reactivate a customer's subscription, you may do so by updating
    * the subscription with full credit card data.
    *
-   * http://docs.getcheddar.com/#cancel-a-customer-39-s-subscription
+   * @example
+   * ```typescript
+   * const cheddar = new Cheddar({...});
+   * const customer = await cheddar.cancelSubscription("CUSTOMER_CODE");
+   * ```
+   *
+   * @throws A {@link CheddarError} if the API call fails
+   *
+   * @see http://docs.getcheddar.com/#cancel-a-customer-39-s-subscription
    */
   async cancelSubscription(code: string): Promise<Customer> {
-    const parseResult = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlResult>({
       method: "POST",
       path: `customers/cancel/productCode/${this.productCode}/code/${code}`,
     });
@@ -300,11 +449,23 @@ export class Cheddar {
   /**
    * Increment a customer's current usage of a single item in the product
    *
-   * https://docs.getcheddar.com/#add-item-quantity
+   * @example
+   * ```typescript
+   * const cheddar = new Cheddar({...});
+   * const customer = await cheddar.addItem({
+   *   customerCode: "CUSTOMER_CODE",
+   *   itemCode: "ITEM_CODE",
+   *   quantity: 3,
+   * });
+   * ```
+   *
+   * @throws A {@link CheddarError} if the API call fails
+   *
+   * @see https://docs.getcheddar.com/#add-item-quantity
    */
   async addItem(request: ItemQuantityRequest): Promise<Customer> {
     const { customerCode, itemCode, ...data } = request;
-    const parseResult = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlResult>({
       method: "POST",
       path: `customers/add-item-quantity/productCode/${this.productCode}/code/${customerCode}/itemCode/${itemCode}`,
       data: parseItemQuantityData(data),
@@ -318,11 +479,24 @@ export class Cheddar {
   /**
    * Decrement a customer's current usage of a single item in the product
    *
-   * https://docs.getcheddar.com/#remove-item-quantity
+   *
+   * @example
+   * ```typescript
+   * const cheddar = new Cheddar({...});
+   * const customer = await cheddar.removeItem({
+   *   customerCode: "CUSTOMER_CODE",
+   *   itemCode: "ITEM_CODE",
+   *   quantity: 3,
+   * });
+   * ```
+   *
+   * @throws A {@link CheddarError} if the API call fails
+   *
+   * @see https://docs.getcheddar.com/#remove-item-quantity
    */
   async removeItem(request: ItemQuantityRequest): Promise<Customer> {
     const { customerCode, itemCode, ...data } = request;
-    const parseResult = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlResult>({
       method: "POST",
       path: `customers/remove-item-quantity/productCode/${this.productCode}/code/${customerCode}/itemCode/${itemCode}`,
       data: parseItemQuantityData(data),
@@ -336,11 +510,23 @@ export class Cheddar {
   /**
    * Set a customer's current usage of a single item in the product
    *
-   * https://docs.getcheddar.com/#set-item-quantity
+   * @example
+   * ```typescript
+   * const cheddar = new Cheddar({...});
+   * const customer = await cheddar.setItem({
+   *   customerCode: "CUSTOMER_CODE",
+   *   itemCode: "ITEM_CODE",
+   *   quantity: 3,
+   * });
+   * ```
+   *
+   * @throws A {@link CheddarError} if the API call fails
+   *
+   * @see https://docs.getcheddar.com/#set-item-quantity
    */
   async setItem(request: SetItemQuantityRequest): Promise<Customer> {
     const { customerCode, itemCode, ...data } = request;
-    const parseResult = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlResult>({
       method: "POST",
       path: `customers/set-item-quantity/productCode/${this.productCode}/code/${customerCode}/itemCode/${itemCode}`,
       data: parseSetItemQuantityData(data),
@@ -352,11 +538,29 @@ export class Cheddar {
   }
 
   /**
-   * Add an arbitrary charge or credit to the customer's current invoice in the product
+   * Add an arbitrary charge or credit to the customer's current invoice in the product.
+   * This method requires the {@link AddCustomChargeRequest} containing the charge details.
+   *
+   * @example
+   * ```typescript
+   * const cheddar = new Cheddar({...});
+   * const customer = await cheddar.addCustomCharge({
+   *   customerCode: "CUSTOMER_CODE",
+   *   chargeCode: "CUSTOM",
+   *   quantity: 4,
+   *   eachAmount: 2.25,
+   * });
+   * ```
+   *
+   * @param request - Charge details formatted as a {@link AddCustomChargeRequest}
+   * @returns A promise that resolves to the updated {@link Customer}
+   * @throws A {@link CheddarError} if the API call fails
+   *
+   * @see https://docs.getcheddar.com/#add-a-custom-charge-credit
    */
   async addCustomCharge(request: AddCustomChargeRequest): Promise<Customer> {
     const { customerCode, ...data } = request;
-    const parseResult = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlResult>({
       method: "POST",
       path: `customers/add-charge/productCode/${this.productCode}/code/${customerCode}`,
       data: parseAddCustomChargeData(data),
@@ -368,15 +572,29 @@ export class Cheddar {
   }
 
   /**
-   * Remove a charge or credit from the customer's current invoice in the product
+   * Remove a charge or credit from the customer's current invoice in the product.
+   * This method expects a {@link DeleteCustomChargeRequest} for the request body.
    *
-   * https://docs.getcheddar.com/#delete-a-custom-charge-credit
+   * @example
+   * ```typescript
+   * const cheddar = new Cheddar({...});
+   * const customer = await cheddar.deleteCustomCharge({
+   *   customerCode: "CUSTOMER_CODE",
+   *   chargeId: "CUSTOM",
+   * });
+   * ```
+   *
+   * @param request - Charge information to be deleted, formatted as a {@link DeleteCustomChargeRequest}
+   * @returns A promise that resolves to the updated {@link Customer}
+   * @throws A {@link CheddarError} if the API call fails
+   *
+   * @see https://docs.getcheddar.com/#delete-a-custom-charge-credit
    */
   async deleteCustomCharge(
     request: DeleteCustomChargeRequest
   ): Promise<Customer> {
     const { customerCode, ...data } = request;
-    const parseResult = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlResult>({
       method: "POST",
       path: `customers/delete-charge/productCode/${this.productCode}/code/${customerCode}`,
       data,
@@ -393,7 +611,25 @@ export class Cheddar {
    * Create a parallel one-time invoice and execute the transaction immediately
    * using the customer's current payment method in the product
    *
-   * https://docs.getcheddar.com/#invoice-interactions
+   * @example
+   * ```typescript
+   * const cheddar = new Cheddar({...});
+   * const result = await cheddar.createOneTimeInvoice({
+   *   customerCode: "CUSTOMER_CODE",
+   *   charges: [
+   *     {
+   *       chargeCode: "CODE",
+   *       quantity: 10,
+   *       eachAmount: 2.25,
+   *       description: "In game currency"
+   *     },
+   *   ],
+   * });
+   * ```
+   *
+   * @param request - invoice request {@link CreateOneTimeInvoiceRequest}
+   *
+   * @see https://docs.getcheddar.com/#invoice-interactions
    */
   async createOneTimeInvoice(
     request: CreateOneTimeInvoiceRequest
@@ -413,13 +649,25 @@ export class Cheddar {
   /**
    * Execute an outstanding invoice in the product
    *
-   * https://docs.getcheddar.com/#run-an-outstanding-invoice
+   * @example
+   * ```typescript
+   * const cheddar = new Cheddar({...});
+   * const result = await cheddar.runOutstandingInvoice({
+   *   customerCode: "CUSTOMER_CODE",
+   *   ccCardCode: "123",
+   * });
+   * ```
+   *
+   * @param request - invoice request {@link OutstandingInvoiceRequest}
+   * @throws A {@link CheddarError} if the API call fails
+   *
+   * @see https://docs.getcheddar.com/#run-an-outstanding-invoice
    */
   async runOutstandingInvoice(
     request: OutstandingInvoiceRequest
   ): Promise<Customer> {
     const { customerCode, ...data } = request;
-    const parseResult = await this.callApi<CustomersXmlParseResult>({
+    const parseResult = await this.callApi<CustomersXmlResult>({
       method: "POST",
       path: `customers/run-outstanding/productCode/${this.productCode}/code/${customerCode}`,
       data,
@@ -433,6 +681,20 @@ export class Cheddar {
   /**
    * Issue a Refund
    * Refund a transaction on a billed invoice in the product
+   *
+   * @example
+   * ```typescript
+   * const cheddar = new Cheddar({...});
+   * const result = await cheddar.issueRefund({
+   *   idOrNumber: "INVOICE_ID",
+   *   amount: 75.35,
+   * });
+   * ```
+   *
+   * @param request - refund request {@link IssueRefundRequest}
+   * @throws A {@link CheddarError} if the API call fails
+   *
+   * @see https://docs.getcheddar.com/#issue-a-refund
    */
   async issueRefund(request: IssueRefundRequest): Promise<any> {
     const parseResult = await this.callApi({
@@ -450,7 +712,18 @@ export class Cheddar {
    * Defer to Cheddar to decide if a void or a refund is executed against
    * the invoice in the product
    *
-   * https://docs.getcheddar.com/#issue-a-void
+   * @example
+   * ```typescript
+   * const cheddar = new Cheddar({...});
+   * const result = await cheddar.issueVoid({
+   *   idOrNumber: "INVOICE_ID",
+   * });
+   * ```
+   *
+   * @param request - void request {@link IssueVoidRequest}
+   * @throws A {@link CheddarError} if the API call fails
+   *
+   * @see https://docs.getcheddar.com/#issue-a-void
    */
   async issueVoid(request: IssueVoidRequest): Promise<any> {
     const parseResult = await this.callApi({
@@ -467,7 +740,18 @@ export class Cheddar {
   /**
    * Defer to Cheddar to decide if a void or a refund is executed against the invoice in the product
    *
-   * https://docs.getcheddar.com/#issue-a-void-or-refund
+   * @example
+   * ```typescript
+   * const cheddar = new Cheddar({...});
+   * const result = await cheddar.issueVoidOrRefund({
+   *   idOrNumber: "INVOICE_ID",
+   * });
+   * ```
+   *
+   * @param request - void request {@link IssueVoidRequest}
+   * @throws A {@link CheddarError} if the API call fails
+   *
+   * @see https://docs.getcheddar.com/#issue-a-void-or-refund
    */
   async issueVoidOrRefund(request: IssueVoidRequest): Promise<any> {
     const parseResult = await this.callApi({
@@ -484,7 +768,18 @@ export class Cheddar {
   /**
    * Send (or resend) email notification for the invoice in the product
    *
-   * https://docs.getcheddar.com/#send-or-resend-an-invoice-email
+   * @example
+   * ```typescript
+   * const cheddar = new Cheddar({...});
+   * const result = await cheddar.resendInvoiceEmail({
+   *   idOrNumber: "INVOICE_ID",
+   * });
+   * ```
+   *
+   * @param request - void request {@link IssueVoidRequest}
+   * @throws A {@link CheddarError} if the API call fails
+   *
+   * @see https://docs.getcheddar.com/#send-or-resend-an-invoice-email
    */
   async resendInvoiceEmail(request: IssueVoidRequest): Promise<any> {
     const parseResult = await this.callApi({
@@ -501,10 +796,19 @@ export class Cheddar {
   /**
    * Get all promotion data from the product
    *
-   * https://docs.getcheddar.com/#get-all-promotions
+   * @example
+   * ```typescript
+   * const cheddar = new Cheddar({...});
+   * const promotions = await cheddar.getPromotions();
+   * console.log(promotions);
+   * ```
+   *
+   * @throws A {@link CheddarError} if the API call fails
+   *
+   * @see https://docs.getcheddar.com/#get-all-promotions
    */
   async getPromotions(): Promise<Promotion[]> {
-    const parseResult = await this.callApi<PromotionsXmlParseResult>({
+    const parseResult = await this.callApi<PromotionsXmlResult>({
       method: "GET",
       path: `promotions/get/productCode/${this.productCode}`,
     });
@@ -519,13 +823,28 @@ export class Cheddar {
   }
 
   /**
-   * Get the promotion data from the product with productCode=MY_PRODUCT_CODE
+   * Get the promotion data from the product
    * for the promotion with coupon code=MY_COUPON_CODE
    *
+   * @example
+   * ```typescript
+   * const cheddar = new Cheddar({...});
+   * const promotion = await cheddar.getPromotion("COUPON_CODE")
+   * if (promotion) {
+   *   console.log("Promotion found");
+   * } else {
+   *   console.log("Promotion not found");
+   * }
+   * ```
+   *
    * @param code - coupon code
+   * @returns A promise that resolves to the promotion {@link Promotion}
+   * @throws A {@link CheddarError} if the API call fails
+   *
+   * @see https://docs.getcheddar.com/#get-a-single-promotions
    */
   async getPromotion(code: string): Promise<Promotion | null> {
-    const parseResult = await this.callApi<PromotionsXmlParseResult>({
+    const parseResult = await this.callApi<PromotionsXmlResult>({
       method: "GET",
       path: `promotions/get/productCode/${this.productCode}/code/${code}`,
     });
