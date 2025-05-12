@@ -19,6 +19,6 @@ export function formatDateYYYY_MM_DD(date: Date) {
 
 export function removeEmptyStrings<T extends Record<string, any>>(obj: T): T {
   return Object.fromEntries(
-    Object.entries(obj).filter(([_, value]) => value !== "")
+    Object.entries(obj).filter(([_, value]) => value !== ""),
   ) as T;
 }

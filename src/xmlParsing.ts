@@ -1,5 +1,5 @@
 import { XMLParser } from "fast-xml-parser";
-import { CheddarError, type ErrorType } from "./types";
+import { CheddarError, type ErrorXmlResult } from "./types";
 
 const alwaysArray = [
   "plans.plan",
@@ -36,11 +36,11 @@ export function handleXmlError(text: string): CheddarError {
     return new CheddarError("unknown", 500, "Unknown error");
   }
 
-  const { error } = parseResult<ErrorType>(text);
+  const { error } = parseResult<ErrorXmlResult>(text);
   return new CheddarError(
     error._id,
     Number(error._code),
     error._$text,
-    error._auxCode
+    error._auxCode,
   );
 }

@@ -31,7 +31,7 @@ describe("Cheddar", {}, () => {
         assert.ok(Array.isArray(plans), "plans should be an array");
         assert.ok(
           plans.length >= 1,
-          "plans array should have at least one element"
+          "plans array should have at least one element",
         );
       });
     });
@@ -84,7 +84,7 @@ describe("Cheddar", {}, () => {
         assert.ok(Array.isArray(customers), "customers should be an array");
         assert.ok(
           customers.length >= 1,
-          "customers array should have at least one element"
+          "customers array should have at least one element",
         );
       });
 
@@ -95,7 +95,7 @@ describe("Cheddar", {}, () => {
         assert.ok(Array.isArray(customers), "customers should be an array");
         assert.ok(
           customers.length >= 1,
-          "customers array should have at least one element"
+          "customers array should have at least one element",
         );
       });
     });
@@ -112,8 +112,8 @@ describe("Cheddar", {}, () => {
       });
     });
 
-    describe("#updateCustomer", () => {
-      test("updates and returns customer", async () => {
+    describe("#editCustomer", () => {
+      test("edits and returns customer", async () => {
         const customer = await cheddar.editCustomer({
           code: customerCode,
           firstName: "updatedFirstName",
@@ -152,7 +152,7 @@ describe("Cheddar", {}, () => {
         assert.strictEqual(customer._code, customerCode);
         assert.strictEqual(
           customer.subscriptions![0].plans![0]._code,
-          TEST_PLAN_CODE
+          TEST_PLAN_CODE,
         );
       });
     });
@@ -167,7 +167,7 @@ describe("Cheddar", {}, () => {
           quantity: 3,
         });
         const item = customer.subscriptions![0].invoices![0].charges!.find(
-          (charge) => charge._code === TEST_ITEM_CODE
+          (charge) => charge._code === TEST_ITEM_CODE,
         );
         assert.strictEqual(item!.quantity, 3);
       });
@@ -181,7 +181,7 @@ describe("Cheddar", {}, () => {
           quantity: 3,
         });
         const item = customer.subscriptions![0].invoices![0].charges!.find(
-          (charge) => charge._code === TEST_ITEM_CODE
+          (charge) => charge._code === TEST_ITEM_CODE,
         );
         assert.strictEqual(item!.quantity, 0);
       });
@@ -195,7 +195,7 @@ describe("Cheddar", {}, () => {
           quantity: 8,
         });
         const item = customer.subscriptions![0].invoices![0].charges!.find(
-          (charge) => charge._code === TEST_ITEM_CODE
+          (charge) => charge._code === TEST_ITEM_CODE,
         );
         assert.strictEqual(item!.quantity, 8);
       });
@@ -253,7 +253,7 @@ describe("Cheddar", {}, () => {
       assert.strictEqual(
         typeof customer,
         "object",
-        "customer should be an object"
+        "customer should be an object",
       );
     });
   });

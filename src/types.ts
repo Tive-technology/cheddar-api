@@ -1,6 +1,17 @@
+/**
+ * Error representation of an error returned from Cheddar API
+ *
+ * https://support.getcheddar.com/kb/api-8/error-handling
+ */
 export class CheddarError extends Error {
   readonly id: string;
+  /**
+   * https://support.getcheddar.com/kb/api-8/error-handling#3-the-details
+   */
   readonly code: number;
+  /**
+   * https://support.getcheddar.com/kb/api-8/error-handling#4-the-gory-details
+   */
   readonly auxCode?: string;
 
   constructor(id: string, code: number, message: string, auxCode?: string) {
@@ -12,15 +23,6 @@ export class CheddarError extends Error {
   }
 }
 
-export type ErrorType = {
-  error: {
-    _$text: string;
-    _id: string;
-    _code: number;
-    _auxCode: string;
-  };
-};
-
 // _$text: string;
 // _id: string;
 // _code: string;
@@ -31,6 +33,9 @@ export type CheddarConfig = {
   productCode: string;
 };
 
+/**
+ * https://docs.getcheddar.com/#get-all-customers
+ */
 export type GetCustomersRequest = {
   subscriptionStatus?: "activeOnly" | "canceledOnly";
   /**
@@ -557,10 +562,19 @@ export type EditSubscriptionRequest = SubscriptionData & {
   customerCode: string;
 };
 
+/**
+ * Create a One-Time Invoice
+ *
+ * Create a parallel one-time invoice and execute the transaction immediately
+ * using the customer's current payment method in the product
+ */
 export interface CreateOneTimeInvoiceRequest extends CreateOneTimeInvoiceData {
   customerCode: string;
 }
 
+/**
+ * One time invoice charge for a specific customer with one or more charge items
+ */
 export type CreateOneTimeInvoiceData = {
   /**
    * An array of charges to include in the one-time invoice. Each object in the array represents a single charge.
@@ -621,6 +635,9 @@ export type AddCustomChargeData = {
   remoteAddress?: string;
 };
 
+/**
+ * Remove a charge or credit from the customer's current invoice in the product
+ */
 export interface DeleteCustomChargeRequest extends DeleteCustomChargeData {
   customerCode: string;
 }
@@ -680,50 +697,58 @@ export type ResendInvoiceEmailRequest = {
   idOrNumber: number | string;
 };
 
-/**
- * The Cheddar API returns appropriate HTTP status codes for every request.
- * https://docs.getcheddar.com/#response-codes
- */
-export type CheddarApiStatusCode =
-  | "200" // OK
-  | "400" // Bad Request
-  | "404" // Not Found
-  | "412" // Precondition Failed
-  | "422" // Unprocessable Entity
-  | "500" // Internal Server Error
-  | "502"; // Bad Gateway
-
-interface InvoiceResponse extends Omit<Invoice, "charges" | "transactions"> {
+interface InvoiceXmlResult extends Omit<Invoice, "charges" | "transactions"> {
   charges?: { charge: Charge[] };
   transactions?: { transaction: Transaction[] };
 }
 
-interface PlanResponse extends Omit<Plan, "items"> {
+interface PlanXmlResult extends Omit<Plan, "items"> {
   items?: { item: PlanItem[] };
 }
 
-interface SubscriptionResponse
+interface SubscriptionXmlResult
   extends Omit<Subscription, "plans" | "items" | "invoices"> {
-  plans?: { plan: PlanResponse[] };
+  plans?: { plan: PlanXmlResult[] };
   items?: { item: SubscriptionItem[] };
-  invoices?: { invoice: InvoiceResponse[] };
+  invoices?: { invoice: InvoiceXmlResult[] };
 }
 
-interface CustomerResponse extends Omit<Customer, "subscriptions"> {
-  subscriptions: { subscription: SubscriptionResponse[] };
+interface CustomerXmlResult extends Omit<Customer, "subscriptions"> {
+  subscriptions: { subscription: SubscriptionXmlResult[] };
 }
 
-interface PromotionResponse extends Omit<Promotion, "incentives" | "coupons"> {
+interface PromotionXmlResult extends Omit<Promotion, "incentives" | "coupons"> {
   incentives: { incentive: Incentive[] };
   coupons: { coupon: Coupon[] };
 }
 
-export type CustomersXmlParseResult = {
-  customers: { customer: CustomerResponse[] };
+/**
+ * XML parsed vrersion of customers
+ */
+export type CustomersXmlResult = {
+  customers: { customer: CustomerXmlResult[] };
 };
 
-export type PlansXmlParseResult = { plans: { plan: PlanResponse[] } };
+/**
+ * XML parsed version of plans
+ */
+export type PlansXmlResult = { plans: { plan: PlanXmlResult[] } };
 
-export type PromotionsXmlParseResult = {
-  promotions: { promotion: PromotionResponse[] };
+/**
+ * XML parsed version of promotions
+ */
+export type PromotionsXmlResult = {
+  promotions: { promotion: PromotionXmlResult[] };
+};
+
+/**
+ * XML parsed version of an error
+ */
+export type ErrorXmlResult = {
+  error: {
+    _$text: string;
+    _id: string;
+    _code: number;
+    _auxCode: string;
+  };
 };

@@ -4,7 +4,7 @@ import {
   type CreateCustomerRequest,
   type CreateOneTimeInvoiceData,
   type Customer,
-  type CustomersXmlParseResult,
+  type CustomersXmlResult,
   type EditCustomerData,
   type GetCustomersRequest,
   type IssueRefundRequest,
@@ -12,15 +12,15 @@ import {
   type ItemData,
   type ItemQuantityData,
   type Plan,
-  type PlansXmlParseResult,
+  type PlansXmlResult,
   type Promotion,
-  type PromotionsXmlParseResult,
+  type PromotionsXmlResult,
   type SetItemQuantityData,
   type SubscriptionData,
 } from "./types";
 import { formatDateYYYY_MM_DD, removeEmptyStrings } from "./utils";
 
-export function customersParser(response: CustomersXmlParseResult): Customer[] {
+export function customersParser(response: CustomersXmlResult): Customer[] {
   return response.customers.customer.map((customer) =>
     removeEmptyStrings({
       ...customer,
@@ -31,55 +31,53 @@ export function customersParser(response: CustomersXmlParseResult): Customer[] {
             removeEmptyStrings({
               ...invoice,
               charges: invoice.charges?.charge?.map((charge) =>
-                removeEmptyStrings(charge)
+                removeEmptyStrings(charge),
               ),
               transactions: invoice.transactions?.transaction?.map(
-                (transaction) => removeEmptyStrings(transaction)
+                (transaction) => removeEmptyStrings(transaction),
               ),
-            })
+            }),
           ),
           plans: subscription.plans?.plan.map((plan) =>
             removeEmptyStrings({
               ...plan,
               items: plan.items?.item?.map((item) => removeEmptyStrings(item)),
-            })
+            }),
           ),
           items: subscription.items?.item?.map((item) =>
-            removeEmptyStrings(item)
+            removeEmptyStrings(item),
           ),
-        })
+        }),
       ),
-    })
+    }),
   );
 }
 
-export function plansParser(response: PlansXmlParseResult): Plan[] {
+export function plansParser(response: PlansXmlResult): Plan[] {
   return response.plans.plan.map((plan) =>
     removeEmptyStrings({
       ...plan,
       items: plan.items?.item.map((item) => removeEmptyStrings(item)),
-    })
+    }),
   );
 }
 
-export function promotionsParser(
-  response: PromotionsXmlParseResult
-): Promotion[] {
+export function promotionsParser(response: PromotionsXmlResult): Promotion[] {
   return response.promotions.promotion.map((promotion) =>
     removeEmptyStrings({
       ...promotion,
       incentives: promotion.incentives?.incentive.map((incentive) =>
-        removeEmptyStrings(incentive)
+        removeEmptyStrings(incentive),
       ),
       coupons: promotion.coupons?.coupon.map((coupon) =>
-        removeEmptyStrings(coupon)
+        removeEmptyStrings(coupon),
       ),
-    })
+    }),
   );
 }
 
 export function parseGetCustomersRequest(
-  request: GetCustomersRequest
+  request: GetCustomersRequest,
 ): URLSearchParams {
   const params = new URLSearchParams();
   const dateFields = [
@@ -130,18 +128,18 @@ export function parseCreateCustomerRequest(request: CreateCustomerRequest) {
 }
 
 export function parseSubscriptionData(
-  subscription: SubscriptionData
+  subscription: SubscriptionData,
 ): Record<string, string> {
   return Object.fromEntries(
     Object.entries(subscription).map(([key, value]) => [
       `subscription[${key}]`,
       value instanceof Date ? value.toISOString() : value,
-    ])
+    ]),
   );
 }
 
 export function parseItemQuantityData(
-  data: ItemQuantityData
+  data: ItemQuantityData,
 ): Record<string, string> {
   const result: Record<string, string> = {};
   if (data.quantity) {
@@ -154,7 +152,7 @@ export function parseItemQuantityData(
 }
 
 export function parseSetItemQuantityData(
-  data: SetItemQuantityData
+  data: SetItemQuantityData,
 ): Record<string, string> {
   const result: Record<string, string> = {};
   if (data.quantity) {
@@ -227,7 +225,7 @@ export function parseEditCustomerData(data: EditCustomerData): URLSearchParams {
 }
 
 export function parseAddCustomChargeData(
-  data: AddCustomChargeData
+  data: AddCustomChargeData,
 ): Record<string, string> {
   const params: Record<string, string> = {};
   params.chargeCode = data.chargeCode;
@@ -246,7 +244,7 @@ export function parseAddCustomChargeData(
 }
 
 export function parseCreateOneTimeInvoiceData(
-  data: CreateOneTimeInvoiceData
+  data: CreateOneTimeInvoiceData,
 ): Record<string, string> {
   const params: Record<string, string> = {};
   if (data.charges && data.charges.length > 0) {
@@ -266,7 +264,7 @@ export function parseCreateOneTimeInvoiceData(
 }
 
 export function parseIssueVoidRequest(
-  request: IssueVoidRequest
+  request: IssueVoidRequest,
 ): Record<string, string> {
   const params: Record<string, string> = {};
 
@@ -284,7 +282,7 @@ export function parseIssueVoidRequest(
 }
 
 export function parseIssueRefundRequest(
-  request: IssueRefundRequest
+  request: IssueRefundRequest,
 ): Record<string, string> {
   const params: Record<string, string> = parseIssueVoidRequest(request);
 
@@ -294,26 +292,32 @@ export function parseIssueRefundRequest(
 }
 
 function parseChargesData(charges: ChargeData[]): Record<string, string> {
-  return charges.reduce((combinedCharges, charge) => {
-    for (const key in charge) {
-      const value = charge[key as keyof ChargeData];
-      if (value) {
-        combinedCharges[`charges[${charge.chargeCode}][${key}]`] =
-          String(value);
+  return charges.reduce(
+    (combinedCharges, charge) => {
+      for (const key in charge) {
+        const value = charge[key as keyof ChargeData];
+        if (value) {
+          combinedCharges[`charges[${charge.chargeCode}][${key}]`] =
+            String(value);
+        }
       }
-    }
-    return combinedCharges;
-  }, {} as Record<string, string>);
+      return combinedCharges;
+    },
+    {} as Record<string, string>,
+  );
 }
 
 function parseItemsData(items: ItemData[]): Record<string, string> {
-  return items.reduce((combinedItems, items) => {
-    for (const key in items) {
-      const value = items[key as keyof ItemData];
-      if (value) {
-        combinedItems[`items[${items.itemCode}][${key}]`] = String(value);
+  return items.reduce(
+    (combinedItems, items) => {
+      for (const key in items) {
+        const value = items[key as keyof ItemData];
+        if (value) {
+          combinedItems[`items[${items.itemCode}][${key}]`] = String(value);
+        }
       }
-    }
-    return combinedItems;
-  }, {} as Record<string, string>);
+      return combinedItems;
+    },
+    {} as Record<string, string>,
+  );
 }
