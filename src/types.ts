@@ -1,9 +1,15 @@
 /**
  * Error representation of an error returned from Cheddar API
  *
- * https://support.getcheddar.com/kb/api-8/error-handling
+ * @example
+ * ```xml
+ * <error id="73542" code="404" auxCode="">Customer not found</error>
+ * ```
+ *
+ * @see https://support.getcheddar.com/kb/api-8/error-handling
  */
 export class CheddarError extends Error {
+  override name = "CheddarError";
   readonly id: string;
   /**
    * https://support.getcheddar.com/kb/api-8/error-handling#3-the-details
@@ -16,17 +22,13 @@ export class CheddarError extends Error {
 
   constructor(id: string, code: number, message: string, auxCode?: string) {
     super(message);
-    this.name = "CheddarError";
+    Object.setPrototypeOf(this, CheddarError.prototype);
     this.id = id;
     this.code = code;
     this.auxCode = auxCode;
   }
 }
 
-// _$text: string;
-// _id: string;
-// _code: string;
-// _auxCode: string;
 export type CheddarConfig = {
   username: string;
   password: string;
@@ -34,7 +36,7 @@ export type CheddarConfig = {
 };
 
 /**
- * https://docs.getcheddar.com/#get-all-customers
+ * @see https://docs.getcheddar.com/#get-all-customers
  */
 export type GetCustomersRequest = {
   subscriptionStatus?: "activeOnly" | "canceledOnly";
@@ -63,18 +65,48 @@ export type GetCustomersRequest = {
   search?: string;
 };
 
-type CCType = "visa" | "mc" | "disc" | "amex" | "diners" | "jcb" | "unk";
+export type PaymentMethod = "cc" | "paypal";
 
-export type CustomerData = {
-  code: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  subscription?: SubscriptionData;
-  [key: string]: any;
-};
+export type CCType = "visa" | "mc" | "disc" | "amex" | "diners" | "jcb" | "unk";
 
-export type ItemQuantityData = {
+/**
+ * All API requests should include the client IP address if possible.
+ * If not provided, the IP of the machine making the request will be used.
+ * This value is used for rate limiting, fraud protection, etc.
+ *
+ * To prevent the same fraudster from attempting to signup for your service
+ * over and over and over again with different credit card numbers, you'll
+ * need to provide the IP address with the request.
+ */
+interface RemoteAddress {
+  /**
+   * Client IPv4 address.
+   * @format ipv4
+   * @see https://docs.getcheddar.com/#fraud-protection-rate-limiting
+   */
+  remoteAddress?: string;
+}
+
+/**
+ * User-defined metadata.
+ *
+ * @see https://support.getcheddar.com/kb/api-8/customer-meta-data
+ */
+interface MetaData {
+  /**
+   * We recognize the need for this meta data feature in a billing capacity.
+   * Please be reasonable in your use of the feature.
+   * If Cheddar staff determines that the feature is being abused,
+   * you may be asked to scale back your use of the feature or your account
+   * may be canceled per the subscription agreement.
+   */
+  metaData?: Record<string, any>;
+}
+
+/**
+ * The item quantity of a specific tracked item to be set
+ */
+export interface ItemQuantityData extends RemoteAddress {
   /**
    * The positive amount accurate to up to 4 decimal places (if other that 1.0000)
    * that you wish to add/remove to the current usage for this item.
@@ -82,11 +114,7 @@ export type ItemQuantityData = {
    * Quantity is only required if you wish to add/remove more than one to the current usage amount.
    */
   quantity?: number;
-  /**
-   * Client IPv4 address
-   */
-  remoteAddress?: string;
-};
+}
 
 export interface SetItemQuantityData extends ItemQuantityData {
   invoicePeriod?: InvoicePeriod;
@@ -97,11 +125,17 @@ export interface ItemQuantityRequest extends ItemQuantityData {
   itemCode: string;
 }
 
+/**
+ * Set the item quantity of a specific tracked item
+ */
 export interface SetItemQuantityRequest extends SetItemQuantityData {
   customerCode: string;
   itemCode: string;
 }
 
+/**
+ * Data for creating or editing a customer subscription
+ */
 export type SubscriptionData = {
   planCode: string;
   /**
@@ -115,7 +149,7 @@ export type SubscriptionData = {
   /**
    * "cc" (default) or "paypal"
    */
-  method?: "cc" | "paypal";
+  method?: PaymentMethod;
   /**
    * Conditional (See Notes) Numbers only -- a valid credit/debit card number
    */
@@ -215,7 +249,7 @@ export type ItemData = {
   quantity?: number;
 };
 
-export type CreateCustomerRequest = {
+export interface CreateCustomerRequest extends MetaData, RemoteAddress {
   /**
    * Your code for this customer. Limited to 255 characters.
    */
@@ -291,22 +325,14 @@ export type CreateCustomerRequest = {
    */
   campaignContent?: string;
   /**
-   * See the KB Article about customer metadata
-   */
-  metaData?: Record<string, any>;
-  /**
    * Your code for the subscribed pricing plan.
    */
   subscription?: SubscriptionData;
   charges?: ChargeData[];
   items?: ItemData[];
-  /**
-   * Client IPv4 address
-   */
-  remoteAddress?: string;
-};
+}
 
-export type EditCustomerSubscriptionData = {
+export interface EditCustomerSubscriptionData extends MetaData, RemoteAddress {
   gatewayToken?: string;
   firstName?: string;
   lastName?: string;
@@ -323,14 +349,13 @@ export type EditCustomerSubscriptionData = {
   campaignSource?: string;
   campaignMedium?: string;
   campaignContent?: string;
-  metaData?: Record<string, string>;
   subscription?: SubscriptionData;
-  remoteAddress?: string;
-};
+}
 
-export type EditCustomerSubscriptionRequest = EditCustomerSubscriptionData & {
+export interface EditCustomerSubscriptionRequest
+  extends EditCustomerSubscriptionData {
   customerCode: string;
-};
+}
 
 export type Charge = {
   _id: string;
@@ -393,6 +418,11 @@ export type PlanItem = {
   createdDatetime: string;
 };
 
+/**
+ * Cheddar's pricing plan
+ *
+ * @see https://support.getcheddar.com/kb/pricing-plans/pricing-plan-basics
+ */
 export type Plan = {
   _id: string;
   _code: string;
@@ -441,7 +471,7 @@ export type Subscription = {
   invoices?: Invoice[];
 };
 
-export type Customer = {
+export interface Customer extends MetaData {
   _id: string;
   _code: string;
   firstName: string;
@@ -462,18 +492,26 @@ export type Customer = {
   campaignName?: string;
   createdDatetime: string;
   modifiedDatetime: string;
-  metaData?: string;
   subscriptions?: Subscription[];
-};
+}
 
 /**
- * https://docs.getcheddar.com/#current-vs-outstanding-invoice
+ * @see https://docs.getcheddar.com/#current-vs-outstanding-invoice
  */
 export type InvoicePeriod = "current" | "outstanding";
 
+/**
+ * @see https://support.getcheddar.com/kb/pricing-plans/promotions
+ */
 export type Promotion = {
   _id: string;
+  /**
+   * Name - Less than 30 characters here.
+   */
   name: string;
+  /**
+   * Less than 255 characters here.
+   */
   description: string;
   createdDatetime: string;
   incentives?: Incentive[];
@@ -500,7 +538,7 @@ export interface EditCustomerRequest extends EditCustomerData {
   code: string;
 }
 
-export type EditCustomerData = {
+export interface EditCustomerData extends MetaData, RemoteAddress {
   /**
    * Limited to 20 characters.
    */
@@ -570,20 +608,11 @@ export type EditCustomerData = {
    * @maxLength 255
    */
   campaignContent?: string;
-  /**
-   * User-defined metadata.
-   */
-  metaData?: Record<string, any>;
-  /**
-   * Client IPv4 address.
-   * @format ipv4
-   */
-  remoteAddress?: string;
-};
+}
 
-export type EditSubscriptionRequest = SubscriptionData & {
+export interface EditSubscriptionRequest extends SubscriptionData {
   customerCode: string;
-};
+}
 
 /**
  * Create a One-Time Invoice
@@ -598,7 +627,7 @@ export interface CreateOneTimeInvoiceRequest extends CreateOneTimeInvoiceData {
 /**
  * One time invoice charge for a specific customer with one or more charge items
  */
-export type CreateOneTimeInvoiceData = {
+export interface CreateOneTimeInvoiceData extends RemoteAddress {
   /**
    * An array of charges to include in the one-time invoice. Each object in the array represents a single charge.
    */
@@ -621,17 +650,18 @@ export type CreateOneTimeInvoiceData = {
      */
     description?: string;
   }[];
-  /**
-   * Client IPv4 address.
-   */
-  remoteAddress?: string;
-};
+}
 
 export interface AddCustomChargeRequest extends AddCustomChargeData {
   customerCode: string;
 }
 
-export type AddCustomChargeData = {
+/**
+ * Add a Custom Charge/Credit
+ *
+ * Add an arbitrary charge or credit to the customer's current invoice in the product
+ */
+export interface AddCustomChargeData extends RemoteAddress {
   /**
    * Your code for this charge. Limited to 36 characters.
    */
@@ -652,11 +682,7 @@ export type AddCustomChargeData = {
    * The billing period - 'current' (the default) or 'outstanding'.
    */
   invoicePeriod?: InvoicePeriod;
-  /**
-   * Client IPv4 address.
-   */
-  remoteAddress?: string;
-};
+}
 
 /**
  * Remove a charge or credit from the customer's current invoice in the product
@@ -665,7 +691,7 @@ export interface DeleteCustomChargeRequest extends DeleteCustomChargeData {
   customerCode: string;
 }
 
-export type DeleteCustomChargeData = {
+export interface DeleteCustomChargeData extends RemoteAddress {
   /**
    * Cheddar's ID for the charge/credit
    */
@@ -674,37 +700,25 @@ export type DeleteCustomChargeData = {
    * The billing period - 'current' (the default) or 'outstanding'. See below.
    */
   invoicePeriod?: InvoicePeriod;
-  /**
-   * Client IPv4 address
-   */
-  remoteAddress?: string;
-};
+}
 
 export interface OutstandingInvoiceRequest extends OutstandingInvoiceData {
   customerCode: string;
 }
 
-export type OutstandingInvoiceData = {
+export interface OutstandingInvoiceData extends RemoteAddress {
   /**
    * 3-4 digits - The Card Verification Value (CCV).
    */
   ccCardCode?: string;
-  /**
-   * Client IPv4 address
-   */
-  remoteAddress?: string;
-};
+}
 
-export type IssueVoidRequest = {
+export interface IssueVoidRequest extends RemoteAddress {
   /**
    * Either Cheddar's ID for the invoice or the Cheddar-generated invoice number
    */
   idOrNumber: number | string;
-  /**
-   * 	Client IPv4 address
-   */
-  remoteAddress?: string;
-};
+}
 
 export interface IssueRefundRequest extends IssueVoidRequest {
   /**
@@ -745,27 +759,24 @@ interface PromotionXmlResult extends Omit<Promotion, "incentives" | "coupons"> {
   coupons: { coupon: Coupon[] };
 }
 
-/**
- * XML parsed vrersion of customers
- */
 export type CustomersXmlResult = {
   customers: { customer: CustomerXmlResult[] };
 };
 
-/**
- * XML parsed version of plans
- */
 export type PlansXmlResult = { plans: { plan: PlanXmlResult[] } };
 
-/**
- * XML parsed version of promotions
- */
 export type PromotionsXmlResult = {
   promotions: { promotion: PromotionXmlResult[] };
 };
 
 /**
- * XML parsed version of an error
+ * Parse Cheddar error xml
+ *
+ * @example
+ * ```xml
+ * <?xml version="1.0" encoding="UTF-8"?>
+ * <error id="73542" code="404" auxCode="">Customer not found</error>
+ * ```
  */
 export type ErrorXmlResult = {
   error: {
