@@ -322,17 +322,17 @@ export function parseCreateOneTimeInvoiceData(
 
 export function parseIssueVoidRequest(
   request: IssueVoidRequest,
-): Record<string, string> {
-  const params: Record<string, string> = {};
+): URLSearchParams {
+  const params = new URLSearchParams();
 
   if (typeof request.idOrNumber === "number") {
-    params.id = request.idOrNumber.toString();
+    params.set("id", request.idOrNumber.toString());
   } else {
-    params.number = request.idOrNumber;
+    params.set("number", request.idOrNumber);
   }
 
   if (request.remoteAddress) {
-    params.remoteAddress = request.remoteAddress;
+    params.set("remoteAddress", request.remoteAddress);
   }
 
   return params;
@@ -340,11 +340,9 @@ export function parseIssueVoidRequest(
 
 export function parseIssueRefundRequest(
   request: IssueRefundRequest,
-): Record<string, string> {
-  const params: Record<string, string> = parseIssueVoidRequest(request);
-
-  params.amount = request.amount.toString();
-
+): URLSearchParams {
+  const params = parseIssueVoidRequest(request);
+  params.set("amount", request.amount.toString());
   return params;
 }
 

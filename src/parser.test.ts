@@ -40,34 +40,22 @@ describe("Parser", () => {
     };
     const result = parseGetCustomersRequest(request);
 
-    // Assert that the result is an instance of URLSearchParams
-    assert.ok(
-      result instanceof URLSearchParams,
-      "Result should be a URLSearchParams object",
-    );
+    const expected = new URLSearchParams();
+    expected.set("subscriptionStatus", "activeOnly");
+    expected.append("planCode", "PLAN_1");
+    expected.append("planCode", "PLAN_2");
+    expected.set("createdBeforeDate", "2023-11-05");
+    expected.set("createdAfterDate", "2023-10-05");
+    expected.set("canceledBeforeDate", "2023-11-05");
+    expected.set("canceledAfterDate", "2023-10-05");
+    expected.set("transactedBeforeDate", "2023-11-05");
+    expected.set("transactedAfterDate", "2023-10-05");
+    expected.set("orderBy", "name");
+    expected.set("orderByDirection", "desc");
+    expected.set("search", "john");
 
-    // Optionally, you can also assert the contents of the URLSearchParams
-    const expectedParams = new URLSearchParams();
-    expectedParams.set("subscriptionStatus", "activeOnly");
-    expectedParams.append("planCode", "PLAN_1");
-    expectedParams.append("planCode", "PLAN_2");
-    expectedParams.set("createdBeforeDate", "2023-11-05");
-    expectedParams.set("createdAfterDate", "2023-10-05");
-    expectedParams.set("canceledBeforeDate", "2023-11-05");
-    expectedParams.set("canceledAfterDate", "2023-10-05");
-    expectedParams.set("transactedBeforeDate", "2023-11-05");
-    expectedParams.set("transactedAfterDate", "2023-10-05");
-    expectedParams.set("orderBy", "name");
-    expectedParams.set("orderByDirection", "desc");
-    expectedParams.set("search", "john");
-
-    // Iterate through the expected parameters and ensure they exist in the result
-    for (const [key, value] of expectedParams.entries()) {
-      assert.deepStrictEqual(
-        result.getAll(key).includes(value),
-        true,
-        `Parameter ${key} should have value ${value}`,
-      );
+    for (const [key] of expected.entries()) {
+      assert.strictEqual(expected[key], result[key]);
     }
   });
 
@@ -610,11 +598,15 @@ describe("Parser", () => {
         idOrNumber: 12345,
         amount: 10.0,
       };
-      const expected: Record<string, string> = {
+      const result = parseIssueRefundRequest(request);
+      const expected = new URLSearchParams({
         id: "12345",
         amount: "10",
-      };
-      assert.deepStrictEqual(parseIssueRefundRequest(request), expected);
+      });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("should parse request with invoice number", () => {
@@ -622,11 +614,15 @@ describe("Parser", () => {
         idOrNumber: "INV-001",
         amount: 25.5,
       };
-      const expected: Record<string, string> = {
+      const result = parseIssueRefundRequest(request);
+      const expected = new URLSearchParams({
         number: "INV-001",
         amount: "25.5",
-      };
-      assert.deepStrictEqual(parseIssueRefundRequest(request), expected);
+      });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("should parse request with remoteAddress", () => {
@@ -635,12 +631,16 @@ describe("Parser", () => {
         amount: 5.0,
         remoteAddress: "192.168.1.10",
       };
-      const expected: Record<string, string> = {
+      const result = parseIssueRefundRequest(request);
+      const expected = new URLSearchParams({
         id: "67890",
         amount: "5",
         remoteAddress: "192.168.1.10",
-      };
-      assert.deepStrictEqual(parseIssueRefundRequest(request), expected);
+      });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("should handle zero amount", () => {
@@ -648,11 +648,15 @@ describe("Parser", () => {
         idOrNumber: "INV-002",
         amount: 0,
       };
-      const expected: Record<string, string> = {
+      const result = parseIssueRefundRequest(request);
+      const expected = new URLSearchParams({
         number: "INV-002",
         amount: "0",
-      };
-      assert.deepStrictEqual(parseIssueRefundRequest(request), expected);
+      });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
   });
 });
