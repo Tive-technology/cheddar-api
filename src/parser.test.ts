@@ -79,12 +79,17 @@ describe("Parser", () => {
         lastName: "lastName",
         email: "test@gmail.com",
       };
-      assert.deepStrictEqual(parseCreateCustomerRequest(request), {
+      const result = parseCreateCustomerRequest(request);
+      const expected = new URLSearchParams({
         code: "CUSTOMER_CODE",
         firstName: "firstName",
         lastName: "lastName",
         email: "test@gmail.com",
       });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("create request + metadata", (t) => {
@@ -101,7 +106,8 @@ describe("Parser", () => {
           },
         },
       };
-      assert.deepStrictEqual(parseCreateCustomerRequest(request), {
+      const result = parseCreateCustomerRequest(request);
+      const expected = new URLSearchParams({
         code: "CUSTOMER_CODE",
         firstName: "firstName",
         lastName: "lastName",
@@ -110,6 +116,10 @@ describe("Parser", () => {
         "metaData[meta3]": "whatever3",
         "metaData[subarray][meta3]": "whatever3",
       });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("create request with subscription + cc", (t) => {
@@ -132,7 +142,8 @@ describe("Parser", () => {
           ccZip: "95123",
         },
       };
-      assert.deepStrictEqual(parseCreateCustomerRequest(request), {
+      const result = parseCreateCustomerRequest(request);
+      const expected = new URLSearchParams({
         code: "CUSTOMER_CODE",
         firstName: "firstName",
         lastName: "lastName",
@@ -149,6 +160,10 @@ describe("Parser", () => {
         "subscription[ccLastName]": "LName",
         "subscription[ccZip]": "95123",
       });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("create request with subscription + gatewayToken", (t) => {
@@ -168,7 +183,8 @@ describe("Parser", () => {
           initialBillDate: new Date("2011-08-01T15:30:00Z"),
         },
       };
-      assert.deepStrictEqual(parseCreateCustomerRequest(request), {
+      const result = parseCreateCustomerRequest(request);
+      const expected = new URLSearchParams({
         code: "CUSTOMER_CODE",
         firstName: "firstName",
         lastName: "lastName",
@@ -182,6 +198,10 @@ describe("Parser", () => {
         "subscription[ccCompany]": "VISA",
         "subscription[initialBillDate]": "2011-08-01T15:30:00.000Z",
       });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
   });
 

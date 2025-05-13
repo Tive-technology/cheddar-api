@@ -111,7 +111,9 @@ export function parseGetCustomersRequest(
   return params;
 }
 
-export function parseCreateCustomerRequest(request: CreateCustomerRequest) {
+export function parseCreateCustomerRequest(
+  request: CreateCustomerRequest,
+): URLSearchParams {
   const {
     firstContactDatetime,
     subscription,
@@ -120,17 +122,51 @@ export function parseCreateCustomerRequest(request: CreateCustomerRequest) {
     metaData,
     ...data
   } = request;
-  const params: Record<string, any> = {
-    ...data,
-    ...(subscription && parseSubscriptionData(subscription)),
-    ...(charges && parseChargesData(charges)),
-    ...(items && parseItemsData(items)),
-  };
-  if (metaData) {
-    flattenMetaData(metaData, "metaData", params);
+
+  const params = new URLSearchParams();
+
+  // Add basic fields
+  for (const [key, value] of Object.entries(data)) {
+    if (value !== undefined && value !== null) {
+      params.set(key, String(value));
+    }
   }
+
+  // Add subscription data
+  if (subscription) {
+    const subParams = parseSubscriptionData(subscription);
+    for (const [key, value] of Object.entries(subParams)) {
+      params.set(key, value);
+    }
+  }
+
+  // Add charges
+  if (charges) {
+    const chargeParams = parseChargesData(charges);
+    for (const [key, value] of Object.entries(chargeParams)) {
+      params.set(key, value);
+    }
+  }
+
+  // Add items
+  if (items) {
+    const itemParams = parseItemsData(items);
+    for (const [key, value] of Object.entries(itemParams)) {
+      params.set(key, value);
+    }
+  }
+
+  // Add metadata
+  if (metaData) {
+    flattenMetaDataUrlParams(params, "metaData", metaData);
+  }
+
+  // Add firstContactDatetime
   if (firstContactDatetime) {
-    params.firstContactDatetime = formatDateYYYY_MM_DD(firstContactDatetime);
+    params.set(
+      "firstContactDatetime",
+      formatDateYYYY_MM_DD(firstContactDatetime),
+    );
   }
 
   return params;
@@ -138,7 +174,7 @@ export function parseCreateCustomerRequest(request: CreateCustomerRequest) {
 
 export function parseCustomerAndSubscriptionData(
   request: EditCustomerSubscriptionData,
-) {
+): URLSearchParams {
   const baseFields = [
     "gatewayToken",
     "firstName",
@@ -180,17 +216,6 @@ export function parseCustomerAndSubscriptionData(
   }
 
   return params;
-}
-
-export function parseSubscriptionData(
-  subscription: SubscriptionData,
-): Record<string, string> {
-  return Object.fromEntries(
-    Object.entries(subscription).map(([key, value]) => [
-      `subscription[${key}]`,
-      value instanceof Date ? value.toISOString() : value,
-    ]),
-  );
 }
 
 export function parseItemQuantityData(data: ItemQuantityData): URLSearchParams {
@@ -320,6 +345,17 @@ export function parseIssueRefundRequest(
   params.amount = request.amount.toString();
 
   return params;
+}
+
+function parseSubscriptionData(
+  subscription: SubscriptionData,
+): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(subscription).map(([key, value]) => [
+      `subscription[${key}]`,
+      value instanceof Date ? value.toISOString() : value,
+    ]),
+  );
 }
 
 function parseChargesData(charges: ChargeData[]): Record<string, string> {
