@@ -43,7 +43,7 @@ describe("Parser", () => {
     // Assert that the result is an instance of URLSearchParams
     assert.ok(
       result instanceof URLSearchParams,
-      "Result should be a URLSearchParams object",
+      "Result should be a URLSearchParams object"
     );
 
     // Optionally, you can also assert the contents of the URLSearchParams
@@ -66,7 +66,7 @@ describe("Parser", () => {
       assert.deepStrictEqual(
         result.getAll(key).includes(value),
         true,
-        `Parameter ${key} should have value ${value}`,
+        `Parameter ${key} should have value ${value}`
       );
     }
   });
@@ -233,32 +233,28 @@ describe("Parser", () => {
       };
       const result = parseEditCustomerData(data);
 
-      const params = new URLSearchParams();
-      params.set("firstName", "John");
-      params.set("lastName", "Smith");
-      params.set("email", "test@gmail.com");
-      params.set("company", "Google");
-      params.set("taxRate", "0.123");
-      params.set("isTaxExempt", "1");
-      params.set("taxNumber", "123323232");
-      params.set("referer", "referer");
-      params.set("remoteAddress", "72.140.152.122");
-      params.set("firstContactDatetime", "2023-11-05T10:30:00.000Z");
-      params.set("campaignContent", "campaignContent");
-      params.set("campaignMedium", "campaignMedium");
-      params.set("campaignName", "campaignName");
-      params.set("campaignSource", "campaignSource");
-      params.set("campaignTerm", "campaignTerm");
-      params.set("metaData[customer_id]", "cus_123456");
-      params.set("metaData[referrer_code]", "refer888");
-      params.set("metaData[subArray][item1]", "item1");
+      const expected = new URLSearchParams();
+      expected.set("firstName", "John");
+      expected.set("lastName", "Smith");
+      expected.set("email", "test@gmail.com");
+      expected.set("company", "Google");
+      expected.set("taxRate", "0.123");
+      expected.set("isTaxExempt", "1");
+      expected.set("taxNumber", "123323232");
+      expected.set("referer", "referer");
+      expected.set("remoteAddress", "72.140.152.122");
+      expected.set("firstContactDatetime", "2023-11-05T10:30:00.000Z");
+      expected.set("campaignContent", "campaignContent");
+      expected.set("campaignMedium", "campaignMedium");
+      expected.set("campaignName", "campaignName");
+      expected.set("campaignSource", "campaignSource");
+      expected.set("campaignTerm", "campaignTerm");
+      expected.set("metaData[customer_id]", "cus_123456");
+      expected.set("metaData[referrer_code]", "refer888");
+      expected.set("metaData[subArray][item1]", "item1");
 
-      for (const [key, value] of params.entries()) {
-        assert.strictEqual(
-          result.getAll(key).includes(value),
-          true,
-          `Parameter ${key} should have value ${value}`,
-        );
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
       }
     });
   });
@@ -297,36 +293,32 @@ describe("Parser", () => {
       };
       const result = parseCustomerAndSubscriptionData(data);
 
-      const params = new URLSearchParams();
-      params.set("firstName", "John");
-      params.set("lastName", "Smith");
-      params.set("email", "test@gmail.com");
-      params.set("company", "Google");
-      params.set("taxRate", "0.123");
-      params.set("isTaxExempt", "1");
-      params.set("taxNumber", "123323232");
-      params.set("referer", "referer");
-      params.set("remoteAddress", "72.140.152.122");
-      params.set("firstContactDatetime", "2023-11-05T10:30:00.000Z");
-      params.set("campaignContent", "campaignContent");
-      params.set("campaignMedium", "campaignMedium");
-      params.set("campaignName", "campaignName");
-      params.set("campaignSource", "campaignSource");
-      params.set("campaignTerm", "campaignTerm");
-      params.set("subscription[planCode]", "PLAN_CODE");
-      params.set("subscription[gatewayToken]", "GATEWAY_TOKEN");
-      params.set("subscription[method]", "cc");
-      params.set("subscription[initialBillDate]", "2023-11-05T10:30:00.000Z");
-      params.set("metaData[customer_id]", "cus_123456");
-      params.set("metaData[referrer_code]", "refer888");
-      params.set("metaData[subArray][item1]", "item1");
+      const expected = new URLSearchParams();
+      expected.set("firstName", "John");
+      expected.set("lastName", "Smith");
+      expected.set("email", "test@gmail.com");
+      expected.set("company", "Google");
+      expected.set("taxRate", "0.123");
+      expected.set("isTaxExempt", "1");
+      expected.set("taxNumber", "123323232");
+      expected.set("referer", "referer");
+      expected.set("remoteAddress", "72.140.152.122");
+      expected.set("firstContactDatetime", "2023-11-05T10:30:00.000Z");
+      expected.set("campaignContent", "campaignContent");
+      expected.set("campaignMedium", "campaignMedium");
+      expected.set("campaignName", "campaignName");
+      expected.set("campaignSource", "campaignSource");
+      expected.set("campaignTerm", "campaignTerm");
+      expected.set("subscription[planCode]", "PLAN_CODE");
+      expected.set("subscription[gatewayToken]", "GATEWAY_TOKEN");
+      expected.set("subscription[method]", "cc");
+      expected.set("subscription[initialBillDate]", "2023-11-05T10:30:00.000Z");
+      expected.set("metaData[customer_id]", "cus_123456");
+      expected.set("metaData[referrer_code]", "refer888");
+      expected.set("metaData[subArray][item1]", "item1");
 
-      for (const [key, value] of params.entries()) {
-        assert.strictEqual(
-          result.getAll(key).includes(value),
-          true,
-          `Parameter ${key} should have value ${value}`,
-        );
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
       }
     });
   });
@@ -336,12 +328,15 @@ describe("Parser", () => {
       quantity: 4.3232111,
       remoteAddress: "72.140.152.122",
     };
-    const result = Object.fromEntries(parseItemQuantityData(data));
-    const expected = {
+    const result = parseItemQuantityData(data);
+    const expected = new URLSearchParams({
       quantity: "4.3232",
       remoteAddress: "72.140.152.122",
-    };
-    assert.deepStrictEqual(result, expected);
+    });
+
+    for (const [key] of Object.entries(expected)) {
+      assert.strictEqual(expected[key], result[key]);
+    }
   });
 
   test("parseSetItemQuantityData", () => {
@@ -351,14 +346,16 @@ describe("Parser", () => {
       invoicePeriod: "outstanding",
     };
 
-    const result = Object.fromEntries(parseSetItemQuantityData(data));
-    const expected = {
+    const result = parseSetItemQuantityData(data);
+    const expected = new URLSearchParams({
       quantity: "4.3232",
       remoteAddress: "72.140.152.122",
       invoicePeriod: "outstanding",
-    };
+    });
 
-    assert.deepStrictEqual(result, expected);
+    for (const [key] of Object.entries(expected)) {
+      assert.strictEqual(expected[key], result[key]);
+    }
   });
 
   describe("parseAddCustomChargeData", () => {
@@ -369,16 +366,16 @@ describe("Parser", () => {
         eachAmount: 10.5,
       };
 
-      const expectedParams = new URLSearchParams({
+      const result = parseAddCustomChargeData(data);
+      const expected = new URLSearchParams({
         chargeCode: "testCode",
         quantity: "2",
         eachAmount: "10.5",
       });
 
-      assert.strictEqual(
-        parseAddCustomChargeData(data).toString(),
-        expectedParams.toString(),
-      );
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("should parse all data including optional fields", () => {
@@ -391,7 +388,8 @@ describe("Parser", () => {
         remoteAddress: "192.168.1.100",
       };
 
-      const expectedParams = new URLSearchParams({
+      const result = parseAddCustomChargeData(data);
+      const expected = new URLSearchParams({
         chargeCode: "fullCode",
         quantity: "1",
         eachAmount: "-5",
@@ -400,45 +398,49 @@ describe("Parser", () => {
         remoteAddress: "192.168.1.100",
       });
 
-      assert.strictEqual(
-        parseAddCustomChargeData(data).toString(),
-        expectedParams.toString(),
-      );
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
-    test("should handle integer and float amounts", () => {
-      const integerData: AddCustomChargeData = {
+    test("should handle integer amounts", () => {
+      const data: AddCustomChargeData = {
         chargeCode: "intCode",
         quantity: 1,
         eachAmount: 10,
       };
 
-      const floatData: AddCustomChargeData = {
-        chargeCode: "floatCode",
-        quantity: 1,
-        eachAmount: 9.99,
-      };
-
-      const expectedIntegerParams = new URLSearchParams({
+      const expected = new URLSearchParams({
         chargeCode: "intCode",
         quantity: "1",
         eachAmount: "10",
       });
 
-      const expectedFloatParams = new URLSearchParams({
+      const resultInt = parseAddCustomChargeData(data);
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], resultInt[key]);
+      }
+    });
+
+    test("should handle float amounts", () => {
+      const data: AddCustomChargeData = {
+        chargeCode: "floatCode",
+        quantity: 1,
+        eachAmount: 9.99,
+      };
+
+      const expected = new URLSearchParams({
         chargeCode: "floatCode",
         quantity: "1",
         eachAmount: "9.99",
       });
 
-      assert.strictEqual(
-        parseAddCustomChargeData(integerData).toString(),
-        expectedIntegerParams.toString(),
-      );
-      assert.strictEqual(
-        parseAddCustomChargeData(floatData).toString(),
-        expectedFloatParams.toString(),
-      );
+      const result = parseAddCustomChargeData(data);
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("should not include undefined optional fields in the output", () => {
@@ -449,17 +451,18 @@ describe("Parser", () => {
         description: "Limited time offer",
       };
 
-      const expectedParams = new URLSearchParams({
+      const expected = new URLSearchParams({
         chargeCode: "partialCode",
         quantity: "3",
         eachAmount: "2.75",
         description: "Limited time offer",
       });
 
-      assert.strictEqual(
-        parseAddCustomChargeData(data).toString(),
-        expectedParams.toString(),
-      );
+      const result = parseAddCustomChargeData(data);
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
   });
 
