@@ -4,6 +4,7 @@ import {
   parseAddCustomChargeData,
   parseCreateCustomerRequest,
   parseCreateOneTimeInvoiceData,
+  parseCustomerAndSubscriptionData,
   parseEditCustomerData,
   parseGetCustomersRequest,
   parseIssueRefundRequest,
@@ -11,6 +12,7 @@ import {
   parseSetItemQuantityData,
 } from "./parser";
 import {
+  EditCustomerSubscriptionData,
   type AddCustomChargeData,
   type CreateCustomerRequest,
   type CreateOneTimeInvoiceData,
@@ -38,34 +40,22 @@ describe("Parser", () => {
     };
     const result = parseGetCustomersRequest(request);
 
-    // Assert that the result is an instance of URLSearchParams
-    assert.ok(
-      result instanceof URLSearchParams,
-      "Result should be a URLSearchParams object",
-    );
+    const expected = new URLSearchParams();
+    expected.set("subscriptionStatus", "activeOnly");
+    expected.append("planCode", "PLAN_1");
+    expected.append("planCode", "PLAN_2");
+    expected.set("createdBeforeDate", "2023-11-05");
+    expected.set("createdAfterDate", "2023-10-05");
+    expected.set("canceledBeforeDate", "2023-11-05");
+    expected.set("canceledAfterDate", "2023-10-05");
+    expected.set("transactedBeforeDate", "2023-11-05");
+    expected.set("transactedAfterDate", "2023-10-05");
+    expected.set("orderBy", "name");
+    expected.set("orderByDirection", "desc");
+    expected.set("search", "john");
 
-    // Optionally, you can also assert the contents of the URLSearchParams
-    const expectedParams = new URLSearchParams();
-    expectedParams.set("subscriptionStatus", "activeOnly");
-    expectedParams.append("planCode", "PLAN_1");
-    expectedParams.append("planCode", "PLAN_2");
-    expectedParams.set("createdBeforeDate", "2023-11-05");
-    expectedParams.set("createdAfterDate", "2023-10-05");
-    expectedParams.set("canceledBeforeDate", "2023-11-05");
-    expectedParams.set("canceledAfterDate", "2023-10-05");
-    expectedParams.set("transactedBeforeDate", "2023-11-05");
-    expectedParams.set("transactedAfterDate", "2023-10-05");
-    expectedParams.set("orderBy", "name");
-    expectedParams.set("orderByDirection", "desc");
-    expectedParams.set("search", "john");
-
-    // Iterate through the expected parameters and ensure they exist in the result
-    for (const [key, value] of expectedParams.entries()) {
-      assert.deepStrictEqual(
-        result.getAll(key).includes(value),
-        true,
-        `Parameter ${key} should have value ${value}`,
-      );
+    for (const [key] of expected.entries()) {
+      assert.strictEqual(expected[key], result[key]);
     }
   });
 
@@ -77,12 +67,47 @@ describe("Parser", () => {
         lastName: "lastName",
         email: "test@gmail.com",
       };
-      assert.deepStrictEqual(parseCreateCustomerRequest(request), {
+      const result = parseCreateCustomerRequest(request);
+      const expected = new URLSearchParams({
         code: "CUSTOMER_CODE",
         firstName: "firstName",
         lastName: "lastName",
         email: "test@gmail.com",
       });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
+    });
+
+    test("create request + metadata", (t) => {
+      const request: CreateCustomerRequest = {
+        code: "CUSTOMER_CODE",
+        firstName: "firstName",
+        lastName: "lastName",
+        email: "test@gmail.com",
+        metaData: {
+          meta1: "whatever1b",
+          meta3: "whatever3",
+          subarray: {
+            meta3: "whatever3",
+          },
+        },
+      };
+      const result = parseCreateCustomerRequest(request);
+      const expected = new URLSearchParams({
+        code: "CUSTOMER_CODE",
+        firstName: "firstName",
+        lastName: "lastName",
+        email: "test@gmail.com",
+        "metaData[meta1]": "whatever1b",
+        "metaData[meta3]": "whatever3",
+        "metaData[subarray][meta3]": "whatever3",
+      });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("create request with subscription + cc", (t) => {
@@ -105,7 +130,8 @@ describe("Parser", () => {
           ccZip: "95123",
         },
       };
-      assert.deepStrictEqual(parseCreateCustomerRequest(request), {
+      const result = parseCreateCustomerRequest(request);
+      const expected = new URLSearchParams({
         code: "CUSTOMER_CODE",
         firstName: "firstName",
         lastName: "lastName",
@@ -122,6 +148,10 @@ describe("Parser", () => {
         "subscription[ccLastName]": "LName",
         "subscription[ccZip]": "95123",
       });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("create request with subscription + gatewayToken", (t) => {
@@ -141,7 +171,8 @@ describe("Parser", () => {
           initialBillDate: new Date("2011-08-01T15:30:00Z"),
         },
       };
-      assert.deepStrictEqual(parseCreateCustomerRequest(request), {
+      const result = parseCreateCustomerRequest(request);
+      const expected = new URLSearchParams({
         code: "CUSTOMER_CODE",
         firstName: "firstName",
         lastName: "lastName",
@@ -155,6 +186,10 @@ describe("Parser", () => {
         "subscription[ccCompany]": "VISA",
         "subscription[initialBillDate]": "2011-08-01T15:30:00.000Z",
       });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
   });
 
@@ -179,35 +214,99 @@ describe("Parser", () => {
         metaData: {
           customer_id: "cus_123456",
           referrer_code: "refer888",
+          subArray: {
+            item1: "item1",
+          },
         },
       };
       const result = parseEditCustomerData(data);
 
-      const params = new URLSearchParams();
-      params.set("firstName", "John");
-      params.set("lastName", "Smith");
-      params.set("email", "test@gmail.com");
-      params.set("company", "Google");
-      params.set("taxRate", "0.123");
-      params.set("isTaxExempt", "1");
-      params.set("taxNumber", "123323232");
-      params.set("referer", "referer");
-      params.set("remoteAddress", "72.140.152.122");
-      params.set("firstContactDatetime", "2023-11-05T10:30:00.000Z");
-      params.set("campaignContent", "campaignContent");
-      params.set("campaignMedium", "campaignMedium");
-      params.set("campaignName", "campaignName");
-      params.set("campaignSource", "campaignSource");
-      params.set("campaignTerm", "campaignTerm");
-      params.set("metaData[customer_id]", "cus_123456");
-      params.set("metaData[referrer_code]", "refer888");
+      const expected = new URLSearchParams();
+      expected.set("firstName", "John");
+      expected.set("lastName", "Smith");
+      expected.set("email", "test@gmail.com");
+      expected.set("company", "Google");
+      expected.set("taxRate", "0.123");
+      expected.set("isTaxExempt", "1");
+      expected.set("taxNumber", "123323232");
+      expected.set("referer", "referer");
+      expected.set("remoteAddress", "72.140.152.122");
+      expected.set("firstContactDatetime", "2023-11-05T10:30:00.000Z");
+      expected.set("campaignContent", "campaignContent");
+      expected.set("campaignMedium", "campaignMedium");
+      expected.set("campaignName", "campaignName");
+      expected.set("campaignSource", "campaignSource");
+      expected.set("campaignTerm", "campaignTerm");
+      expected.set("metaData[customer_id]", "cus_123456");
+      expected.set("metaData[referrer_code]", "refer888");
+      expected.set("metaData[subArray][item1]", "item1");
 
-      for (const [key, value] of params.entries()) {
-        assert.strictEqual(
-          result.getAll(key).includes(value),
-          true,
-          `Parameter ${key} should have value ${value}`,
-        );
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
+    });
+  });
+
+  describe("parseCustomerAndSubscriptionData", () => {
+    test("full customer data", () => {
+      const data: EditCustomerSubscriptionData = {
+        firstName: "John",
+        lastName: "Smith",
+        email: "test@gmail.com",
+        company: "Google",
+        taxRate: 0.123,
+        isTaxExempt: true,
+        taxNumber: "123323232",
+        referer: "referer",
+        remoteAddress: "72.140.152.122",
+        firstContactDatetime: new Date("2023-11-05T10:30:00Z"),
+        campaignContent: "campaignContent",
+        campaignMedium: "campaignMedium",
+        campaignName: "campaignName",
+        campaignSource: "campaignSource",
+        campaignTerm: "campaignTerm",
+        subscription: {
+          initialBillDate: new Date("2023-11-05T10:30:00Z"),
+          planCode: "PLAN_CODE",
+          gatewayToken: "GATEWAY_TOKEN",
+          method: "cc",
+        },
+        metaData: {
+          customer_id: "cus_123456",
+          referrer_code: "refer888",
+          subArray: {
+            item1: "item1",
+          },
+        },
+      };
+      const result = parseCustomerAndSubscriptionData(data);
+
+      const expected = new URLSearchParams();
+      expected.set("firstName", "John");
+      expected.set("lastName", "Smith");
+      expected.set("email", "test@gmail.com");
+      expected.set("company", "Google");
+      expected.set("taxRate", "0.123");
+      expected.set("isTaxExempt", "1");
+      expected.set("taxNumber", "123323232");
+      expected.set("referer", "referer");
+      expected.set("remoteAddress", "72.140.152.122");
+      expected.set("firstContactDatetime", "2023-11-05T10:30:00.000Z");
+      expected.set("campaignContent", "campaignContent");
+      expected.set("campaignMedium", "campaignMedium");
+      expected.set("campaignName", "campaignName");
+      expected.set("campaignSource", "campaignSource");
+      expected.set("campaignTerm", "campaignTerm");
+      expected.set("subscription[planCode]", "PLAN_CODE");
+      expected.set("subscription[gatewayToken]", "GATEWAY_TOKEN");
+      expected.set("subscription[method]", "cc");
+      expected.set("subscription[initialBillDate]", "2023-11-05T10:30:00.000Z");
+      expected.set("metaData[customer_id]", "cus_123456");
+      expected.set("metaData[referrer_code]", "refer888");
+      expected.set("metaData[subArray][item1]", "item1");
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
       }
     });
   });
@@ -217,10 +316,15 @@ describe("Parser", () => {
       quantity: 4.3232111,
       remoteAddress: "72.140.152.122",
     };
-    assert.deepStrictEqual(parseItemQuantityData(data), {
+    const result = parseItemQuantityData(data);
+    const expected = new URLSearchParams({
       quantity: "4.3232",
       remoteAddress: "72.140.152.122",
     });
+
+    for (const [key] of Object.entries(expected)) {
+      assert.strictEqual(expected[key], result[key]);
+    }
   });
 
   test("parseSetItemQuantityData", () => {
@@ -229,11 +333,17 @@ describe("Parser", () => {
       remoteAddress: "72.140.152.122",
       invoicePeriod: "outstanding",
     };
-    assert.deepStrictEqual(parseSetItemQuantityData(data), {
+
+    const result = parseSetItemQuantityData(data);
+    const expected = new URLSearchParams({
       quantity: "4.3232",
       remoteAddress: "72.140.152.122",
       invoicePeriod: "outstanding",
     });
+
+    for (const [key] of Object.entries(expected)) {
+      assert.strictEqual(expected[key], result[key]);
+    }
   });
 
   describe("parseAddCustomChargeData", () => {
@@ -244,13 +354,16 @@ describe("Parser", () => {
         eachAmount: 10.5,
       };
 
-      const expectedParams: Record<string, string> = {
+      const result = parseAddCustomChargeData(data);
+      const expected = new URLSearchParams({
         chargeCode: "testCode",
         quantity: "2",
         eachAmount: "10.5",
-      };
+      });
 
-      assert.deepStrictEqual(parseAddCustomChargeData(data), expectedParams);
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("should parse all data including optional fields", () => {
@@ -263,42 +376,59 @@ describe("Parser", () => {
         remoteAddress: "192.168.1.100",
       };
 
-      const expectedParams: Record<string, string> = {
+      const result = parseAddCustomChargeData(data);
+      const expected = new URLSearchParams({
         chargeCode: "fullCode",
         quantity: "1",
         eachAmount: "-5",
         description: "Discount for loyal customer",
         invoicePeriod: "outstanding",
         remoteAddress: "192.168.1.100",
-      };
+      });
 
-      assert.deepStrictEqual(parseAddCustomChargeData(data), expectedParams);
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
-    test("should handle integer and float amounts", () => {
-      const integerData: AddCustomChargeData = {
+    test("should handle integer amounts", () => {
+      const data: AddCustomChargeData = {
         chargeCode: "intCode",
         quantity: 1,
         eachAmount: 10,
       };
 
-      const floatData: AddCustomChargeData = {
-        chargeCode: "floatCode",
-        quantity: 1,
-        eachAmount: 9.99,
-      };
-
-      assert.deepStrictEqual(parseAddCustomChargeData(integerData), {
+      const expected = new URLSearchParams({
         chargeCode: "intCode",
         quantity: "1",
         eachAmount: "10",
       });
 
-      assert.deepStrictEqual(parseAddCustomChargeData(floatData), {
+      const resultInt = parseAddCustomChargeData(data);
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], resultInt[key]);
+      }
+    });
+
+    test("should handle float amounts", () => {
+      const data: AddCustomChargeData = {
+        chargeCode: "floatCode",
+        quantity: 1,
+        eachAmount: 9.99,
+      };
+
+      const expected = new URLSearchParams({
         chargeCode: "floatCode",
         quantity: "1",
         eachAmount: "9.99",
       });
+
+      const result = parseAddCustomChargeData(data);
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("should not include undefined optional fields in the output", () => {
@@ -309,14 +439,18 @@ describe("Parser", () => {
         description: "Limited time offer",
       };
 
-      const expectedParams: Record<string, string> = {
+      const expected = new URLSearchParams({
         chargeCode: "partialCode",
         quantity: "3",
         eachAmount: "2.75",
         description: "Limited time offer",
-      };
+      });
 
-      assert.deepStrictEqual(parseAddCustomChargeData(data), expectedParams);
+      const result = parseAddCustomChargeData(data);
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
   });
 
@@ -331,12 +465,16 @@ describe("Parser", () => {
           },
         ],
       };
-      const expected: Record<string, string> = {
+      const result = parseCreateOneTimeInvoiceData(data);
+      const expected = new URLSearchParams({
         "charges[0][chargeCode]": "charge1",
         "charges[0][quantity]": "1",
         "charges[0][eachAmount]": "10",
-      };
-      assert.deepStrictEqual(parseCreateOneTimeInvoiceData(data), expected);
+      });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("should parse multiple charges", () => {
@@ -351,7 +489,8 @@ describe("Parser", () => {
           },
         ],
       };
-      const expected: Record<string, string> = {
+      const result = parseCreateOneTimeInvoiceData(data);
+      const expected = new URLSearchParams({
         "charges[0][chargeCode]": "charge1",
         "charges[0][quantity]": "1",
         "charges[0][eachAmount]": "10",
@@ -359,32 +498,43 @@ describe("Parser", () => {
         "charges[1][quantity]": "2",
         "charges[1][eachAmount]": "20",
         "charges[1][description]": "Second charge",
-      };
-      assert.deepStrictEqual(parseCreateOneTimeInvoiceData(data), expected);
+      });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("should handle zero quantity and amount", () => {
       const data: CreateOneTimeInvoiceData = {
         charges: [{ chargeCode: "zeroCharge", quantity: 0, eachAmount: 0 }],
       };
-      const expected: Record<string, string> = {
+      const result = parseCreateOneTimeInvoiceData(data);
+      const expected = new URLSearchParams({
         "charges[0][chargeCode]": "zeroCharge",
         "charges[0][quantity]": "0",
         "charges[0][eachAmount]": "0",
-      };
-      assert.deepStrictEqual(parseCreateOneTimeInvoiceData(data), expected);
+      });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("should handle negative eachAmount", () => {
       const data: CreateOneTimeInvoiceData = {
         charges: [{ chargeCode: "credit", quantity: 1, eachAmount: -5.0 }],
       };
-      const expected: Record<string, string> = {
+      const result = parseCreateOneTimeInvoiceData(data);
+      const expected = new URLSearchParams({
         "charges[0][chargeCode]": "credit",
         "charges[0][quantity]": "1",
         "charges[0][eachAmount]": "-5",
-      };
-      assert.deepStrictEqual(parseCreateOneTimeInvoiceData(data), expected);
+      });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("should include remoteAddress if provided", () => {
@@ -392,13 +542,18 @@ describe("Parser", () => {
         charges: [{ chargeCode: "charge1", quantity: 1, eachAmount: 10.0 }],
         remoteAddress: "192.0.2.1",
       };
-      const expected: Record<string, string> = {
+
+      const result = parseCreateOneTimeInvoiceData(data);
+      const expected = new URLSearchParams({
         "charges[0][chargeCode]": "charge1",
         "charges[0][quantity]": "1",
         "charges[0][eachAmount]": "10",
         remoteAddress: "192.0.2.1",
-      };
-      assert.deepStrictEqual(parseCreateOneTimeInvoiceData(data), expected);
+      });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("should handle multiple charges with and without description", () => {
@@ -415,7 +570,9 @@ describe("Parser", () => {
         ],
         remoteAddress: "203.0.113.5",
       };
-      const expected: Record<string, string> = {
+
+      const result = parseCreateOneTimeInvoiceData(data);
+      const expected = new URLSearchParams({
         "charges[0][chargeCode]": "charge1",
         "charges[0][quantity]": "1",
         "charges[0][eachAmount]": "10",
@@ -427,8 +584,11 @@ describe("Parser", () => {
         "charges[2][quantity]": "3",
         "charges[2][eachAmount]": "30",
         remoteAddress: "203.0.113.5",
-      };
-      assert.deepStrictEqual(parseCreateOneTimeInvoiceData(data), expected);
+      });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
   });
 
@@ -438,11 +598,15 @@ describe("Parser", () => {
         idOrNumber: 12345,
         amount: 10.0,
       };
-      const expected: Record<string, string> = {
+      const result = parseIssueRefundRequest(request);
+      const expected = new URLSearchParams({
         id: "12345",
         amount: "10",
-      };
-      assert.deepStrictEqual(parseIssueRefundRequest(request), expected);
+      });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("should parse request with invoice number", () => {
@@ -450,11 +614,15 @@ describe("Parser", () => {
         idOrNumber: "INV-001",
         amount: 25.5,
       };
-      const expected: Record<string, string> = {
+      const result = parseIssueRefundRequest(request);
+      const expected = new URLSearchParams({
         number: "INV-001",
         amount: "25.5",
-      };
-      assert.deepStrictEqual(parseIssueRefundRequest(request), expected);
+      });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("should parse request with remoteAddress", () => {
@@ -463,12 +631,16 @@ describe("Parser", () => {
         amount: 5.0,
         remoteAddress: "192.168.1.10",
       };
-      const expected: Record<string, string> = {
+      const result = parseIssueRefundRequest(request);
+      const expected = new URLSearchParams({
         id: "67890",
         amount: "5",
         remoteAddress: "192.168.1.10",
-      };
-      assert.deepStrictEqual(parseIssueRefundRequest(request), expected);
+      });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("should handle zero amount", () => {
@@ -476,11 +648,15 @@ describe("Parser", () => {
         idOrNumber: "INV-002",
         amount: 0,
       };
-      const expected: Record<string, string> = {
+      const result = parseIssueRefundRequest(request);
+      const expected = new URLSearchParams({
         number: "INV-002",
         amount: "0",
-      };
-      assert.deepStrictEqual(parseIssueRefundRequest(request), expected);
+      });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
   });
 });
