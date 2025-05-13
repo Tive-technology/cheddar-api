@@ -4,6 +4,7 @@ import {
   parseAddCustomChargeData,
   parseCreateCustomerRequest,
   parseCreateOneTimeInvoiceData,
+  parseCustomerAndSubscriptionData,
   parseEditCustomerData,
   parseGetCustomersRequest,
   parseIssueRefundRequest,
@@ -11,6 +12,7 @@ import {
   parseSetItemQuantityData,
 } from "./parser";
 import {
+  EditCustomerSubscriptionData,
   type AddCustomChargeData,
   type CreateCustomerRequest,
   type CreateOneTimeInvoiceData,
@@ -82,6 +84,31 @@ describe("Parser", () => {
         firstName: "firstName",
         lastName: "lastName",
         email: "test@gmail.com",
+      });
+    });
+
+    test("create request + metadata", (t) => {
+      const request: CreateCustomerRequest = {
+        code: "CUSTOMER_CODE",
+        firstName: "firstName",
+        lastName: "lastName",
+        email: "test@gmail.com",
+        metaData: {
+          meta1: "whatever1b",
+          meta3: "whatever3",
+          subarray: {
+            meta3: "whatever3",
+          },
+        },
+      };
+      assert.deepStrictEqual(parseCreateCustomerRequest(request), {
+        code: "CUSTOMER_CODE",
+        firstName: "firstName",
+        lastName: "lastName",
+        email: "test@gmail.com",
+        "metaData[meta1]": "whatever1b",
+        "metaData[meta3]": "whatever3",
+        "metaData[subarray][meta3]": "whatever3",
       });
     });
 
@@ -179,6 +206,9 @@ describe("Parser", () => {
         metaData: {
           customer_id: "cus_123456",
           referrer_code: "refer888",
+          subArray: {
+            item1: "item1",
+          },
         },
       };
       const result = parseEditCustomerData(data);
@@ -201,6 +231,75 @@ describe("Parser", () => {
       params.set("campaignTerm", "campaignTerm");
       params.set("metaData[customer_id]", "cus_123456");
       params.set("metaData[referrer_code]", "refer888");
+      params.set("metaData[subArray][item1]", "item1");
+
+      for (const [key, value] of params.entries()) {
+        assert.strictEqual(
+          result.getAll(key).includes(value),
+          true,
+          `Parameter ${key} should have value ${value}`,
+        );
+      }
+    });
+  });
+
+  describe("parseCustomerAndSubscriptionData", () => {
+    test("full customer data", () => {
+      const data: EditCustomerSubscriptionData = {
+        firstName: "John",
+        lastName: "Smith",
+        email: "test@gmail.com",
+        company: "Google",
+        taxRate: 0.123,
+        isTaxExempt: true,
+        taxNumber: "123323232",
+        referer: "referer",
+        remoteAddress: "72.140.152.122",
+        firstContactDatetime: new Date("2023-11-05T10:30:00Z"),
+        campaignContent: "campaignContent",
+        campaignMedium: "campaignMedium",
+        campaignName: "campaignName",
+        campaignSource: "campaignSource",
+        campaignTerm: "campaignTerm",
+        subscription: {
+          initialBillDate: new Date("2023-11-05T10:30:00Z"),
+          planCode: "PLAN_CODE",
+          gatewayToken: "GATEWAY_TOKEN",
+          method: "cc",
+        },
+        metaData: {
+          customer_id: "cus_123456",
+          referrer_code: "refer888",
+          subArray: {
+            item1: "item1",
+          },
+        },
+      };
+      const result = parseCustomerAndSubscriptionData(data);
+
+      const params = new URLSearchParams();
+      params.set("firstName", "John");
+      params.set("lastName", "Smith");
+      params.set("email", "test@gmail.com");
+      params.set("company", "Google");
+      params.set("taxRate", "0.123");
+      params.set("isTaxExempt", "1");
+      params.set("taxNumber", "123323232");
+      params.set("referer", "referer");
+      params.set("remoteAddress", "72.140.152.122");
+      params.set("firstContactDatetime", "2023-11-05T10:30:00.000Z");
+      params.set("campaignContent", "campaignContent");
+      params.set("campaignMedium", "campaignMedium");
+      params.set("campaignName", "campaignName");
+      params.set("campaignSource", "campaignSource");
+      params.set("campaignTerm", "campaignTerm");
+      params.set("subscription[planCode]", "PLAN_CODE");
+      params.set("subscription[gatewayToken]", "GATEWAY_TOKEN");
+      params.set("subscription[method]", "cc");
+      params.set("subscription[initialBillDate]", "2023-11-05T10:30:00.000Z");
+      params.set("metaData[customer_id]", "cus_123456");
+      params.set("metaData[referrer_code]", "refer888");
+      params.set("metaData[subArray][item1]", "item1");
 
       for (const [key, value] of params.entries()) {
         assert.strictEqual(
@@ -217,10 +316,12 @@ describe("Parser", () => {
       quantity: 4.3232111,
       remoteAddress: "72.140.152.122",
     };
-    assert.deepStrictEqual(parseItemQuantityData(data), {
+    const result = Object.fromEntries(parseItemQuantityData(data));
+    const expected = {
       quantity: "4.3232",
       remoteAddress: "72.140.152.122",
-    });
+    };
+    assert.deepStrictEqual(result, expected);
   });
 
   test("parseSetItemQuantityData", () => {
@@ -229,11 +330,15 @@ describe("Parser", () => {
       remoteAddress: "72.140.152.122",
       invoicePeriod: "outstanding",
     };
-    assert.deepStrictEqual(parseSetItemQuantityData(data), {
+
+    const result = Object.fromEntries(parseSetItemQuantityData(data));
+    const expected = {
       quantity: "4.3232",
       remoteAddress: "72.140.152.122",
       invoicePeriod: "outstanding",
-    });
+    };
+
+    assert.deepStrictEqual(result, expected);
   });
 
   describe("parseAddCustomChargeData", () => {
@@ -244,13 +349,16 @@ describe("Parser", () => {
         eachAmount: 10.5,
       };
 
-      const expectedParams: Record<string, string> = {
+      const expectedParams = new URLSearchParams({
         chargeCode: "testCode",
         quantity: "2",
         eachAmount: "10.5",
-      };
+      });
 
-      assert.deepStrictEqual(parseAddCustomChargeData(data), expectedParams);
+      assert.strictEqual(
+        parseAddCustomChargeData(data).toString(),
+        expectedParams.toString(),
+      );
     });
 
     test("should parse all data including optional fields", () => {
@@ -263,16 +371,19 @@ describe("Parser", () => {
         remoteAddress: "192.168.1.100",
       };
 
-      const expectedParams: Record<string, string> = {
+      const expectedParams = new URLSearchParams({
         chargeCode: "fullCode",
         quantity: "1",
         eachAmount: "-5",
         description: "Discount for loyal customer",
         invoicePeriod: "outstanding",
         remoteAddress: "192.168.1.100",
-      };
+      });
 
-      assert.deepStrictEqual(parseAddCustomChargeData(data), expectedParams);
+      assert.strictEqual(
+        parseAddCustomChargeData(data).toString(),
+        expectedParams.toString(),
+      );
     });
 
     test("should handle integer and float amounts", () => {
@@ -288,17 +399,26 @@ describe("Parser", () => {
         eachAmount: 9.99,
       };
 
-      assert.deepStrictEqual(parseAddCustomChargeData(integerData), {
+      const expectedIntegerParams = new URLSearchParams({
         chargeCode: "intCode",
         quantity: "1",
         eachAmount: "10",
       });
 
-      assert.deepStrictEqual(parseAddCustomChargeData(floatData), {
+      const expectedFloatParams = new URLSearchParams({
         chargeCode: "floatCode",
         quantity: "1",
         eachAmount: "9.99",
       });
+
+      assert.strictEqual(
+        parseAddCustomChargeData(integerData).toString(),
+        expectedIntegerParams.toString(),
+      );
+      assert.strictEqual(
+        parseAddCustomChargeData(floatData).toString(),
+        expectedFloatParams.toString(),
+      );
     });
 
     test("should not include undefined optional fields in the output", () => {
@@ -309,14 +429,17 @@ describe("Parser", () => {
         description: "Limited time offer",
       };
 
-      const expectedParams: Record<string, string> = {
+      const expectedParams = new URLSearchParams({
         chargeCode: "partialCode",
         quantity: "3",
         eachAmount: "2.75",
         description: "Limited time offer",
-      };
+      });
 
-      assert.deepStrictEqual(parseAddCustomChargeData(data), expectedParams);
+      assert.strictEqual(
+        parseAddCustomChargeData(data).toString(),
+        expectedParams.toString(),
+      );
     });
   });
 
