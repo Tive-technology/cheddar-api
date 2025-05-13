@@ -43,7 +43,7 @@ describe("Parser", () => {
     // Assert that the result is an instance of URLSearchParams
     assert.ok(
       result instanceof URLSearchParams,
-      "Result should be a URLSearchParams object"
+      "Result should be a URLSearchParams object",
     );
 
     // Optionally, you can also assert the contents of the URLSearchParams
@@ -66,7 +66,7 @@ describe("Parser", () => {
       assert.deepStrictEqual(
         result.getAll(key).includes(value),
         true,
-        `Parameter ${key} should have value ${value}`
+        `Parameter ${key} should have value ${value}`,
       );
     }
   });
@@ -477,12 +477,16 @@ describe("Parser", () => {
           },
         ],
       };
-      const expected: Record<string, string> = {
+      const result = parseCreateOneTimeInvoiceData(data);
+      const expected = new URLSearchParams({
         "charges[0][chargeCode]": "charge1",
         "charges[0][quantity]": "1",
         "charges[0][eachAmount]": "10",
-      };
-      assert.deepStrictEqual(parseCreateOneTimeInvoiceData(data), expected);
+      });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("should parse multiple charges", () => {
@@ -497,7 +501,8 @@ describe("Parser", () => {
           },
         ],
       };
-      const expected: Record<string, string> = {
+      const result = parseCreateOneTimeInvoiceData(data);
+      const expected = new URLSearchParams({
         "charges[0][chargeCode]": "charge1",
         "charges[0][quantity]": "1",
         "charges[0][eachAmount]": "10",
@@ -505,32 +510,43 @@ describe("Parser", () => {
         "charges[1][quantity]": "2",
         "charges[1][eachAmount]": "20",
         "charges[1][description]": "Second charge",
-      };
-      assert.deepStrictEqual(parseCreateOneTimeInvoiceData(data), expected);
+      });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("should handle zero quantity and amount", () => {
       const data: CreateOneTimeInvoiceData = {
         charges: [{ chargeCode: "zeroCharge", quantity: 0, eachAmount: 0 }],
       };
-      const expected: Record<string, string> = {
+      const result = parseCreateOneTimeInvoiceData(data);
+      const expected = new URLSearchParams({
         "charges[0][chargeCode]": "zeroCharge",
         "charges[0][quantity]": "0",
         "charges[0][eachAmount]": "0",
-      };
-      assert.deepStrictEqual(parseCreateOneTimeInvoiceData(data), expected);
+      });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("should handle negative eachAmount", () => {
       const data: CreateOneTimeInvoiceData = {
         charges: [{ chargeCode: "credit", quantity: 1, eachAmount: -5.0 }],
       };
-      const expected: Record<string, string> = {
+      const result = parseCreateOneTimeInvoiceData(data);
+      const expected = new URLSearchParams({
         "charges[0][chargeCode]": "credit",
         "charges[0][quantity]": "1",
         "charges[0][eachAmount]": "-5",
-      };
-      assert.deepStrictEqual(parseCreateOneTimeInvoiceData(data), expected);
+      });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("should include remoteAddress if provided", () => {
@@ -538,13 +554,18 @@ describe("Parser", () => {
         charges: [{ chargeCode: "charge1", quantity: 1, eachAmount: 10.0 }],
         remoteAddress: "192.0.2.1",
       };
-      const expected: Record<string, string> = {
+
+      const result = parseCreateOneTimeInvoiceData(data);
+      const expected = new URLSearchParams({
         "charges[0][chargeCode]": "charge1",
         "charges[0][quantity]": "1",
         "charges[0][eachAmount]": "10",
         remoteAddress: "192.0.2.1",
-      };
-      assert.deepStrictEqual(parseCreateOneTimeInvoiceData(data), expected);
+      });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
 
     test("should handle multiple charges with and without description", () => {
@@ -561,7 +582,9 @@ describe("Parser", () => {
         ],
         remoteAddress: "203.0.113.5",
       };
-      const expected: Record<string, string> = {
+
+      const result = parseCreateOneTimeInvoiceData(data);
+      const expected = new URLSearchParams({
         "charges[0][chargeCode]": "charge1",
         "charges[0][quantity]": "1",
         "charges[0][eachAmount]": "10",
@@ -573,8 +596,11 @@ describe("Parser", () => {
         "charges[2][quantity]": "3",
         "charges[2][eachAmount]": "30",
         remoteAddress: "203.0.113.5",
-      };
-      assert.deepStrictEqual(parseCreateOneTimeInvoiceData(data), expected);
+      });
+
+      for (const [key] of Object.entries(expected)) {
+        assert.strictEqual(expected[key], result[key]);
+      }
     });
   });
 

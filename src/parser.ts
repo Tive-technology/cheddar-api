@@ -301,20 +301,21 @@ export function parseAddCustomChargeData(
 
 export function parseCreateOneTimeInvoiceData(
   data: CreateOneTimeInvoiceData,
-): Record<string, string> {
-  const params: Record<string, string> = {};
+): URLSearchParams {
+  const params = new URLSearchParams();
+
   if (data.charges && data.charges.length > 0) {
     data.charges.forEach((charge, index) => {
-      params[`charges[${index}][chargeCode]`] = charge.chargeCode;
-      params[`charges[${index}][quantity]`] = charge.quantity.toString();
-      params[`charges[${index}][eachAmount]`] = charge.eachAmount.toString();
+      params.set(`charges[${index}][chargeCode]`, charge.chargeCode);
+      params.set(`charges[${index}][quantity]`, charge.quantity.toString());
+      params.set(`charges[${index}][eachAmount]`, charge.eachAmount.toString());
       if (charge.description) {
-        params[`charges[${index}][description]`] = charge.description;
+        params.set(`charges[${index}][description]`, charge.description);
       }
     });
   }
   if (data.remoteAddress) {
-    params["remoteAddress"] = data.remoteAddress;
+    params.set("remoteAddress", data.remoteAddress);
   }
   return params;
 }
