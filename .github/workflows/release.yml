@@ -1,0 +1,44 @@
+name: release
+
+on:
+  push:
+    branches:
+      - "v[0-9]+.[0-9]+.[0-9]+*"
+
+jobs:
+  jsr:
+    name: publish-to-jsr
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno install --no-lock --allow-scripts
+      - name: Publish to JSR
+        run: npx jsr publish
+  npm:
+    name: publish-to-npm
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm ci
+      - run: npm run build
+      - run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
