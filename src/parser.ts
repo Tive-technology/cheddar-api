@@ -346,7 +346,7 @@ export function parseIssueRefundRequest(
   return params;
 }
 
-function parseSubscriptionData(
+export function parseSubscriptionData(
   subscription: SubscriptionData,
 ): Record<string, string> {
   return Object.fromEntries(
