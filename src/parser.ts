@@ -388,18 +388,6 @@ function parseItemsData(items: ItemData[]): Record<string, string> {
   );
 }
 
-function flattenMetaData(obj: any, path: string, result: Record<string, any>) {
-  for (const key in obj) {
-    const value = obj[key];
-    const fullPath = `${path}[${key}]`;
-    if (value !== null && typeof value === "object" && !Array.isArray(value)) {
-      flattenMetaData(value, fullPath, result);
-    } else {
-      result[fullPath] = value;
-    }
-  }
-}
-
 function flattenMetaDataUrlParams(
   params: URLSearchParams,
   path: string,
