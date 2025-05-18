@@ -16,6 +16,11 @@
     "api"
   ],
   "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js"
+    }
+  },
   "files": [
     "dist/",
     "LICENSE",
