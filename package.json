@@ -1,6 +1,6 @@
 {
   "name": "@tivetechnology/cheddar-api",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "author": "Victor Uvarov",
   "repository": {
     "type": "git",
@@ -15,12 +15,8 @@
     "getter",
     "api"
   ],
-  "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "exports": {
-    ".": "./dist/index.js"
-  },
   "files": [
     "dist/",
     "LICENSE",
