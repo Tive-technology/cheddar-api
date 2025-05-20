@@ -55,7 +55,7 @@ describe("Parser", () => {
     expected.set("search", "john");
 
     for (const [key] of expected.entries()) {
-      assert.strictEqual(expected[key], result[key]);
+      assert.strictEqual(expected.get(key), result.get(key));
     }
   });
 
@@ -76,7 +76,7 @@ describe("Parser", () => {
       });
 
       for (const [key] of Object.entries(expected)) {
-        assert.strictEqual(expected[key], result[key]);
+        assert.strictEqual(expected.get(key), result.get(key));
       }
     });
 
@@ -106,7 +106,7 @@ describe("Parser", () => {
       });
 
       for (const [key] of Object.entries(expected)) {
-        assert.strictEqual(expected[key], result[key]);
+        assert.strictEqual(expected.get(key), result.get(key));
       }
     });
 
@@ -150,7 +150,7 @@ describe("Parser", () => {
       });
 
       for (const [key] of Object.entries(expected)) {
-        assert.strictEqual(expected[key], result[key]);
+        assert.strictEqual(expected.get(key), result.get(key));
       }
     });
 
@@ -188,7 +188,7 @@ describe("Parser", () => {
       });
 
       for (const [key] of Object.entries(expected)) {
-        assert.strictEqual(expected[key], result[key]);
+        assert.strictEqual(expected.get(key), result.get(key));
       }
     });
   });
@@ -242,7 +242,7 @@ describe("Parser", () => {
       expected.set("metaData[subArray][item1]", "item1");
 
       for (const [key] of Object.entries(expected)) {
-        assert.strictEqual(expected[key], result[key]);
+        assert.strictEqual(expected.get(key), result.get(key));
       }
     });
   });
@@ -306,7 +306,7 @@ describe("Parser", () => {
       expected.set("metaData[subArray][item1]", "item1");
 
       for (const [key] of Object.entries(expected)) {
-        assert.strictEqual(expected[key], result[key]);
+        assert.strictEqual(expected.get(key), result.get(key));
       }
     });
   });
@@ -323,7 +323,7 @@ describe("Parser", () => {
     });
 
     for (const [key] of Object.entries(expected)) {
-      assert.strictEqual(expected[key], result[key]);
+      assert.strictEqual(expected.get(key), result.get(key));
     }
   });
 
@@ -342,7 +342,7 @@ describe("Parser", () => {
     });
 
     for (const [key] of Object.entries(expected)) {
-      assert.strictEqual(expected[key], result[key]);
+      assert.strictEqual(expected.get(key), result.get(key));
     }
   });
 
@@ -362,7 +362,7 @@ describe("Parser", () => {
       });
 
       for (const [key] of Object.entries(expected)) {
-        assert.strictEqual(expected[key], result[key]);
+        assert.strictEqual(expected.get(key), result.get(key));
       }
     });
 
@@ -387,7 +387,7 @@ describe("Parser", () => {
       });
 
       for (const [key] of Object.entries(expected)) {
-        assert.strictEqual(expected[key], result[key]);
+        assert.strictEqual(expected.get(key), result.get(key));
       }
     });
 
@@ -407,7 +407,7 @@ describe("Parser", () => {
       const resultInt = parseAddCustomChargeData(data);
 
       for (const [key] of Object.entries(expected)) {
-        assert.strictEqual(expected[key], resultInt[key]);
+        assert.strictEqual(expected.get(key), resultInt.get(key));
       }
     });
 
@@ -427,7 +427,7 @@ describe("Parser", () => {
       const result = parseAddCustomChargeData(data);
 
       for (const [key] of Object.entries(expected)) {
-        assert.strictEqual(expected[key], result[key]);
+        assert.strictEqual(expected.get(key), result.get(key));
       }
     });
 
@@ -449,7 +449,7 @@ describe("Parser", () => {
       const result = parseAddCustomChargeData(data);
 
       for (const [key] of Object.entries(expected)) {
-        assert.strictEqual(expected[key], result[key]);
+        assert.strictEqual(expected.get(key), result.get(key));
       }
     });
   });
@@ -473,7 +473,7 @@ describe("Parser", () => {
       });
 
       for (const [key] of Object.entries(expected)) {
-        assert.strictEqual(expected[key], result[key]);
+        assert.strictEqual(expected.get(key), result.get(key));
       }
     });
 
@@ -501,7 +501,7 @@ describe("Parser", () => {
       });
 
       for (const [key] of Object.entries(expected)) {
-        assert.strictEqual(expected[key], result[key]);
+        assert.strictEqual(expected.get(key), result.get(key));
       }
     });
 
@@ -517,7 +517,7 @@ describe("Parser", () => {
       });
 
       for (const [key] of Object.entries(expected)) {
-        assert.strictEqual(expected[key], result[key]);
+        assert.strictEqual(expected.get(key), result.get(key));
       }
     });
 
@@ -533,7 +533,7 @@ describe("Parser", () => {
       });
 
       for (const [key] of Object.entries(expected)) {
-        assert.strictEqual(expected[key], result[key]);
+        assert.strictEqual(expected.get(key), result.get(key));
       }
     });
 
@@ -552,7 +552,7 @@ describe("Parser", () => {
       });
 
       for (const [key] of Object.entries(expected)) {
-        assert.strictEqual(expected[key], result[key]);
+        assert.strictEqual(expected.get(key), result.get(key));
       }
     });
 
@@ -587,7 +587,7 @@ describe("Parser", () => {
       });
 
       for (const [key] of Object.entries(expected)) {
-        assert.strictEqual(expected[key], result[key]);
+        assert.strictEqual(expected.get(key), result.get(key));
       }
     });
   });
@@ -605,7 +605,7 @@ describe("Parser", () => {
       });
 
       for (const [key] of Object.entries(expected)) {
-        assert.strictEqual(expected[key], result[key]);
+        assert.strictEqual(expected.get(key), result.get(key));
       }
     });
 
@@ -621,7 +621,7 @@ describe("Parser", () => {
       });
 
       for (const [key] of Object.entries(expected)) {
-        assert.strictEqual(expected[key], result[key]);
+        assert.strictEqual(expected.get(key), result.get(key));
       }
     });
 
@@ -639,7 +639,7 @@ describe("Parser", () => {
       });
 
       for (const [key] of Object.entries(expected)) {
-        assert.strictEqual(expected[key], result[key]);
+        assert.strictEqual(expected.get(key), result.get(key));
       }
     });
 
@@ -655,7 +655,7 @@ describe("Parser", () => {
       });
 
       for (const [key] of Object.entries(expected)) {
-        assert.strictEqual(expected[key], result[key]);
+        assert.strictEqual(expected.get(key), result.get(key));
       }
     });
   });
