@@ -2,6 +2,8 @@
 
 This module will simplify the process of integrating [Cheddar](https://www.getcheddar.com/) into your existing JavaScript apps.
 
+> **Note:** This is Tive's TypeScript fork of [Swydo/node-cheddar-api](https://github.com/Swydo/node-cheddar-api), published as `@tivetechnology/cheddar-api`. It has significantly diverged from upstream — fully rewritten in TypeScript with dual ESM + CJS builds, and adds billing operations the original lacks (`issueRefund`, `issueVoid`, `issueVoidOrRefund`, `runOutstandingInvoice`). Tive maintains it independently.
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
